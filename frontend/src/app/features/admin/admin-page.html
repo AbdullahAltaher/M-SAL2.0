@@ -1,0 +1,95 @@
+<section class="panel">
+  <h2 class="sub-h" dir="rtl">الإدارة</h2>
+  <div class="toolbar" role="tablist" aria-label="الإدارة">
+    <button class="pill" type="button" role="tab" [class.primary]="tab() === 'users'" [attr.aria-selected]="tab() === 'users'" (click)="tab.set('users')">المستخدمون</button>
+    <button class="pill" type="button" role="tab" [class.primary]="tab() === 'invitations'" [attr.aria-selected]="tab() === 'invitations'" (click)="tab.set('invitations')">الدعوات</button>
+    <button class="pill" type="button" role="tab" [class.primary]="tab() === 'services'" [attr.aria-selected]="tab() === 'services'" (click)="tab.set('services')">الخدمات</button>
+    <button class="pill" type="button" role="tab" [class.primary]="tab() === 'audit'" [attr.aria-selected]="tab() === 'audit'" (click)="tab.set('audit')">سجل النشاط</button>
+  </div>
+
+  @switch (tab()) {
+    @case ('users') {
+      <ul class="m-list">
+        @for (u of users(); track u.id) {
+          <li class="m-row" [class.off]="u.status === 'DISABLED'">
+            <div class="m-main">
+              <div class="m-name" dir="ltr">{{ u.email }}</div>
+              <div class="m-sub" dir="rtl">{{ status(u.status) }} · {{ u.roles.join('، ') }}</div>
+            </div>
+            @if (u.id !== me()?.id) {
+              <button class="chip" type="button" (click)="toggleAdmin(u)">{{ u.roles.includes('ADMIN') ? 'إزالة المدير' : 'مدير' }}</button>
+              <button class="chip" [class.danger]="u.status === 'ACTIVE'" type="button" (click)="toggleUser(u)">{{ u.status === 'ACTIVE' ? 'إيقاف' : 'تفعيل' }}</button>
+            }
+          </li>
+        }
+      </ul>
+    }
+    @case ('invitations') {
+      <form class="flabel" dir="rtl" (submit)="$event.preventDefault(); invite()">
+        <span>دعوة جديدة</span>
+        <input class="field" type="email" dir="ltr" autocomplete="off" placeholder="email@example.com" aria-label="بريد المدعو"
+               #inv [value]="email()" (input)="email.set(inv.value)">
+        <div class="toolbar"><button class="pill primary" type="submit">إرسال الدعوة</button></div>
+      </form>
+      <ul class="m-list">
+        @for (i of invitations(); track i.id) {
+          <li class="m-row" [class.off]="i.status !== 'PENDING'">
+            <div class="m-main">
+              <div class="m-name" dir="ltr">{{ i.email }}</div>
+              <div class="m-sub" dir="rtl">{{ status(i.status) }} · تنتهي <bdi dir="ltr">{{ when(i.expiresAt) }}</bdi></div>
+            </div>
+            @if (i.status === 'PENDING') {
+              <button class="chip danger" type="button" (click)="revoke(i)">إلغاء</button>
+            }
+          </li>
+        }
+      </ul>
+    }
+    @case ('services') {
+      <ul class="m-list">
+        @for (s of services(); track s.code) {
+          <li class="m-row" [class.off]="!s.enabled">
+            <div class="m-main">
+              <div class="m-name" dir="rtl">{{ s.nameAr }}</div>
+              <div class="m-sub" dir="ltr">{{ s.code }}</div>
+            </div>
+            @if (s.code !== 'SRV-000' && s.code !== 'SRV-009') {
+              <button class="chip" [class.danger]="s.enabled" type="button" (click)="toggleService(s)">{{ s.enabled ? 'إيقاف' : 'تفعيل' }}</button>
+            }
+          </li>
+        }
+      </ul>
+    }
+    @case ('audit') {
+      <label class="flabel" dir="rtl">
+        <span>الخدمة</span>
+        <select class="field" #svc (change)="filter(svc.value)">
+          <option value="">الكل</option>
+          @for (s of services(); track s.code) {
+            <option [value]="s.code" [selected]="s.code === auditService()">{{ s.code }} · {{ s.nameAr }}</option>
+          }
+        </select>
+      </label>
+      @if (audit(); as a) {
+        <table class="cmp">
+          <thead><tr><th>الوقت</th><th>المستخدم</th><th>الخدمة</th><th>العملية</th></tr></thead>
+          <tbody>
+            @for (e of a.items; track e.id) {
+              <tr>
+                <td dir="ltr">{{ when(e.occurredAt) }}</td>
+                <td dir="ltr">{{ e.userEmail ?? '—' }}</td>
+                <td dir="ltr">{{ e.serviceCode }}</td>
+                <td dir="ltr">{{ e.action }} {{ e.entityType ?? '' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div class="toolbar">
+          <button class="pill" type="button" [disabled]="a.page === 0" (click)="go(a.page - 1)">السابق</button>
+          <span class="hint" dir="rtl">صفحة <bdi dir="ltr">{{ a.page + 1 }}</bdi> من <bdi dir="ltr">{{ pages(a) }}</bdi></span>
+          <button class="pill" type="button" [disabled]="(a.page + 1) * a.size >= a.total" (click)="go(a.page + 1)">التالي</button>
+        </div>
+      }
+    }
+  }
+</section>

@@ -1,0 +1,114 @@
+@if (home(); as h) {
+  <section class="g-hero" [attr.aria-label]="'الحساب ' + h.account.name" (touchstart)="touchStart($event)" (touchend)="touchEnd($event)">
+    <div class="g-hero-top">
+      <span class="g-hero-acct" dir="auto">{{ h.account.name }}</span>
+      <button class="g-circ on-hero" type="button" aria-label="تعديل الحسابات" (click)="sheets.accounts()"><app-icon name="edit" [size]="20" /></button>
+    </div>
+    @if (summary(); as s) {
+      <div class="g-hero-label" dir="rtl">المتبقي</div>
+      <div class="g-hero-big" [class.over]="s.over"><bdi class="n" dir="ltr">{{ fmt(s.remaining) }}</bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+      <div class="g-hero-range">
+        <span class="rng"><span dir="rtl">{{ range()?.start }}</span><span class="sep" aria-hidden="true">←</span><span dir="rtl">{{ range()?.end }}</span></span>
+      </div>
+      <div class="g-bar" [class.over]="s.over" role="progressbar" aria-label="نسبة المصروف من المتاح" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="pct(s.progress)">
+        <i [style.width.%]="pct(s.progress)"></i>
+      </div>
+      @if (s.over) {
+        <span class="g-over-tag" dir="rtl">تجاوزت المتاح</span>
+      }
+    } @else if (noCycle()) {
+      <div class="g-hero-label" dir="rtl">بدون دورة</div>
+      <div class="g-hero-big"><bdi class="n" dir="ltr">{{ fmt(h.selected.noCycleTotal) }}</bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+      <p class="g-hero-note" dir="rtl">هذه المصاريف مؤرخة قبل أول دورة. أضف دورة سابقة لتُحتسب ضمنها.</p>
+      <button class="g-btn" type="button" (click)="addEarlierCycle()">إضافة دورة سابقة</button>
+    } @else {
+      <div class="g-hero-label" dir="rtl">ابدأ دورتك الأولى</div>
+      <p class="g-hero-note" dir="rtl">الدورة تمتد من تاريخ الراتب حتى الراتب التالي، وليس من أول الشهر. يمكنك إضافة المصاريف قبل ذلك بزر +.</p>
+    }
+  </section>
+
+  <div class="g-acctrow">
+    @if (store.activeAccounts().length > 1) {
+      <div class="g-dots" role="group" aria-label="الحسابات">
+        @for (a of store.activeAccounts(); track a.id) {
+          <button class="g-dot" type="button" [attr.aria-label]="a.name" [attr.aria-current]="a.id === store.accountId() ? 'true' : null"
+                  (click)="store.switchAccount(a.id)"><i></i></button>
+        }
+      </div>
+    } @else {
+      <span></span>
+    }
+    <button class="g-chip" type="button" (click)="sheets.addAccount()">+ حساب جديد</button>
+  </div>
+
+  @if (summary(); as s) {
+    @switch (daily()?.kind) {
+      @case ('prompt') {
+        <button class="g-prompt" type="button" (click)="sheets.cycleOrNew()">
+          <span class="ic"><app-icon name="calendar" [size]="22" /></span>
+          <span class="tx" dir="rtl">حدّد تاريخ الراتب القادم لتعرف كم تقدر تصرف كل يوم</span>
+          <span class="ch"><app-icon name="chevL" [size]="20" /></span>
+        </button>
+      }
+      @case ('closed') {
+        <section class="g-card g-daily">
+          <div class="g-card-head"><span class="g-card-title" dir="rtl">متوسط الصرف اليومي</span></div>
+          <div class="g-big"><bdi class="n" dir="ltr">{{ fmt(s.dailyAverage) }}</bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+          <div class="g-line"><span dir="rtl">مدة الدورة</span><span class="grp"><bdi dir="ltr">{{ s.totalDays }}</bdi><span dir="rtl">يوم</span></span></div>
+        </section>
+      }
+      @case ('open') {
+        @if (daily(); as d) {
+          @if (d.kind === 'open') {
+            <section class="g-card g-daily">
+              <div class="g-card-head">
+                <span class="g-card-title" dir="rtl">{{ d.over ? 'تجاوزت اليوم' : 'تقدر تصرف اليوم' }}</span>
+                <span class="g-pill"><span dir="rtl">باقي</span><bdi dir="ltr">{{ s.daysLeft }}</bdi><span dir="rtl">يوم</span></span>
+              </div>
+              <div class="g-big" [class.over]="d.over"><bdi class="n" dir="ltr">{{ fmt(d.value) }}</bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+              <div class="g-bar" [class.over]="d.over" role="progressbar" aria-label="المصروف اليوم من ميزانية اليوم" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="pct(d.frac)">
+                <i [style.width.%]="pct(d.frac)"></i>
+              </div>
+              <div class="g-line">
+                <span class="grp"><span dir="rtl">صرفت</span><app-money [value]="s.spentToday" /></span>
+                <span class="grp"><span dir="rtl">من</span><app-money [value]="d.dayBudget" /></span>
+              </div>
+              @if (d.over && s.tomorrow !== null) {
+                <div class="g-line"><span dir="rtl">بكرة تقدر تصرف</span><app-money [value]="s.tomorrow" /></div>
+              }
+            </section>
+          }
+        }
+      }
+    }
+    <div class="g-pair">
+      <section class="g-card g-mini spent"><div class="lb" dir="rtl">المصروف</div><app-money [value]="s.spent" /></section>
+      <section class="g-card g-mini">
+        <div class="lb" dir="rtl">المخصَّص</div><app-money [value]="s.allowance" />
+        @if (+s.extra > 0) {
+          <div class="sub"><span dir="rtl">+ دخل إضافي </span><app-money [value]="s.extra" /></div>
+        }
+      </section>
+    </div>
+  }
+
+  <button class="g-btn primary" type="button" (click)="sheets.newCycle()">وصل الراتب</button>
+
+  <section class="g-card g-tight">
+    <div class="g-card-head">
+      <span class="g-card-title" dir="rtl">آخر المصاريف</span>
+      @if (h.recent.length) {
+        <a class="g-link" routerLink="/expenses/entries">عرض الكل</a>
+      }
+    </div>
+    @if (h.recent.length) {
+      <ul class="g-rows">
+        @for (e of h.recent; track e.id) {
+          <li app-entry-row [entry]="e" [showDate]="true" [today]="h.today"></li>
+        }
+      </ul>
+    } @else {
+      <p class="g-none" dir="rtl">لا توجد مصاريف في هذه الدورة بعد. اضغط + لإضافة مصروف.</p>
+    }
+  </section>
+}

@@ -54,6 +54,12 @@ export class SessionStore {
     return this.loading;
   }
 
+  /** Keeps the user in step after a {@code PATCH /me} (new version, open budget...). */
+  update(changes: Partial<Me>): void {
+    const current = this.me();
+    if (current) this.me.set({ ...current, ...changes });
+  }
+
   /** Forgets the user (on sign-out), keeping the reason to show on the sign-in screen. */
   clear(reason: string | null = null): void {
     this.me.set(null);

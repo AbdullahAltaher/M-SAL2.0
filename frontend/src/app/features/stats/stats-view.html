@@ -1,0 +1,129 @@
+@if (stats(); as s) {
+  <section class="g-card g-total">
+    <div class="g-card-head"><span class="g-card-title" dir="rtl">إجمالي المصروف</span></div>
+    <div class="g-big"><bdi class="n" dir="ltr">{{ fmt(s.total) }}</bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+    <div class="g-line"><span dir="rtl">المتوسط اليومي</span><app-money [value]="s.dailyAverage" /></div>
+    <div class="g-line"><span dir="rtl">عدد المصاريف</span><bdi dir="ltr">{{ s.count }}</bdi></div>
+    @if (+s.extra > 0) {
+      <div class="g-line"><span dir="rtl">دخل إضافي</span><app-money [value]="s.extra" /></div>
+    }
+  </section>
+
+  @if (s.count === 0) {
+    <p class="g-none" dir="rtl">لا توجد مصاريف في هذه الدورة لعرض الإحصاءات.</p>
+  } @else {
+    <section class="g-card">
+      <div class="g-card-head"><span class="g-card-title" dir="rtl">حسب الفئة</span></div>
+      <div class="g-donut">
+        <svg viewBox="0 0 120 120" class="g-donut-svg" role="img" aria-label="توزيع المصروف حسب الفئة">
+          <circle cx="60" cy="60" r="42" fill="none" class="g-donut-track" stroke-width="14" />
+          @for (sl of slices(); track $index) {
+            <circle cx="60" cy="60" r="42" fill="none" stroke-width="14" [style.stroke]="sl.color"
+                    [attr.stroke-dasharray]="sl.dash" [attr.stroke-dashoffset]="sl.offset" transform="rotate(-90 60 60)" />
+          }
+        </svg>
+        <div class="g-donut-c"><span class="lb" dir="rtl">الإجمالي</span><app-money [value]="s.total" /></div>
+      </div>
+      <ul class="g-legend">
+        @for (c of s.categories; track c.categoryId; let i = $index) {
+          <li>
+            <span class="dot" [style.background]="sliceVar(i)" aria-hidden="true"></span>
+            <span class="nm" dir="auto">{{ store.catOf(c.categoryId).emoji }} {{ store.catOf(c.categoryId).name }}</span>
+            <bdi class="pc" dir="ltr">{{ c.pct }}%</bdi>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="g-card">
+      <div class="g-card-head"><span class="g-card-title" dir="rtl">آخر 7 أيام</span></div>
+      <svg viewBox="0 0 300 140" class="g-chart" role="img" aria-label="المصروف في آخر 7 أيام">
+        <defs>
+          <linearGradient id="gGradBar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" style="stop-color:var(--x-accent-ink)" /><stop offset="100%" style="stop-color:var(--x-accent)" />
+          </linearGradient>
+        </defs>
+        @for (b of bars(); track $index) {
+          <rect [attr.x]="b.x" [attr.y]="b.trackY" [attr.width]="b.w" [attr.height]="b.maxH" rx="9" class="g-trk" />
+          @if (b.ht) {
+            <rect [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.ht" rx="9" class="g-barfill" [class.today]="b.today" />
+          }
+          @if (b.val) {
+            <text [attr.x]="b.cx" [attr.y]="b.valY" text-anchor="middle" class="g-val">{{ b.val }}</text>
+          }
+          <text [attr.x]="b.cx" [attr.y]="b.labY" text-anchor="middle" class="g-lab" [class.today]="b.today">{{ b.day }}</text>
+        }
+      </svg>
+    </section>
+
+    @if (isCycle()) {
+      @if (s.trend.length) {
+        <section class="g-card">
+          <div class="g-card-head"><span class="g-card-title" dir="rtl">اتجاه آخر 6 دورات</span></div>
+          <svg viewBox="0 0 300 164" class="g-chart" role="img" aria-label="إجمالي المصروف في آخر 6 دورات">
+            <defs>
+              <linearGradient id="gGradArea" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" style="stop-color:var(--x-accent);stop-opacity:.42" /><stop offset="100%" style="stop-color:var(--x-accent);stop-opacity:0" />
+              </linearGradient>
+            </defs>
+            <line x1="12" [attr.y1]="trend().base" x2="288" [attr.y2]="trend().base" class="g-axis" />
+            @if (trend().line) {
+              <path [attr.d]="trend().area" fill="url(#gGradArea)" />
+              <path [attr.d]="trend().line" fill="none" class="g-curve" />
+            }
+            @for (p of trend().points; track $index) {
+              @if (p.last) {
+                <circle [attr.cx]="p.x" [attr.cy]="p.y" r="9" class="g-halo" />
+              }
+              <circle [attr.cx]="p.x" [attr.cy]="p.y" [attr.r]="p.last ? 5 : 4" class="g-pt" [class.last]="p.last" />
+              <text [attr.x]="p.x" [attr.y]="p.valY" text-anchor="middle" class="g-val">{{ p.val }}</text>
+              <text [attr.x]="p.x" [attr.y]="trend().base + 22" text-anchor="middle" class="g-lab" [class.today]="p.last">{{ p.lab }}</text>
+            }
+          </svg>
+        </section>
+      }
+
+      <section class="g-card">
+        <div class="g-card-head"><span class="g-card-title" dir="rtl">أكبر التغيّرات عن الدورة السابقة</span></div>
+        @if (!s.hasPreviousCycle) {
+          <p class="g-none" dir="rtl">لا توجد دورة سابقة للمقارنة.</p>
+        } @else if (!s.changes.length) {
+          <p class="g-none" dir="rtl">لا تغييرات تُذكر.</p>
+        } @else {
+          <ul class="g-chg">
+            @for (c of s.changes; track c.categoryId) {
+              <li [class]="'k-' + c.kind.toLowerCase()">
+                <span class="g-tile sm" aria-hidden="true">{{ store.catOf(c.categoryId).emoji }}</span>
+                <span class="nm" dir="auto">{{ store.catOf(c.categoryId).name }}</span>
+                <span class="tag" dir="rtl">{{ kind(c.kind) }}</span>
+                <span class="money dl" dir="ltr"><bdi class="n">{{ delta(c.delta) }}</bdi><span class="u" dir="rtl">{{ unit }}</span></span>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    <section class="g-card">
+      <div class="g-card-head"><span class="g-card-title" dir="rtl">الاستخدام حسب الفئة</span></div>
+      <ul class="g-use">
+        @for (c of s.categories; track c.categoryId; let i = $index) {
+          <li>
+            <div class="top">
+              <span class="g-tile sm" aria-hidden="true">{{ store.catOf(c.categoryId).emoji }}</span>
+              <span class="nm" dir="auto">{{ store.catOf(c.categoryId).name }}</span>
+              <app-money [value]="c.total" />
+            </div>
+            <div class="g-bar" role="progressbar" [attr.aria-label]="store.catOf(c.categoryId).name" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="c.pct">
+              <i [style.width.%]="c.pct < 2 ? 2 : c.pct" [style.background]="sliceVar(i)"></i>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <button class="g-btn primary" type="button" (click)="sheets.receipt()">
+      <app-icon name="share" [size]="20" /><span dir="rtl">شارك ملخصك</span>
+    </button>
+  }
+}

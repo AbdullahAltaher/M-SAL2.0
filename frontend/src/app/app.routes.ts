@@ -4,7 +4,7 @@ import { authGuard, guestGuard } from './core/auth/guards';
 import { serviceGuard } from './core/permissions/service-guard';
 import { LastTab } from './features/shell/last-tab';
 
-/** The routes of SCREENS.md section 2. Screens without a page yet show a placeholder (phase 5). */
+/** The routes of SCREENS.md section 2. */
 export const routes: Routes = [
   {
     path: 'login',
@@ -20,38 +20,34 @@ export const routes: Routes = [
       {
         path: 'budget',
         canActivate: [serviceGuard('SRV-002')],
-        loadComponent: () => import('./features/shell/placeholder-page').then((m) => m.PlaceholderPage),
-        data: { title: 'الميزانية الشهرية' },
+        loadComponent: () => import('./features/budget/budget-page').then((m) => m.BudgetPage),
       },
       {
         path: 'expenses',
+        loadComponent: () => import('./features/expenses/expenses-layout').then((m) => m.ExpensesLayout),
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'home' },
           {
             path: 'home',
             canActivate: [serviceGuard('SRV-001')],
-            loadComponent: () => import('./features/shell/placeholder-page').then((m) => m.PlaceholderPage),
-            data: { title: 'الرئيسية' },
+            loadComponent: () => import('./features/expenses/home-view').then((m) => m.HomeView),
           },
           {
             path: 'entries',
             canActivate: [serviceGuard('SRV-001')],
-            loadComponent: () => import('./features/shell/placeholder-page').then((m) => m.PlaceholderPage),
-            data: { title: 'المصاريف' },
+            loadComponent: () => import('./features/expenses/entries-view').then((m) => m.EntriesView),
           },
           {
             path: 'stats',
             canActivate: [serviceGuard('SRV-006')],
-            loadComponent: () => import('./features/shell/placeholder-page').then((m) => m.PlaceholderPage),
-            data: { title: 'الإحصاءات' },
+            loadComponent: () => import('./features/stats/stats-view').then((m) => m.StatsView),
           },
         ],
       },
       {
         path: 'admin',
         canActivate: [serviceGuard('SRV-009')],
-        loadComponent: () => import('./features/shell/placeholder-page').then((m) => m.PlaceholderPage),
-        data: { title: 'الإدارة' },
+        loadComponent: () => import('./features/admin/admin-page').then((m) => m.AdminPage),
       },
     ],
   },

@@ -1,1 +1,12 @@
-/* Global styles live in src/styles/ (tokens and base), listed in angular.json. */
+/* Global styles live in src/styles/ (tokens and M-SAL's CSS), listed in angular.json. */
+
+/* The screens' own elements take no box, so their content sits directly in M-SAL's
+   .view column (flex, 14px gap) exactly as in M-SAL's markup. */
+app-budget-page,
+app-expenses-layout,
+app-home-view,
+app-entries-view,
+app-stats-view,
+app-admin-page {
+  display: contents;
+}

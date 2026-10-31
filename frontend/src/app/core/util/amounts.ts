@@ -62,3 +62,14 @@ export function parseLedgerAmount(raw: unknown): LedgerAmount {
   const value = isFinite(v) ? roundMoney(v) : 0;
   return { amount: String(value === 0 ? 0 : value), isApprox };
 }
+
+/**
+ * A cycle allowance (R-CYC-03), from M-SAL's parseAllowance: empty is refused (null), "0" or
+ * "000" is 0, anything else follows the expense amount rules.
+ */
+export function parseAllowance(raw: unknown): string | null {
+  const s = toLatinDigits(String(raw ?? '')).replace(/[\s,.٫٬،]/g, '');
+  if (s === '') return null;
+  if (/^0+$/.test(s)) return '0.00';
+  return parseEntryAmount(raw);
+}

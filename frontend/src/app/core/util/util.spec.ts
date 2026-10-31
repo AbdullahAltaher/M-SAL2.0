@@ -1,4 +1,4 @@
-import { parseEntryAmount, parseLedgerAmount, toLatinDigits } from './amounts';
+import { parseAllowance, parseEntryAmount, parseLedgerAmount, toLatinDigits } from './amounts';
 import { computeTotals } from './budget-totals';
 import { dayLabel, fullArabicDate, parseDate, shortArabicDate, weekdayIndex } from './dates';
 import { formatMoney, moneyText } from './money';
@@ -34,6 +34,18 @@ describe('R-ENT-03: expense amount input', () => {
 
   it('turns Arabic digits into Latin ones (R-GEN-04)', () => {
     expect(toLatinDigits('٠١٢٣٤٥٦٧٨٩ ۰۱۲۳۴۵۶۷۸۹')).toBe('0123456789 0123456789');
+  });
+});
+
+describe('R-CYC-03: allowance input', () => {
+  it('refuses empty, accepts 0 and follows the expense rules otherwise', () => {
+    expect(parseAllowance('')).toBeNull();
+    expect(parseAllowance('  ')).toBeNull();
+    expect(parseAllowance('0')).toBe('0.00');
+    expect(parseAllowance('000')).toBe('0.00');
+    expect(parseAllowance('٠')).toBe('0.00');
+    expect(parseAllowance('3,000')).toBe('3000.00');
+    expect(parseAllowance('-5')).toBeNull();
   });
 });
 

@@ -5,41 +5,30 @@ import { provideRouter } from '@angular/router';
 
 import { environment } from '../../../environments/environment';
 import { SupabaseAuth } from '../../core/auth/supabase-auth';
-import { Me, SessionStore } from '../../core/session/session-store';
+import { testMe } from '../../testing/test-me';
 import { Shell } from './shell';
 
-function me(services: string[]): Me {
-  return {
-    id: 'u1', email: 'sara@test.local', displayName: null, timeZone: 'Asia/Dubai', today: '2026-11-11',
-    roles: ['USER'], lastBudgetId: 'b1', exportReminder: { due: false, days: 0, never: true }, version: 1,
-    services: Object.fromEntries(services.map((s) => [s, { read: true, write: true }])),
-  };
-}
-
-describe('Shell', () => {
-  async function render(services: string[]): Promise<HTMLElement> {
+describe('Shell (the shared header)', () => {
+  it('shows the people menu with the open budget, "new person", and the two tabs', async () => {
     await TestBed.configureTestingModule({
       imports: [Shell],
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting(),
         { provide: SupabaseAuth, useValue: { signOut: async () => undefined } }],
     }).compileComponents();
-    const loading = TestBed.inject(SessionStore).load();
-    TestBed.inject(HttpTestingController).expectOne(`${environment.apiUrl}/me`).flush(me(services));
-    await loading;
     const fixture = TestBed.createComponent(Shell);
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne(`${environment.apiUrl}/me`).flush(testMe(['SRV-000', 'SRV-001', 'SRV-002']));
+    http.expectOne(`${environment.apiUrl}/budgets`).flush([
+      { id: 'b1', name: 'الأساسي', monthLabel: 'نوفمبر 2026', sortOrder: 1, version: 0 },
+      { id: 'b2', name: 'أمي', monthLabel: 'نوفمبر 2026', sortOrder: 2, version: 0 },
+    ]);
+    await new Promise((r) => setTimeout(r));
     await fixture.whenStable();
-    return fixture.nativeElement as HTMLElement;
-  }
-
-  it('shows the two tabs and hides admin from a normal user', async () => {
-    const el = await render(['SRV-000', 'SRV-001', 'SRV-002']);
-    expect(el.querySelector('.tabs')?.textContent).toContain('الميزانية');
-    expect(el.querySelector('.tabs')?.textContent).toContain('المصاريف');
-    expect(el.textContent).not.toContain('الإدارة');
-  });
-
-  it('shows admin with SRV-009', async () => {
-    const el = await render(['SRV-000', 'SRV-001', 'SRV-002', 'SRV-009']);
-    expect(el.textContent).toContain('الإدارة');
+    const el = fixture.nativeElement as HTMLElement;
+    const select = el.querySelector<HTMLSelectElement>('#profileSelect')!;
+    expect([...select.options].map((o) => o.text)).toEqual(['الأساسي', 'أمي', '＋ شخص جديد…']);
+    expect(select.value).toBe('b2');
+    expect([...el.querySelectorAll('.tab')].map((t) => t.textContent?.trim())).toEqual(['الميزانية', 'المصاريف']);
+    expect(el.querySelector('.kb-proxy')).not.toBeNull();
   });
 });

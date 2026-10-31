@@ -1,0 +1,59 @@
+@if (ledger.state(); as s) {
+  <section class="panel" id="salaryPanel">
+    <span class="plate-num">00</span>
+    <div class="block-head">
+      <input class="title-input" id="salaryLabel" dir="rtl" aria-label="مسمى الراتب" placeholder="الراتب"
+             [value]="s.salaryLabel" #sl (input)="ledger.editBudget('salaryLabel', sl.value)" (blur)="ledger.editBudget('salaryLabel', sl.value, true)">
+      <input class="amount-input" id="salaryAmount" dir="ltr" inputmode="decimal" aria-label="مبلغ الراتب" placeholder="0"
+             [value]="shown('salary', s.salaryRaw)" #sa
+             (focus)="focusAmount('salary', s.salaryRaw, sa)" (input)="ledger.editSalary(typed(sa))" (blur)="blurAmount('salary', sa)">
+    </div>
+  </section>
+
+  <div style="display:flex;flex-direction:column;gap:14px">
+    @for (g of s.groups; track g.id; let gi = $index) {
+      <section class="panel" [attr.data-block]="g.id">
+        <span class="plate-num">{{ plate(gi) }}</span>
+        <div class="block-head">
+          <input class="title-input" dir="rtl" placeholder="اسم المجموعة" aria-label="اسم المجموعة"
+                 [value]="g.title" #ti (input)="ledger.editTitle(g.id, ti.value)" (blur)="ledger.editTitle(g.id, ti.value, true)">
+          <button class="icon-btn" type="button" aria-label="حذف المجموعة" (click)="deleteGroup(g)">×</button>
+        </div>
+        <ul class="rows">
+          @for (r of g.items; track r.id) {
+            <li class="row" [class.done]="r.isDone" [attr.data-row]="r.id">
+              <button class="toggle" type="button" [class.done]="r.isDone" aria-label="تم الصرف" [attr.aria-pressed]="r.isDone"
+                      (click)="ledger.toggleDone(r.id)"></button>
+              <input class="name-input" dir="rtl" placeholder="البند" aria-label="اسم البند"
+                     [value]="r.name" #ni (input)="ledger.editName(r.id, ni.value)" (blur)="ledger.editName(r.id, ni.value, true)">
+              <input class="amount-input" dir="ltr" inputmode="decimal" placeholder="0" aria-label="المبلغ"
+                     [value]="shown(r.id, r.raw)" #ai
+                     (focus)="focusAmount(r.id, r.raw, ai)" (input)="ledger.editAmount(r.id, typed(ai))" (blur)="blurAmount(r.id, ai)">
+              <button class="icon-btn" type="button" aria-label="حذف البند" (click)="ledger.deleteItem(r.id)">×</button>
+            </li>
+          }
+        </ul>
+        <button class="add-row-btn" type="button" (click)="addItem(g.id)">+ بند</button>
+        @if (ledger.totals()?.groups?.[gi]; as t) {
+          <div class="totals">
+            <div class="tline">
+              <span class="lbl" dir="rtl">المجموع</span>
+              <span class="val sub-val" dir="ltr" [class.neg]="t.subtotal < 0">@if (t.subtotalApprox) {<span class="approx">~</span>}{{ value(t.subtotal) }}</span>
+            </div>
+            <div class="tline rest">
+              <span class="lbl" dir="rtl">المتبقي بعده</span>
+              <span class="val rest-val" dir="ltr" [class.neg]="t.balanceAfter < 0">@if (t.balanceApprox) {<span class="approx">~</span>}{{ value(t.balanceAfter) }}</span>
+            </div>
+          </div>
+        }
+      </section>
+    }
+  </div>
+
+  <nav class="toolbar" aria-label="أدوات">
+    <button class="pill" type="button" (click)="addBudget()">+ شخص</button>
+    <button class="pill primary" type="button" (click)="addGroup()">+ مجموعة</button>
+    <button class="pill" type="button" (click)="newMonth()">شهر جديد</button>
+    <button class="pill primary" type="button" (click)="receipt()">إيصال</button>
+  </nav>
+}

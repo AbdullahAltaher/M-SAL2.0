@@ -33,6 +33,8 @@
               "src/styles/tokens-ledger.css",
               "src/styles/tokens-expenses.css",
               "src/styles/base.css",
+              "src/styles/ledger.css",
+              "src/styles/expenses.css",
               "src/styles.scss"
             ]
           },
