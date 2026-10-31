@@ -27,6 +27,7 @@ const set = (name, v) => {
 };
 set('VAPID_PUBLIC_KEY', pub);
 set('VAPID_PRIVATE_KEY', jwk.d);
-if (!value('VAPID_SUBJECT')) set('VAPID_SUBJECT', 'mailto:noreply@m-sal2.invalid');
+// Apple refuses a made-up mailto (403 BadJwtToken); the app's own address works
+if (!value('VAPID_SUBJECT')) set('VAPID_SUBJECT', 'https://abdullahaltaher.github.io/M-SAL2.0/');
 writeFileSync(path, text);
 console.log('Written to .env. Public key (not secret):', pub);

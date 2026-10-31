@@ -131,6 +131,18 @@ class PushApiTest extends IntegrationTest {
 	}
 
 	@Test
+	void aNewTimeTheSameDayRemindsAgain() throws Exception {
+		TestUser sara = signUp("sara");
+		subscribe(sara, APPLE);
+		remindAt(sara, "11:30");
+		assertThat(reminder.run()).isEqualTo(1);
+		remindAt(sara, "11:30"); // the same time: nothing new
+		assertThat(reminder.run()).isZero();
+		remindAt(sara, "11:45");
+		assertThat(reminder.run()).isEqualTo(1);
+	}
+
+	@Test
 	void anHourLateOrInAnotherTimeZoneItIsNotSent() throws Exception {
 		TestUser sara = signUp("sara");
 		subscribe(sara, APPLE);

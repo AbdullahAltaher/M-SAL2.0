@@ -1,8 +1,10 @@
 package com.abdullah.msal2.users;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -52,6 +54,10 @@ public class AppUser extends VersionedEntity {
 	/** In the user's time zone; null when the daily reminder is off (V8) */
 	@Column(name = "daily_reminder_time")
 	private LocalTime dailyReminderTime;
+
+	/** The user's "today" when the reminder was last decided (push/DailyReminder) */
+	@Column(name = "last_reminder_on")
+	private LocalDate lastReminderOn;
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
@@ -115,7 +121,11 @@ public class AppUser extends VersionedEntity {
 		return dailyReminderTime;
 	}
 
+	/** A new time is a new reminder: today counts again, so it can still come today. */
 	public void setDailyReminderTime(LocalTime dailyReminderTime) {
+		if (!Objects.equals(this.dailyReminderTime, dailyReminderTime)) {
+			this.lastReminderOn = null;
+		}
 		this.dailyReminderTime = dailyReminderTime;
 	}
 

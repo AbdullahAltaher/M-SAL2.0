@@ -39,13 +39,14 @@ services:
       # Your own email: the first sign-in with it becomes ADMIN (API.md 2.5)
       - key: MSAL_BOOTSTRAP_ADMIN_EMAIL
         sync: false
-      # The same three values as in .env (made once by scripts/generate-vapid-keys.mjs)
+      # The same two keys as in .env (made once by scripts/generate-vapid-keys.mjs)
       - key: VAPID_PUBLIC_KEY
         sync: false
       - key: VAPID_PRIVATE_KEY
         sync: false
+      # Who sends: the app's real address. Apple refuses a made-up mailto (403 BadJwtToken)
       - key: VAPID_SUBJECT
-        sync: false
+        value: https://abdullahaltaher.github.io/M-SAL2.0/
       # Not "dev": no Swagger in production (API.md section 1)
       - key: SPRING_PROFILES_ACTIVE
         value: prod

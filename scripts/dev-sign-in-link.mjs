@@ -3,7 +3,8 @@
 // per hour, and holds a link, which an installed iPhone app cannot open).
 // Run it yourself:  node scripts/dev-sign-in-link.mjs         (link to http://localhost:4200)
 //                   node scripts/dev-sign-in-link.mjs <url>   (link to the deployed app)
-// The code: in the app type your email, press "أرسل الرمز", then type this code.
+// The code: in the app type your email and press "أرسل الرمز" FIRST, then run this and type
+// its code. Each new code cancels the one before, so the order matters.
 // The link signs in as you: never share it. Secrets are read from .env and never printed.
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';

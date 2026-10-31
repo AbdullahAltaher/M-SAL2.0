@@ -32,6 +32,8 @@ import javax.crypto.Mac;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -54,6 +56,7 @@ public class WebPush {
 		FAILED
 	}
 
+	private static final Logger log = LoggerFactory.getLogger(WebPush.class);
 	private static final Base64.Encoder B64 = Base64.getUrlEncoder().withoutPadding();
 	private static final Base64.Decoder B64D = Base64.getUrlDecoder();
 	private static final int RECORD_SIZE = 4096;
@@ -67,7 +70,7 @@ public class WebPush {
 
 	public WebPush(@Value("${msal.push.vapid-public-key:}") String publicKey,
 			@Value("${msal.push.vapid-private-key:}") String privateKey,
-			@Value("${msal.push.subject:mailto:noreply@m-sal2.invalid}") String subject, Clock clock) {
+			@Value("${msal.push.subject:https://abdullahaltaher.github.io/M-SAL2.0/}") String subject, Clock clock) {
 		this.clock = clock;
 		this.subject = subject;
 		this.http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
@@ -97,10 +100,22 @@ public class WebPush {
 		return publicKey != null;
 	}
 
-	/** Sends one encrypted message; never throws for the push service's answers. */
+	/** What the push service answered, and why when it refused ("403 {"reason":"BadJwtToken"}"). */
+	public record Delivery(Outcome outcome, String detail) {
+	}
+
+	/** Sends one encrypted message; never throws. A refusal is logged with the service's reason. */
 	public Outcome send(String endpoint, String p256dh, String auth, String payload) {
+		Delivery delivery = deliver(endpoint, p256dh, auth, payload);
+		if (delivery.outcome() == Outcome.FAILED) {
+			log.warn("Push not delivered to {}: {}", URI.create(endpoint).getHost(), delivery.detail());
+		}
+		return delivery.outcome();
+	}
+
+	public Delivery deliver(String endpoint, String p256dh, String auth, String payload) {
 		if (!enabled()) {
-			return Outcome.FAILED;
+			return new Delivery(Outcome.FAILED, "no VAPID keys");
 		}
 		try {
 			URI uri = URI.create(endpoint);
@@ -115,18 +130,20 @@ public class WebPush {
 					.header("Urgency", "normal")
 					.POST(HttpRequest.BodyPublishers.ofByteArray(body))
 					.build();
-			int status = http.send(request, HttpResponse.BodyHandlers.discarding()).statusCode();
+			HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
+			int status = response.statusCode();
+			String detail = status + " " + response.body().substring(0, Math.min(response.body().length(), 200));
 			if (status == 404 || status == 410) {
-				return Outcome.GONE;
+				return new Delivery(Outcome.GONE, detail);
 			}
-			return status >= 200 && status < 300 ? Outcome.SENT : Outcome.FAILED;
+			return new Delivery(status >= 200 && status < 300 ? Outcome.SENT : Outcome.FAILED, detail);
 		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			return Outcome.FAILED;
+			return new Delivery(Outcome.FAILED, "interrupted");
 		}
 		catch (Exception e) {
-			return Outcome.FAILED;
+			return new Delivery(Outcome.FAILED, e.getClass().getSimpleName() + ": " + e.getMessage());
 		}
 	}
 

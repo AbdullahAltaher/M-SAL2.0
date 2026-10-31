@@ -70,7 +70,8 @@ msal:
   push:
     vapid-public-key: ${VAPID_PUBLIC_KEY:}
     vapid-private-key: ${VAPID_PRIVATE_KEY:}
-    subject: ${VAPID_SUBJECT:mailto:noreply@m-sal2.invalid}
+    # Apple refuses a made-up mailto (403 BadJwtToken); the app's address works
+    subject: ${VAPID_SUBJECT:https://abdullahaltaher.github.io/M-SAL2.0/}
   cors-origins:
     - http://localhost:4200
     - https://abdullahaltaher.github.io
