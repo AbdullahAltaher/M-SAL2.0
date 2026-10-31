@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
+import com.abdullah.msal2.push.WebPush;
 import com.abdullah.msal2.users.SupabaseAuthAdmin;
 
 import tools.jackson.databind.JsonNode;
@@ -31,9 +32,10 @@ import tools.jackson.databind.json.JsonMapper;
  * Spring context and one container. Every test starts with no users and no user data.
  * <p>
  * "Now" is fixed at 2026-11-11 08:00 UTC (12:00 in Dubai), the date of the examples in
- * BUSINESS_RULES.md. Supabase Auth is a mock: tests never call the real service.
+ * BUSINESS_RULES.md. Supabase Auth and Web Push are mocks: tests never call the real services.
  */
-@SpringBootTest(properties = "msal.bootstrap-admin-email=" + IntegrationTest.ADMIN_EMAIL)
+@SpringBootTest(properties = { "msal.bootstrap-admin-email=" + IntegrationTest.ADMIN_EMAIL,
+		"msal.push.reminder-cron=-" })
 @AutoConfigureMockMvc
 @Import({ TestcontainersConfiguration.class, FixedClockConfiguration.class })
 public abstract class IntegrationTest {
@@ -61,6 +63,10 @@ public abstract class IntegrationTest {
 
 	@MockitoBean
 	protected SupabaseAuthAdmin authAdmin;
+
+	/** Push services are never called; tests run the daily reminder themselves */
+	@MockitoBean
+	protected WebPush webPush;
 
 	@BeforeEach
 	void resetData() {

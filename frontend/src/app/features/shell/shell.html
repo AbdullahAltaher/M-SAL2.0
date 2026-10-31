@@ -46,6 +46,17 @@
   </header>
 
   <div class="banner-host" aria-live="polite">
+    @if (!status.online()) {
+      <div class="banner bad" role="alert">
+        <span class="b-text" dir="rtl">لا يوجد اتصال، لا يمكن الحفظ الآن.</span>
+      </div>
+    }
+    @if (status.updateReady()) {
+      <div class="banner" role="status">
+        <span class="b-text" dir="rtl">يوجد تحديث جديد</span>
+        <button class="pill sm" type="button" (click)="status.update()">تحديث</button>
+      </div>
+    }
     @if (exportReminder(); as r) {
       <div class="banner warn" role="status">
         <span class="b-text" dir="rtl">{{ r.never ? 'لم تُصدّر نسخة احتياطية من بياناتك بعد. صدّر نسخة لتحتفظ بها خارج المتصفح.'
@@ -64,3 +75,6 @@
 <app-toast-host />
 <input class="kb-proxy" id="kbProxy" type="text" inputmode="decimal" autocomplete="off" aria-hidden="true" tabindex="-1">
 <app-sheet-host />
+@if (lock.locked()) {
+  <app-lock-screen (signOut)="signOutFromLock()" />
+}

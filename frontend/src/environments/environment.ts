@@ -8,4 +8,6 @@ export const environment: {
   supabaseUrl: string;
   /** Public key for Supabase Auth from the browser; it is not a secret, but stays out of git */
   supabasePublishableKey: string;
+  /** The build, such as "2026-11-01 (f30c2e4)", shown in settings */
+  version: string;
 } = generated;

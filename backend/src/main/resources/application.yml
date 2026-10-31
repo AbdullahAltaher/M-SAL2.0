@@ -65,6 +65,12 @@ msal:
   rate-limit:
     per-minute: 120
     strict-per-minute: 10
+  # The daily reminder (SCREENS.md section 7). VAPID keys are secret: only from the environment
+  # (CLAUDE.md rule 16); without them no notification is sent. Made by scripts/generate-vapid-keys.mjs
+  push:
+    vapid-public-key: ${VAPID_PUBLIC_KEY:}
+    vapid-private-key: ${VAPID_PRIVATE_KEY:}
+    subject: ${VAPID_SUBJECT:mailto:noreply@m-sal2.invalid}
   cors-origins:
     - http://localhost:4200
     - https://abdullahaltaher.github.io

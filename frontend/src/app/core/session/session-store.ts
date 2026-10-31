@@ -18,6 +18,10 @@ export interface Me {
   services: Record<string, { read: boolean; write: boolean }>;
   lastBudgetId: string | null;
   exportReminder: { due: boolean; days: number; never: boolean };
+  /** "21:00:00" in the user's time zone, or null when the daily reminder is off */
+  dailyReminderTime: string | null;
+  /** The server's Web Push key, or null when it sends no notifications */
+  pushPublicKey: string | null;
   version: number;
 }
 

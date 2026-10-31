@@ -28,6 +28,7 @@ public enum ErrorCode {
 
 	SRV_000_E001("SRV-000-E001", HttpStatus.FORBIDDEN, "هذا البريد غير مدعو لاستخدام التطبيق."),
 	SRV_000_E002("SRV-000-E002", HttpStatus.BAD_REQUEST, "المنطقة الزمنية غير صحيحة."),
+	SRV_000_E003("SRV-000-E003", HttpStatus.BAD_REQUEST, "اشتراك الإشعارات غير صالح."),
 
 	SRV_001_E001("SRV-001-E001", HttpStatus.BAD_REQUEST, "أدخل مبلغًا صحيحًا أكبر من صفر."),
 	SRV_001_E002("SRV-001-E002", HttpStatus.BAD_REQUEST, "اختر تصنيفًا."),

@@ -16,6 +16,8 @@ const me: Me = {
   services: { 'SRV-001': { read: true, write: true }, 'SRV-006': { read: true, write: false } },
   lastBudgetId: 'b1',
   exportReminder: { due: false, days: 0, never: true },
+  dailyReminderTime: null,
+  pushPublicKey: null,
   version: 1,
 };
 

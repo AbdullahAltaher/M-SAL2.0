@@ -408,7 +408,7 @@ spring:
 | `V5__seed_category_templates.sql` | الفئات الـ 20 الافتراضية |
 | `V6__create_imports.sql` | ملفات الاستيراد |
 | `V7__add_invitation_auth_user.sql` | عمود `auth_user_id` في `invitations`: مستخدم Supabase الذي أُنشئ مع الدعوة، حتى يُحذف عند إلغاء دعوة لم تُستخدم (`API.md` 2.3). **أُضيف في مرحلة التنفيذ 3** |
-| `V8__create_push_subscriptions.sql` | اشتراكات الإشعارات ووقت التذكير اليومي. **يُضاف في مرحلة التنفيذ 7** (أُضيف في جلسة التخطيط 4، انظر [SCREENS.md](SCREENS.md) القسم 7) |
+| `V8__create_push_subscriptions.sql` | اشتراكات الإشعارات ووقت التذكير اليومي. **أُضيف في مرحلة التنفيذ 7** مع عمود `last_reminder_on` (أُضيف في جلسة التخطيط 4، انظر [SCREENS.md](SCREENS.md) القسم 7) |
 
 ### V1__create_system.sql
 ```sql
@@ -739,6 +739,7 @@ alter table invitations add column auth_user_id uuid;
 ### V8__create_push_subscriptions.sql (مرحلة التنفيذ 7)
 ```sql
 alter table app_users add column daily_reminder_time time;   -- null = التذكير متوقف
+alter table app_users add column last_reminder_on date;      -- "اليوم" (بتوقيت المستخدم) لآخر فحص، أُضيف في مرحلة التنفيذ 7
 
 create table push_subscriptions (
     id          uuid        primary key default gen_random_uuid(),

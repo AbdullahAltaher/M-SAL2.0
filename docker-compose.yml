@@ -41,6 +41,9 @@ services:
       # dev turns on Swagger at http://localhost:8080/swagger-ui.html
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       MSAL_BOOTSTRAP_ADMIN_EMAIL: ${MSAL_BOOTSTRAP_ADMIN_EMAIL}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
     ports:
       - "8080:8080"
     # Same as Render Starter: 512MB and 0.5 CPU (CLAUDE.md rule 13)

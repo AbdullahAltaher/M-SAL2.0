@@ -1,10 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { environment } from '../../../environments/environment';
 import { Api } from '../../core/api/api';
 import { ApiError } from '../../core/api/api-error';
 import { ImportRecord } from '../../core/api/models';
 import { SupabaseAuth } from '../../core/auth/supabase-auth';
+import { AppLock } from '../../core/pwa/app-lock';
+import { DailyReminder } from '../../core/pwa/daily-reminder';
+import { canLock } from '../../core/pwa/device';
 import { SessionStore } from '../../core/session/session-store';
 import { Dialogs } from '../../shared/sheet/dialogs';
 import { Sheets } from '../../shared/sheet/sheets';
@@ -13,8 +17,8 @@ import { ImportExport } from './import-export';
 
 /**
  * SH-08: data and settings (SCREENS.md 4.2): the account, the data (export, import and its
- * history, in place of M-SAL's storage status and snapshots) and sign-out. Face ID and the
- * reminder come with phase 7.
+ * history, in place of M-SAL's storage status and snapshots), the Face ID lock, the daily
+ * reminder, and the app (version, install steps, sign-out).
  */
 @Component({
   selector: 'app-settings-sheet',
@@ -65,8 +69,38 @@ import { ImportExport } from './import-export';
       } @else {
         <p class="x-none" dir="rtl">لا يوجد استيراد بعد.</p>
       }
+      <h3 class="sub-h" dir="rtl">الأمان</h3>
+      @if (lockAvailable()) {
+        <ul class="m-list">
+          <li class="m-row">
+            <span class="m-name" dir="rtl">قفل Face ID</span>
+            <span class="m-sub" dir="rtl">{{ lock.enabled() ? 'مفعّل' : 'متوقف' }}</span>
+            <button class="pill sm" type="button" (click)="toggleLock()">{{ lock.enabled() ? 'إيقاف' : 'تفعيل' }}</button>
+          </li>
+        </ul>
+        <p class="hint" dir="rtl">قفل خصوصية على هذا الجهاز: يُطلب عند فتح التطبيق وبعد 5 دقائق في الخلفية. لا يغني عن تسجيل الدخول.</p>
+      } @else {
+        <p class="x-none" dir="rtl">قفل Face ID غير متاح على هذا الجهاز.</p>
+      }
+      <h3 class="sub-h" dir="rtl">التذكير</h3>
+      <ul class="m-list">
+        <li class="m-row">
+          <span class="m-name" dir="rtl">تذكير يومي بتسجيل المصاريف</span>
+          @if (reminder.time(); as t) {
+            <input #rt class="field" type="time" dir="ltr" aria-label="وقت التذكير" [value]="t" (change)="setReminderTime(rt.value)">
+            <button class="pill sm" type="button" (click)="reminderOff()">إيقاف</button>
+          } @else {
+            <button class="pill sm" type="button" (click)="reminderOn()">تفعيل</button>
+          }
+        </li>
+      </ul>
+      <p class="hint" dir="rtl">إشعار «سجّلت مصاريف اليوم؟» في الوقت الذي تختاره، فقط إذا لم تسجّل أي مصروف ذلك اليوم.</p>
       <h3 class="sub-h" dir="rtl">التطبيق</h3>
+      <div class="totals">
+        <div class="tline"><span class="lbl" dir="rtl">الإصدار</span><span class="val" dir="ltr">{{ version }}</span></div>
+      </div>
       <div class="toolbar">
+        <button class="pill" type="button" (click)="installHelp()">تعليمات التثبيت</button>
         <button class="pill" type="button" (click)="signOut()">تسجيل الخروج</button>
       </div>
     }
@@ -81,6 +115,10 @@ export class SettingsSheet {
   private readonly toasts = inject(Toasts);
   private readonly router = inject(Router);
   protected readonly io = inject(ImportExport);
+  protected readonly lock = inject(AppLock);
+  protected readonly reminder = inject(DailyReminder);
+  protected readonly version = environment.version;
+  protected readonly lockAvailable = signal(false);
 
   protected readonly me = this.session.user;
   protected readonly imports = signal<ImportRecord[]>([]);
@@ -97,6 +135,62 @@ export class SettingsSheet {
 
   constructor() {
     this.api.imports().then((list) => this.imports.set(list), () => undefined);
+    void canLock().then((ok) => this.lockAvailable.set(ok));
+  }
+
+  /** Face ID asks right away, so this runs inside the tap. */
+  protected async toggleLock(): Promise<void> {
+    if (this.lock.enabled()) {
+      this.lock.disable();
+      this.toasts.show('أُوقف القفل');
+      return;
+    }
+    try {
+      await this.lock.enable(this.me()?.email ?? '');
+      this.toasts.show('فُعّل قفل Face ID');
+    } catch {
+      this.toasts.show('لم يُفعَّل القفل.');
+    }
+  }
+
+  /** The browser asks for notifications here, inside the tap; 21:00 to start, as a default. */
+  protected async reminderOn(): Promise<void> {
+    const why = this.reminder.unavailable();
+    if (why) {
+      this.toasts.show(why);
+      return;
+    }
+    try {
+      await this.reminder.enable('21:00');
+      this.toasts.show('فُعّل التذكير، الساعة 21:00');
+    } catch (e) {
+      const error = e as Partial<ApiError>;
+      this.toasts.show(error?.code && error.message ? error.message : 'لم يُفعَّل التذكير.');
+    }
+  }
+
+  protected async setReminderTime(time: string): Promise<void> {
+    if (!/^\d{2}:\d{2}$/.test(time)) return;
+    try {
+      await this.reminder.changeTime(time);
+      this.toasts.show('حُفظ');
+    } catch (e) {
+      this.toasts.show((e as ApiError).message);
+    }
+  }
+
+  protected async reminderOff(): Promise<void> {
+    try {
+      await this.reminder.disable();
+      this.toasts.show('أُوقف التذكير');
+    } catch (e) {
+      this.toasts.show((e as ApiError).message);
+    }
+  }
+
+  protected installHelp(): void {
+    this.sheets.close();
+    void this.router.navigateByUrl('/install');
   }
 
   /** M-SAL's fmtDateTime: YYYY-MM-DD HH:MM on this device. */

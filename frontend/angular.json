@@ -53,7 +53,8 @@
                 }
               ],
               "outputHashing": "all",
-              "baseHref": "/M-SAL2.0/"
+              "baseHref": "/M-SAL2.0/",
+              "serviceWorker": "ngsw-config.json"
             },
             "development": {
               "optimization": false,

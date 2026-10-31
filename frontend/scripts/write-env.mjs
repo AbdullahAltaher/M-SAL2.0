@@ -1,6 +1,7 @@
 // Writes src/environments/environment.generated.ts from ../.env or the process environment.
 // The file is gitignored: no key is ever committed (CLAUDE.md rule 16). Values are never printed.
 // Runs before `npm start`, `npm run build` and `npm test`.
+import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -16,10 +17,20 @@ if (existsSync(envFile)) {
 }
 const get = (name, fallback = '') => process.env[name] ?? fromFile[name] ?? fallback;
 
+/** The build shown in settings: its date and commit, such as "2026-11-01 (f30c2e4)" */
+let commit = '';
+try {
+  commit = execSync('git rev-parse --short HEAD', { cwd: here, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+} catch {
+  // not a git checkout
+}
+const version = new Date().toLocaleDateString('en-CA') + (commit ? ` (${commit})` : '');
+
 const config = {
   apiUrl: get('MSAL_API_URL', 'http://localhost:8080/api/v1'),
   supabaseUrl: get('SUPABASE_URL'),
   supabasePublishableKey: get('SUPABASE_PUBLISHABLE_KEY'),
+  version,
 };
 
 writeFileSync(

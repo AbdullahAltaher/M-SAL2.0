@@ -1,6 +1,7 @@
 package com.abdullah.msal2.users;
 
 import java.time.Instant;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -47,6 +48,10 @@ public class AppUser extends VersionedEntity {
 
 	@Column(name = "last_export_at")
 	private Instant lastExportAt;
+
+	/** In the user's time zone; null when the daily reminder is off (V8) */
+	@Column(name = "daily_reminder_time")
+	private LocalTime dailyReminderTime;
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
@@ -104,6 +109,14 @@ public class AppUser extends VersionedEntity {
 
 	public Instant getLastExportAt() {
 		return lastExportAt;
+	}
+
+	public LocalTime getDailyReminderTime() {
+		return dailyReminderTime;
+	}
+
+	public void setDailyReminderTime(LocalTime dailyReminderTime) {
+		this.dailyReminderTime = dailyReminderTime;
 	}
 
 	public Set<String> getRoles() {

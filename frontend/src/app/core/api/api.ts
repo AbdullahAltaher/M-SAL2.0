@@ -44,7 +44,7 @@ export class Api {
   }
 
   // ── SRV-000 ─────────────────────────────────────────────────
-  patchMe(body: { displayName?: string; timeZone?: string; lastBudgetId?: string; version: number }) {
+  patchMe(body: { displayName?: string; timeZone?: string; lastBudgetId?: string; dailyReminderTime?: string | null; version: number }) {
     return this.patch<Me>('/me', body);
   }
 
@@ -114,6 +114,10 @@ export class Api {
   // ── SRV-006, SRV-008 ────────────────────────────────────────
   stats(accountId: string, cycle: string) { return this.get<Stats>(`/accounts/${accountId}/stats`, { cycle }); }
   receipt(accountId: string, cycle: string) { return this.get<Receipt>(`/accounts/${accountId}/receipt`, { cycle }); }
+
+  // ── SRV-000: this device's notifications (the daily reminder) ─
+  subscribePush(subscription: PushSubscriptionJSON) { return this.post<void>('/me/push-subscriptions', subscription); }
+  unsubscribePush(endpoint: string) { return this.delete(`/me/push-subscriptions?endpoint=${encodeURIComponent(endpoint)}`); }
 
   // ── SRV-007 ─────────────────────────────────────────────────
   /** The export file (R-IO-01); the server also notes the export for its reminder. */

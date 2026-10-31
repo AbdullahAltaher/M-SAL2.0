@@ -4,12 +4,16 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 
 import { ApiError } from '../../core/api/api-error';
+import { SupabaseAuth } from '../../core/auth/supabase-auth';
 import { BudgetsStore } from '../../core/data/budgets-store';
+import { AppLock } from '../../core/pwa/app-lock';
+import { AppStatus } from '../../core/pwa/app-status';
 import { SessionStore } from '../../core/session/session-store';
 import { Dialogs } from '../../shared/sheet/dialogs';
 import { SheetHost } from '../../shared/sheet/sheet-host';
 import { ToastHost, Toasts } from '../../shared/toast/toast';
 import { LedgerStore } from '../budget/ledger-store';
+import { LockScreen } from '../lock/lock-screen';
 import { ImportExport } from '../settings/import-export';
 import { LastTab } from './last-tab';
 
@@ -23,7 +27,7 @@ const NF = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
  */
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, SheetHost, ToastHost],
+  imports: [RouterOutlet, SheetHost, ToastHost, LockScreen],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shell.html',
 })
@@ -31,6 +35,9 @@ export class Shell {
   protected readonly budgets = inject(BudgetsStore);
   protected readonly ledger = inject(LedgerStore);
   private readonly session = inject(SessionStore);
+  private readonly auth = inject(SupabaseAuth);
+  protected readonly status = inject(AppStatus);
+  protected readonly lock = inject(AppLock);
   private readonly dialogs = inject(Dialogs);
   private readonly toasts = inject(Toasts);
   private readonly router = inject(Router);
@@ -79,6 +86,14 @@ export class Shell {
       this.document.body.classList.remove('x-on');
       this.syncThemeColor(false);
     });
+  }
+
+  /** Face ID failed: the lock goes, and the email sign-in decides (SCREENS.md S-03). */
+  protected async signOutFromLock(): Promise<void> {
+    this.lock.disable();
+    this.session.clear();
+    await this.auth.signOut();
+    await this.router.navigateByUrl('/login');
   }
 
   protected format(n: number): string {

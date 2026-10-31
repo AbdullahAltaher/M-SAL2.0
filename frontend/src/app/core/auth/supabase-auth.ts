@@ -1,11 +1,12 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { AuthError, Session, SupabaseClient, createClient } from '@supabase/supabase-js';
+import { AuthClient, AuthError, Session } from '@supabase/auth-js';
 
 import { environment } from '../../../environments/environment';
 
 /**
- * Sign-in with a 6-digit email code through Supabase Auth (API.md 2.1). supabase-js is used for
- * sign-in only; all data goes through Spring Boot (PLAN.md section 2).
+ * Sign-in with a 6-digit email code through Supabase Auth (API.md 2.1). Only Supabase's auth
+ * client is loaded (@supabase/auth-js, what supabase-js uses inside), not its database, storage
+ * or realtime parts: all data goes through Spring Boot (PLAN.md section 2).
  * <p>
  * Supabase keeps the session and refreshes it, so the code is asked once per device. The
  * session lives under "msal2.auth" in localStorage, never under a "mizaniya" key (CLAUDE.md rule 15).
@@ -14,15 +15,21 @@ import { environment } from '../../../environments/environment';
 export class SupabaseAuth {
   static readonly STORAGE_KEY = 'msal2.auth';
 
-  private readonly client: SupabaseClient = createClient(environment.supabaseUrl, environment.supabasePublishableKey, {
-    auth: {
+  /** The same settings and headers supabase-js gives its auth client */
+  private readonly client = {
+    auth: new AuthClient({
+      url: `${environment.supabaseUrl}/auth/v1`,
+      headers: {
+        apikey: environment.supabasePublishableKey,
+        Authorization: `Bearer ${environment.supabasePublishableKey}`,
+      },
       storageKey: SupabaseAuth.STORAGE_KEY,
       persistSession: true,
       autoRefreshToken: true,
       // Until SMTP sends the code (phase 10), the email holds a link; opening it signs in here
       detectSessionInUrl: true,
-    },
-  });
+    }),
+  };
 
   private readonly session = signal<Session | null>(null);
   private readonly ready = signal(false);
@@ -48,7 +55,7 @@ export class SupabaseAuth {
     this.ready.set(true);
   }
 
-  /** The current access token (refreshed by supabase-js), or null. */
+  /** The current access token (refreshed by the auth client), or null. */
   async accessToken(): Promise<string | null> {
     const { data } = await this.client.auth.getSession();
     return data.session?.access_token ?? null;

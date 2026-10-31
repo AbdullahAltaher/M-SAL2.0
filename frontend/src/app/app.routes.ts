@@ -2,18 +2,23 @@ import { Routes } from '@angular/router';
 
 import { authGuard, guestGuard } from './core/auth/guards';
 import { serviceGuard } from './core/permissions/service-guard';
+import { installGuard } from './core/pwa/install-guard';
 import { LastTab } from './features/shell/last-tab';
 
 /** The routes of SCREENS.md section 2. */
 export const routes: Routes = [
   {
+    path: 'install',
+    loadComponent: () => import('./features/install/install-page').then((m) => m.InstallPage),
+  },
+  {
     path: 'login',
-    canActivate: [guestGuard],
+    canActivate: [installGuard, guestGuard],
     loadComponent: () => import('./features/auth/login-page').then((m) => m.LoginPage),
   },
   {
     path: '',
-    canActivate: [authGuard, serviceGuard('SRV-000')],
+    canActivate: [installGuard, authGuard, serviceGuard('SRV-000')],
     loadComponent: () => import('./features/shell/shell').then((m) => m.Shell),
     children: [
       { path: '', pathMatch: 'full', redirectTo: () => LastTab.path() },
