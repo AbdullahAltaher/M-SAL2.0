@@ -12,7 +12,7 @@ Angular (PWA) · Spring Boot (Java 21) · Supabase Postgres + Auth · Flyway · 
 
 ## Status
 
-Phases 0 to 3 complete: the backend API is done. Next: phase 4, the Angular foundation.
+Phases 0 to 4 complete: the backend API and the Angular foundation (sign-in, design, permissions). Next: phase 5, the screens.
 
 ## Run locally
 
@@ -29,7 +29,7 @@ cd backend && ./mvnw verify    # backend tests (needs Docker: Testcontainers)
 ```
 
 ```bash
-cd frontend && npm ci && npm start   # Angular on :4200
+cd frontend && npm ci && npm start   # Angular on :4200, config from ../.env (never committed)
 ```
 
 ## Docs

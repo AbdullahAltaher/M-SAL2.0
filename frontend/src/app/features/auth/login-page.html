@@ -1,0 +1,40 @@
+<main class="wrap login">
+  <header class="brand">
+    <span class="eyebrow">M-SAL</span>
+    <h1>ميزانية الشهر</h1>
+  </header>
+
+  <section class="panel">
+    @if (step() === 'email') {
+      <form (ngSubmit)="send()">
+        <label for="email">البريد الإلكتروني</label>
+        <input id="email" name="email" type="email" dir="ltr" autocomplete="email" inputmode="email" required
+               [ngModel]="email()" (ngModelChange)="email.set($event)" [disabled]="busy()">
+        <button type="submit" class="primary" [disabled]="busy() || !email().trim()">أرسل الرمز</button>
+      </form>
+    } @else {
+      <form (ngSubmit)="verify()">
+        <p class="hint">أرسلنا رمزًا من 6 أرقام إلى <bdi dir="ltr">{{ email() }}</bdi></p>
+        <label for="code">الرمز</label>
+        <input id="code" name="code" class="code num" type="text" dir="ltr" inputmode="numeric"
+               autocomplete="one-time-code" maxlength="6" placeholder="••••••"
+               [ngModel]="code()" (ngModelChange)="onCode($event)" [disabled]="busy()">
+        <button type="submit" class="primary" [disabled]="busy() || code().length !== 6">دخول</button>
+        <div class="row">
+          <button type="button" class="link" (click)="changeEmail()">تغيير الإيميل</button>
+          <button type="button" class="link" (click)="send()" [disabled]="!canResend()">
+            @if (waitSeconds() > 0) {
+              إعادة الإرسال بعد <span class="num">{{ waitSeconds() }}</span>
+            } @else {
+              إعادة الإرسال
+            }
+          </button>
+        </div>
+      </form>
+    }
+
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+  </section>
+</main>

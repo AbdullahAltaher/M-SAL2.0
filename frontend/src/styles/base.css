@@ -1,0 +1,37 @@
+/* Base styles: reset, body and reduced motion copied from M-SAL index.html lines 53-68. */
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--ar);
+  font-size:17px;
+  line-height:1.45;
+  min-height:100dvh;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  overflow-x:hidden;
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;animation:none !important}
+}
+
+/* Shared building blocks (M-SAL .panel and .wrap) */
+.panel{
+  position:relative;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px 18px 16px;
+  box-shadow:0 1px 2px rgba(36,35,31,.05);
+}
+.wrap{
+  position:relative;z-index:1;
+  max-width:560px;margin:0 auto;
+  padding:12px 14px calc(48px + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;gap:14px;
+}
+/* Numbers are always Latin and left-to-right inside Arabic text (R-GEN-05) */
+.num{font-family:var(--num);direction:ltr;unicode-bidi:isolate}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}

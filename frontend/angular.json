@@ -30,6 +30,9 @@
               }
             ],
             "styles": [
+              "src/styles/tokens-ledger.css",
+              "src/styles/tokens-expenses.css",
+              "src/styles/base.css",
               "src/styles.scss"
             ]
           },
@@ -47,7 +50,8 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "baseHref": "/M-SAL2.0/"
             },
             "development": {
               "optimization": false,

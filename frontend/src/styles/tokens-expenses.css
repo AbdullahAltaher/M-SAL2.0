@@ -1,0 +1,35 @@
+/* Expenses (glass) tokens: copied unchanged from M-SAL index.html lines 349-381 (SCREENS.md section 8).
+   They apply while body has the x-on class (the Expenses section), as in M-SAL. */
+body.x-on{
+  color-scheme:dark;
+  --x-bg0:#0B1426;--x-bg1:#131C33;--x-blob:rgba(61,120,235,.30);--x-dot:rgba(170,200,255,.85);
+  --x-card:rgba(255,255,255,.05);--x-line:rgba(120,160,255,.18);--x-line-soft:rgba(120,160,255,.10);
+  --x-hi:inset 0 1px 0 rgba(255,255,255,.10);--x-shadow:0 22px 44px -18px rgba(0,0,0,.55);
+  --x-text:#F3F6FF;--x-muted:rgba(255,255,255,.66);
+  --x-accent:#4D8DF0;--x-accent-ink:#A2C6FF;
+  --x-exp:#FF8F85;--x-inc:#5CDC9F;--x-warn:#FFC56B;
+  --x-tile:rgba(6,11,24,.72);--x-field:rgba(255,255,255,.07);--x-track:rgba(255,255,255,.13);
+  --x-glass:rgba(16,26,48,.62);--x-glass-solid:rgba(16,26,48,.96);
+  --x-hero-a:#2F6BE0;--x-hero-b:#1D47A8;--x-on-hero:#FFFFFF;--x-on-hero-muted:rgba(255,255,255,.95);
+  --x-btn-a:#2F6BE0;--x-btn-b:#1F4DB8;--x-scrim:rgba(3,8,20,.55);--x-card-solid:#161F36;
+  --x-s1:#4D8DF0;--x-s2:#9A86FF;--x-s3:#2BC4C9;--x-s4:#FFC56B;--x-s5:#FF8F85;--x-s6:#5CDC9F;--x-s7:#D894F5;--x-s8:#9FB3D9;
+  --x-chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23B9C6E2' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  /* the shared tokens are re-pointed here, so existing components (header, pills, sheets) pick up the glass look */
+  --bg:var(--x-bg0);--surface:var(--x-card);--ink:var(--x-text);--sec:var(--x-muted);--border:var(--x-line);
+  --green:var(--x-accent);--brass:var(--x-warn);--neg:var(--x-exp);--on-green:#FFFFFF;--header-bg:var(--x-glass);--chev:var(--x-chev);
+}
+@media (prefers-color-scheme: light){
+  body.x-on{
+    color-scheme:light;
+    --x-bg0:#E3EBF8;--x-bg1:#F5F8FD;--x-blob:rgba(110,160,245,.38);--x-dot:rgba(60,110,210,.55);
+    --x-card:rgba(255,255,255,.72);--x-line:rgba(60,100,180,.18);--x-line-soft:rgba(60,100,180,.10);
+    --x-hi:inset 0 1px 0 rgba(255,255,255,.95);--x-shadow:0 20px 40px -20px rgba(40,70,140,.35);
+    --x-text:#0E1A33;--x-muted:rgba(14,26,51,.70);
+    --x-accent:#2459C8;--x-accent-ink:#1F4FB4;
+    --x-exp:#C73A2E;--x-inc:#12794A;--x-warn:#9A5B00;
+    --x-tile:rgba(47,111,224,.10);--x-field:rgba(255,255,255,.85);--x-track:rgba(30,60,130,.14);
+    --x-glass:rgba(255,255,255,.66);--x-glass-solid:rgba(250,252,255,.96);--x-scrim:rgba(25,45,90,.38);--x-card-solid:#F7F9FD;
+    --x-s1:#2459C8;--x-s2:#6B4FD8;--x-s3:#0C8A90;--x-s4:#B26A00;--x-s5:#CB4336;--x-s6:#157F4B;--x-s7:#9448C4;--x-s8:#566A8E;
+    --x-chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235A6785' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+}
