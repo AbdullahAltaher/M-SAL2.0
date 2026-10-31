@@ -174,6 +174,24 @@
 - **التذكير من البداية للنهاية** (يحتاج HTTPS، والتطبيق مثبتاً على الآيفون، ومفاتيح VAPID)، وFace ID على الآيفون، وشاشات البداية، وشريط "يوجد تحديث جديد".
 - **"الأزرار التي تحفظ تُعطَّل" بدون إنترنت** (SCREENS.md 7): يظهر الشريط فقط، والحفظ يفشل برسالة "لا يوجد اتصال". التعطيل الكامل لم يُعمل.
 
-## 6. الخطوة التالية: المرحلة 8 (النشر)
+## 5د. المرحلة 8 (النشر): جارية
+
+**الأسعار (2026-11-01):** Render Starter ما زال **7 دولار شهرياً** (512MB، و0.5 CPU، ويعمل دائماً)، والقرار كما هو.
+
+**جاهز في المستودع:**
+- **`render.yaml`** (Blueprint): خدمة `m-sal2`، وDocker من `backend/`، وSingapore، و`plan: starter`، والفحص `/actuator/health`، و`autoDeployTrigger: checksPass` (ينشر بعد نجاح CI)، و`buildFilter` على `backend/**`. القيم العامة مكتوبة (عنوان Session pooler، و`DB_SSLMODE=require`، و`SPRING_PROFILES_ACTIVE=prod` بدون Swagger)، والأسرار `sync: false` يكتبها المستخدم في Render مرة واحدة: `DB_PASSWORD`، و`SUPABASE_SECRET_KEY`، و`MSAL_BOOTSTRAP_ADMIN_EMAIL`، و`VAPID_*` الثلاثة (نفس أسماء `.env`). **غير مؤكد:** معرّف الخطة `starter` (صفحة Blueprint تذكر أسماء مثل `0.5c-512mb`)، وRender يعرض الخطة والسعر قبل الإنشاء.
+- **`.github/workflows/ci.yml`**: اختبارات السيرفر (Testcontainers) والواجهة والبناء، على كل push وPR.
+- **`.github/workflows/pages.yml`**: يبني Angular بمتغيرات Actions (`MSAL_API_URL`، و`SUPABASE_URL`، و`SUPABASE_PUBLISHABLE_KEY`)، ويضيف `404.html` (فتح `/M-SAL2.0/expenses` مباشرة)، وينشر على Pages. **يُتخطى** حتى يوجد `MSAL_API_URL`.
+- **`backend/mvnw` صار قابلاً للتنفيذ في git** (`100755`). كان `100644`، فيفشل البناء على Linux (Render وGitHub) مع أنه يعمل على Windows.
+- **`scripts/dev-sign-in-link.mjs`** يطبع أيضاً **الرمز (6 أرقام)**، ويقبل عنوان التطبيق المنشور. حتى SMTP (المرحلة 10)، هذه طريقة الدخول في تطبيق الآيفون المثبت: الإيميل في التطبيق، و"أرسل الرمز"، ثم الرمز من السكربت.
+
+**الخطوات الباقية بالترتيب:**
+1. push (بموافقة المستخدم).
+2. **المستخدم في Render:** New ← Blueprint ← مستودع `M-SAL2.0` (ربط GitHub إذا طُلب) ← يراجع الخطة والسعر ← يكتب الأسرار من `.env` ← Apply. **أول تشغيل يطبّق Flyway V1–V8 على قاعدة Supabase** (أول تغيير عليها، بموافقة المستخدم).
+3. Claude يفحص `https://<الخدمة>.onrender.com/actuator/health`، والذاكرة في Render Metrics.
+4. **بموافقة المستخدم:** Claude يضبط متغيرات Actions بـ `gh variable set`، ويفعّل Pages من GitHub Actions (`gh api repos/AbdullahAltaher/M-SAL2.0/pages -f build_type=workflow`)، ثم يشغّل `pages.yml`. **مستودع `M-SAL2.0` فقط، وليس `M-SAL`** (القاعدة 15).
+5. المستخدم يفتح `https://abdullahaltaher.github.io/M-SAL2.0/` على الآيفون، ويثبّته، ويدخل بالرمز من السكربت، ويجرّب التذكير وFace ID وشاشة البداية.
+
+## 6. الخطوة التالية: إكمال المرحلة 8 (انظر 5د)
 
 حسب `PLAN.md` القسم 14: مراجعة أسعار الاستضافة، ثم Render Starter في Singapore، وGitHub Pages للواجهة، والنشر التلقائي بـ GitHub Actions. **مفاتيح VAPID أنشأها المستخدم** في `.env` (2026-11-01)، والسيرفر المحلي يقرأها ويشتغل. وفي النشر: متغيرات VAPID في Render، و`MSAL_API_URL` لبناء Angular، والتأكد أن نطاق الـ Service Worker `/M-SAL2.0/` على GitHub Pages.

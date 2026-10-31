@@ -1,0 +1,51 @@
+# Render Blueprint: the Spring Boot server (PLAN.md section 2, phase 8).
+# Render Starter in Singapore, next to the Supabase database: 512MB and 0.5 CPU at a fixed
+# $7 a month, always on (CLAUDE.md rules 1 and 13).
+# Secrets are `sync: false`: Render asks for them once, when the Blueprint is created, and they
+# live only in Render (CLAUDE.md rule 16). Nothing secret is in this file.
+services:
+  - type: web
+    name: m-sal2
+    runtime: docker
+    region: singapore
+    plan: starter
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /actuator/health
+    # Deploy a push to main only after its GitHub checks (.github/workflows/ci.yml) pass
+    autoDeployTrigger: checksPass
+    buildFilter:
+      paths:
+        - backend/**
+        - render.yaml
+    envVars:
+      # Supabase's Session pooler (IPv4, works with Flyway), DATABASE.md section 8
+      - key: DB_HOST
+        value: aws-0-ap-southeast-1.pooler.supabase.com
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_NAME
+        value: postgres
+      - key: DB_USER
+        value: postgres.bzdzveckpxmmdoqcfewv
+      - key: DB_SSLMODE
+        value: require
+      - key: DB_PASSWORD
+        sync: false
+      - key: SUPABASE_URL
+        value: https://bzdzveckpxmmdoqcfewv.supabase.co
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      # Your own email: the first sign-in with it becomes ADMIN (API.md 2.5)
+      - key: MSAL_BOOTSTRAP_ADMIN_EMAIL
+        sync: false
+      # The same three values as in .env (made once by scripts/generate-vapid-keys.mjs)
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        sync: false
+      # Not "dev": no Swagger in production (API.md section 1)
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
