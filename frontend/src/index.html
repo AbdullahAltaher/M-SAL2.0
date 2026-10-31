@@ -42,8 +42,56 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+  <style>
+    /* The animated start (SCREENS.md section 7): it follows iOS's plain launch image, M-SAL's page
+       comes to life, then fades into the app. Hidden by main.ts once Angular has started. */
+    #boot {
+      --bg: #F5F2EA; --surface: #FFFCF5; --border: #DED9CD; --green: #38594A; --brass: #B99A5B;
+      position: fixed; inset: 0; z-index: 2000; background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4vh;
+      padding-bottom: 16vh; transition: opacity .35s ease, transform .35s ease;
+    }
+    @media (prefers-color-scheme: dark) {
+      #boot { --bg: #1B1A16; --surface: #242320; --border: #38362F; --green: #8FB4A0; --brass: #C2A66B; }
+    }
+    #boot.out { opacity: 0; transform: scale(1.04); pointer-events: none; }
+    #boot svg { width: min(34vw, 150px); height: auto; overflow: visible; }
+    #boot svg * { transform-box: fill-box; transform-origin: center; }
+    #boot .b-card { fill: var(--surface); stroke: var(--border); stroke-width: 2;
+      animation: b-card .45s cubic-bezier(.2, .8, .2, 1) both; }
+    #boot .b-rule { stroke: var(--green); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 92; stroke-dashoffset: 92;
+      animation: b-draw .5s .3s cubic-bezier(.6, 0, .2, 1) forwards; }
+    #boot .b-dots { stroke: var(--border); stroke-width: 2; stroke-dasharray: 2 5; opacity: 0;
+      animation: b-fade .3s forwards; }
+    #boot .b-dots.d1 { animation-delay: .65s; }
+    #boot .b-dots.d2 { animation-delay: .78s; }
+    #boot .b-cur { fill: var(--brass); font: 700 28px 'IBM Plex Sans Arabic', 'Noto Sans Arabic', sans-serif; opacity: 0;
+      animation: b-rise .45s .85s cubic-bezier(.2, .8, .2, 1) forwards; }
+    #boot .b-name { margin: 0; color: var(--green); font: 600 min(6vw, 26px) 'IBM Plex Sans Arabic', sans-serif; opacity: 0;
+      animation: b-rise .45s 1s cubic-bezier(.2, .8, .2, 1) forwards; }
+    @keyframes b-card { from { opacity: 0; transform: scale(.86) translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes b-draw { to { stroke-dashoffset: 0; } }
+    @keyframes b-fade { to { opacity: 1; } }
+    @keyframes b-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) {
+      #boot *, #boot { animation: none !important; transition: none !important; }
+      #boot .b-rule { stroke-dashoffset: 0; }
+      #boot .b-dots, #boot .b-cur, #boot .b-name { opacity: 1; }
+    }
+  </style>
 </head>
 <body>
+  <div id="boot" aria-hidden="true">
+    <svg viewBox="0 0 180 180">
+      <rect class="b-card" x="24" y="24" width="132" height="132" rx="14"/>
+      <!-- drawn from the right, as Arabic is written -->
+      <line class="b-rule" x1="136" y1="64" x2="44" y2="64"/>
+      <line class="b-dots d1" x1="44" y1="88" x2="136" y2="88"/>
+      <line class="b-dots d2" x1="44" y1="108" x2="136" y2="108"/>
+      <text class="b-cur" x="90" y="138" text-anchor="middle">د.إ</text>
+    </svg>
+    <p class="b-name">ميزانية الشهر</p>
+  </div>
   <app-root></app-root>
 </body>
 </html>

@@ -30,17 +30,13 @@ const icon = (t, scale = 1) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox=
   <g transform="translate(90 90) scale(${scale}) translate(-90 -90)">${page(t)}</g>
 </svg>`;
 
-/** The page in the middle, and the app's name under it, as the sign-in screen. */
-const splash = (t, w, h) => {
-  const size = w * 0.34;
-  const top = h * 0.42 - size / 2;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+/**
+ * The paper colour only: iOS shows a still image at launch, so the logo is left to the animated
+ * start screen in index.html, which follows it without a jump.
+ */
+const splash = (t, w, h) => `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
   <rect width="${w}" height="${h}" fill="${t.bg}"/>
-  <g transform="translate(${(w - size) / 2} ${top}) scale(${size / 180})">${page(t)}</g>
-  <text x="${w / 2}" y="${top + size + w * 0.11}" font-family="Noto Sans Arabic" font-size="${w * 0.06}"
-        font-weight="600" fill="${t.green}" text-anchor="middle">ميزانية الشهر</text>
 </svg>`;
-};
 
 /** iPhones in portrait: CSS width and height, and pixel ratio. */
 const PHONES = [
