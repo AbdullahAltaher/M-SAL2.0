@@ -1,0 +1,35 @@
+# Secrets: never commit
+.env
+.env.*
+*.env
+!.env.example
+*.pem
+*.key
+
+# Backups: they live in the private M-SAL2.0-backups repo only
+*.dump
+*.sql.gz
+*.sql.gpg
+backups/
+
+# Java / Spring Boot
+target/
+build/
+.gradle/
+*.class
+*.log
+hs_err_pid*
+
+# Angular / Node
+node_modules/
+dist/
+.angular/
+coverage/
+npm-debug.log*
+
+# IDE and OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
