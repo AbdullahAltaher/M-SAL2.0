@@ -12,7 +12,24 @@ Angular (PWA) · Spring Boot (Java 21) · Supabase Postgres + Auth · Flyway · 
 
 ## Status
 
-Planning complete. Implementation starts with phase 0.
+Phase 0 (setup) complete. Next: phase 1, the backend foundation.
+
+## Run locally
+
+Requires Docker Desktop, Java 21 and Node 22. Copy `.env.example` to `.env` first.
+
+```bash
+docker compose up -d --build   # Postgres on :5433, Spring Boot on :8080
+curl localhost:8080/actuator/health
+```
+
+```bash
+cd backend && ./mvnw verify    # backend tests
+```
+
+```bash
+cd frontend && npm ci && npm start   # Angular on :4200
+```
 
 ## Docs
 

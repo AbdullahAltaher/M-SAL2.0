@@ -1,0 +1,50 @@
+# Local development: Postgres + Spring Boot.
+# Values come from .env (LOCAL_DB_*), see .env.example.
+#   docker compose up -d --build
+#   docker stats            (backend must stay under 512MB, CLAUDE.md rule 13)
+
+name: msal2
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${LOCAL_DB_NAME}
+      POSTGRES_USER: ${LOCAL_DB_USER}
+      POSTGRES_PASSWORD: ${LOCAL_DB_PASSWORD}
+      TZ: Asia/Dubai
+    ports:
+      # 5433 on the host: a Windows Postgres already uses 5432
+      - "${LOCAL_DB_PORT:-5433}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    image: m-sal2.0
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${LOCAL_DB_NAME}
+      DB_USER: ${LOCAL_DB_USER}
+      DB_PASSWORD: ${LOCAL_DB_PASSWORD}
+    ports:
+      - "8080:8080"
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 20s
+
+volumes:
+  db-data:
