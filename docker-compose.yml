@@ -36,6 +36,8 @@ services:
       DB_NAME: ${LOCAL_DB_NAME}
       DB_USER: ${LOCAL_DB_USER}
       DB_PASSWORD: ${LOCAL_DB_PASSWORD}
+      SUPABASE_URL: ${SUPABASE_URL}
+      MSAL_BOOTSTRAP_ADMIN_EMAIL: ${MSAL_BOOTSTRAP_ADMIN_EMAIL}
     ports:
       - "8080:8080"
     mem_limit: 512m

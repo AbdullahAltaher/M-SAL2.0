@@ -12,7 +12,7 @@ Angular (PWA) · Spring Boot (Java 21) · Supabase Postgres + Auth · Flyway · 
 
 ## Status
 
-Phase 0 (setup) complete. Next: phase 1, the backend foundation.
+Phases 0 (setup) and 1 (backend foundation) complete. Next: phase 2, the business logic.
 
 ## Run locally
 
@@ -24,7 +24,7 @@ curl localhost:8080/actuator/health
 ```
 
 ```bash
-cd backend && ./mvnw verify    # backend tests
+cd backend && ./mvnw verify    # backend tests (needs Docker: Testcontainers)
 ```
 
 ```bash

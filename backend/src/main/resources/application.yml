@@ -13,6 +13,17 @@ spring:
     password: ${DB_PASSWORD:msal_local}
     hikari:
       maximum-pool-size: 5
+  # Flyway alone changes the tables (CLAUDE.md rule 3); Hibernate only validates them
+  flyway:
+    schemas: msal
+    default-schema: msal
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: msal
 
 server:
   port: ${PORT:8080}
@@ -27,3 +38,16 @@ management:
     health:
       probes:
         enabled: true
+
+logging:
+  pattern:
+    level: "%5p [%X{service:-}] [user=%X{user:-}] [req=%X{requestId:-}]"
+
+msal:
+  # Not secret: the project URL is public (PLAN.md section 2)
+  supabase-url: ${SUPABASE_URL:https://bzdzveckpxmmdoqcfewv.supabase.co}
+  # The first sign-in with this email, while no user exists, becomes ADMIN (API.md 2.5)
+  bootstrap-admin-email: ${MSAL_BOOTSTRAP_ADMIN_EMAIL:}
+  cors-origins:
+    - http://localhost:4200
+    - https://abdullahaltaher.github.io

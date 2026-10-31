@@ -20,7 +20,7 @@
 
 | القاعدة | القيمة |
 |---|---|
-| **العنوان الأساسي** | `https://<railway-domain>/api/v1` |
+| **العنوان الأساسي** | `https://<render-domain>/api/v1` (محلياً `http://localhost:8080/api/v1`) |
 | **الصيغة** | JSON، وأسماء الحقول بأسلوب `camelCase` |
 | **تسجيل الدخول** | `Authorization: Bearer <JWT من Supabase>` في كل طلب |
 | **المعرّفات** | UUID كنص |
