@@ -17,6 +17,7 @@ import com.abdullah.msal2.system.audit.AuditAction;
 import com.abdullah.msal2.system.audit.AuditService;
 import com.abdullah.msal2.system.error.ApiException;
 import com.abdullah.msal2.system.error.ErrorCode;
+import com.abdullah.msal2.system.time.Today;
 import com.abdullah.msal2.users.AppUser;
 import com.abdullah.msal2.users.AppUserRepository;
 
@@ -83,7 +84,7 @@ public class MeService {
 
 	private MeResponse toResponse(AppUser user) {
 		Instant now = Instant.now(clock);
-		LocalDate today = LocalDate.ofInstant(now, ZoneId.of(user.getTimeZone()));
+		LocalDate today = Today.of(now, user.getTimeZone());
 		Map<String, MeResponse.Rights> services = new LinkedHashMap<>();
 		permissions.permitted(user.getId())
 				.forEach((code, access) -> services.put(code, new MeResponse.Rights(access.canRead(), access.canWrite())));

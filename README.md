@@ -12,7 +12,7 @@ Angular (PWA) · Spring Boot (Java 21) · Supabase Postgres + Auth · Flyway · 
 
 ## Status
 
-Phases 0 (setup) and 1 (backend foundation) complete. Next: phase 2, the business logic.
+Phases 0 (setup), 1 (backend foundation) and 2 (business logic) complete. Next: phase 3, the API.
 
 ## Run locally
 

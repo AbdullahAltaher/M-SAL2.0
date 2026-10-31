@@ -18,6 +18,7 @@
 8. [الإيصال (SRV-008)](#8-الإيصال-srv-008)
 9. [الاستيراد والتصدير (SRV-007)](#9-الاستيراد-والتصدير-srv-007)
 10. [ملاحظات لجلسة التخطيط 2 (قاعدة البيانات)](#10-ملاحظات-لجلسة-التخطيط-2-قاعدة-البيانات)
+11. [أين يُختبر كل قاعدة](#11-أين-يُختبر-كل-قاعدة)
 
 ---
 
@@ -59,7 +60,7 @@ state
 ### R-GEN-01: التقريب
 *المصدر: `roundMoney`، و`sumMoney`*
 - كل مبلغ يُقرّب إلى **خانتين** بعد كل عملية: `round((n + EPSILON) × 100) / 100`.
-- في M-SAL2.0 نستخدم `BigDecimal` مع `HALF_UP` بخانتين.
+- في M-SAL2.0 نستخدم `BigDecimal` بخانتين (`Money.round`): النصف يُقرَّب للأعلى (`HALF_UP`) للموجب، ونحو الصفر للسالب (`-1.005` يصير `-1.00`)، لأن `Math.round` في JavaScript يقرّب النصف نحو +∞. هكذا تطابق الأرقام التطبيق القديم تماماً.
 
 ### R-GEN-02: التواريخ
 *المصدر: `formatDate`، و`parseDate`، و`todayStr`*
@@ -553,3 +554,52 @@ state
 8. **`createdAt` في التطبيق القديم** بالمللي ثانية ← `timestamptz` عند الاستيراد.
 9. **الانتماء للدورة لا يُخزَّن** في جدول المصاريف، بل يُحسب من التاريخ (R-CYC-01).
 10. **المنطقة الزمنية للمستخدم** ← عمود `time_zone` في `app_users` (افتراضياً `Asia/Dubai`) لحساب "اليوم".
+
+---
+
+## 11. أين يُختبر كل قاعدة
+
+> أُضيف في مرحلة التنفيذ 2 (2026-10-31). الحسابات في Java بدون قاعدة بيانات، وكل اختبار بنفس أرقام M-SAL القديم (القاعدة 10 في `CLAUDE.md`). الاختبارات في `backend/src/test/java/com/abdullah/msal2/`.
+
+| القاعدة | الكود | الاختبار | ملاحظة |
+|---|---|---|---|
+| R-GEN-01 | `system/money/Money` | `MoneyTest` | |
+| R-GEN-02 | `system/time/Today` | `TodayTest` | اختبارات "منتصف الليل في UTC+4" |
+| R-GEN-03 | `EntryData.isLive` | في كل الاختبارات (المحذوف لا يدخل) | |
+| R-GEN-04، R-GEN-05، R-GEN-06 | | **Angular** (المرحلة 4 و5) | إدخال وعرض. السيرفر يقبل الصيغة الموحّدة فقط (`API.md` القسم 1) |
+| R-BUD-01، R-BUD-02 | `budget/BudgetTotals` | `BudgetTotalsTest` | |
+| R-BUD-03 | | **Angular** | تحليل الإدخال |
+| R-BUD-04، R-BUD-06 | | **المرحلة 3** (اختبارات الـ API) | إنشاء وحذف |
+| R-BUD-05 | `budget/MonthLabel` | `BudgetTotalsTest` | والمسح نفسه في المرحلة 3 |
+| R-CYC-01 | `cycles/Cycles` | `CyclesTest` | |
+| R-CYC-02 | `Cycles.prefill` | `CyclesTest` | الرسالة في Angular |
+| R-CYC-03 | `Cycles.isDuplicateDate` | `CyclesTest` | ورسائل الأخطاء في المرحلة 3 |
+| R-CYC-04، R-CYC-05 | `cycles/CycleSummary` | `CycleSummaryTest` | ومنها "الحالة المبلّغ عنها" (122.37 و109.08) |
+| R-CYC-06 | | **Angular** | البيانات من `/home` (المرحلة 3) |
+| R-CYC-07 | `Cycles.movedEntryCount` | `CyclesTest` | |
+| R-CYC-08 | `Cycles.bucket` | `CyclesTest` | |
+| R-ENT-01، R-ENT-02، R-ENT-08 | `expenses/EntryRules` | `EntriesTest` | ترتيب رسائل R-ENT-02 في المرحلة 3 |
+| R-ENT-03 | | **Angular** | تحليل الإدخال |
+| R-ENT-04، R-ENT-05 | | **Angular** | |
+| R-ENT-06، R-ENT-07، R-ENT-09 | | **المرحلة 3** | عمليات على قاعدة البيانات |
+| R-ENT-10 | `expenses/EntryDays` | `EntriesTest` | |
+| R-ENT-11 | `expenses/EntrySearch` | `EntriesTest` | |
+| R-ENT-12 | `expenses/NameSuggestions` | `NameSuggestionsTest` | |
+| R-ENT-13 | | لا ينطبق | `entries.account_id` إلزامي مع FK، فلا يوجد مصروف بدون حساب |
+| R-ACC | `accounts/AccountRules` | `AccountRulesTest` | |
+| R-CAT | | **المرحلة 3** | |
+| R-STA-01 إلى R-STA-05 | `stats/Stats`، و`stats/CategoryTotals` | `StatsTest` | |
+| R-STA-06 | | **Angular** | عرض |
+| R-RCP-01 | `receipt/ReceiptModel` | `ReceiptModelTest` | |
+| R-RCP-02 | | **Angular** | يُرسم من `GET /budgets/{id}` |
+| R-IO-01 | `me/ExportReminder` | `ExportReminderTest` | |
+| R-IO-02 إلى R-IO-04 | | **المرحلة 6** | مع اختبارات `migration.test.js` |
+| R-IO-05 | `system/audit/AuditService` | `MeApiTest` | |
+
+**اختبارات M-SAL القديمة التي لم تُنقل، ولماذا:**
+- `parseDate` و`addDays` و`daysBetween` وإعادة التشغيل بعدة مناطق زمنية: يحل محلها `LocalDate` في Java، و"اليوم" يُختبر في `TodayTest`.
+- "مصاريف بتاريخ غير صالح": عمود `entry_date` من نوع `date`، فلا يقبل تاريخاً غير صالح.
+- `setCycleDate` لا يغيّر المدخلات، والحقول غير المعروفة في الدورة: الـ records في Java لا تتغير، والحقول غير المعروفة تُحفظ في `imports.raw_data` (المرحلة 6).
+- `formatMoney` و`dayLabel` و`chartNum` و`smoothPath` و`parseEntryAmount` و`canSaveEntry`: **تُنقل لاختبارات Angular** في المرحلة 4 و5.
+- `migration.test.js` و`mergeStates` و`replaceKeepingExp` و`parseImport` و`countState`: **المرحلة 6**.
+- `persistence.test.js` و`static.test.js` و`contrast.test.js`: خاصة بالتطبيق القديم (localStorage وملف HTML واحد والألوان). الألوان تُراجع في Angular.
