@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
@@ -64,9 +66,16 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler({ HttpMessageNotReadableException.class, HandlerMethodValidationException.class,
-			MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class })
+			MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class,
+			MissingServletRequestPartException.class })
 	ResponseEntity<ApiError> handleBadRequest(Exception e) {
 		return errors.response(ErrorCode.SYS_E006, List.of());
+	}
+
+	/** An import file over 5MB sent without a Content-Length (RequestSizeFilter catches the rest). */
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	ResponseEntity<ApiError> handleTooLarge(MaxUploadSizeExceededException e) {
+		return errors.response(ErrorCode.SRV_007_E003, List.of());
 	}
 
 	@ExceptionHandler({ NoResourceFoundException.class, HttpRequestMethodNotSupportedException.class })

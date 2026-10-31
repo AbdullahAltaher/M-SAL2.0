@@ -7,7 +7,7 @@ import type { Me } from '../session/session-store';
 import { toApiError } from './api-error';
 import {
   Account, AdminUser, AuditPage, Budget, BudgetGroup, BudgetItem, BudgetListItem, Category, Cycle, CycleInput, Day, Entry,
-  EntryInput, Home, Invitation, Receipt, ServiceInfo, Stats,
+  EntryInput, Home, ImportMode, ImportPreview, ImportRecord, Invitation, Receipt, ServiceInfo, Stats,
 } from './models';
 
 /**
@@ -115,6 +115,13 @@ export class Api {
   stats(accountId: string, cycle: string) { return this.get<Stats>(`/accounts/${accountId}/stats`, { cycle }); }
   receipt(accountId: string, cycle: string) { return this.get<Receipt>(`/accounts/${accountId}/receipt`, { cycle }); }
 
+  // ── SRV-007 ─────────────────────────────────────────────────
+  /** The export file (R-IO-01); the server also notes the export for its reminder. */
+  exportFile() { return this.run(this.http.get(this.base + '/export', { responseType: 'blob' })); }
+  previewImport(file: File) { return this.post<ImportPreview>('/imports/preview', form(file)); }
+  importFile(file: File, mode: ImportMode) { return this.post<ImportRecord>(`/imports?mode=${mode}`, form(file)); }
+  imports() { return this.get<ImportRecord[]>('/imports'); }
+
   // ── SRV-009 ─────────────────────────────────────────────────
   adminUsers() { return this.get<AdminUser[]>('/admin/users'); }
   patchAdminUser(id: string, body: { status?: string; roles?: string[]; version: number }) {
@@ -130,4 +137,11 @@ export class Api {
       userId: params.userId, service: params.service, page: String(params.page ?? 0), size: String(params.size ?? 50),
     });
   }
+}
+
+/** The import file as multipart {@code file} (API.md SRV-007). */
+function form(file: File): FormData {
+  const data = new FormData();
+  data.append('file', file, file.name);
+  return data;
 }

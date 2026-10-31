@@ -45,6 +45,17 @@
     </div>
   </header>
 
+  <div class="banner-host" aria-live="polite">
+    @if (exportReminder(); as r) {
+      <div class="banner warn" role="status">
+        <span class="b-text" dir="rtl">{{ r.never ? 'لم تُصدّر نسخة احتياطية من بياناتك بعد. صدّر نسخة لتحتفظ بها خارج المتصفح.'
+          : 'مرّت ' + r.days + ' يومًا على آخر نسخة احتياطية مُصدَّرة. صدّر نسخة جديدة.' }}</span>
+        <button class="pill sm" type="button" (click)="io.export()">تصدير الآن</button>
+        <button class="icon-btn" type="button" aria-label="إغلاق" (click)="reminderClosed.set(true)">×</button>
+      </div>
+    }
+  </div>
+
   <div class="view">
     <router-outlet />
   </div>

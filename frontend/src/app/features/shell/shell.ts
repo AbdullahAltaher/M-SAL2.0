@@ -5,10 +5,12 @@ import { filter } from 'rxjs';
 
 import { ApiError } from '../../core/api/api-error';
 import { BudgetsStore } from '../../core/data/budgets-store';
+import { SessionStore } from '../../core/session/session-store';
 import { Dialogs } from '../../shared/sheet/dialogs';
 import { SheetHost } from '../../shared/sheet/sheet-host';
 import { ToastHost, Toasts } from '../../shared/toast/toast';
 import { LedgerStore } from '../budget/ledger-store';
+import { ImportExport } from '../settings/import-export';
 import { LastTab } from './last-tab';
 
 const ADD_VALUE = '__add__';
@@ -28,6 +30,7 @@ const NF = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 export class Shell {
   protected readonly budgets = inject(BudgetsStore);
   protected readonly ledger = inject(LedgerStore);
+  private readonly session = inject(SessionStore);
   private readonly dialogs = inject(Dialogs);
   private readonly toasts = inject(Toasts);
   private readonly router = inject(Router);
@@ -40,6 +43,13 @@ export class Shell {
   protected readonly shrunk = signal(false);
   protected readonly savedOn = signal(false);
   protected readonly final = computed(() => this.ledger.totals());
+  protected readonly io = inject(ImportExport);
+  /** M-SAL's export banner (R-IO-01): until an export, or closed for this visit */
+  protected readonly reminderClosed = signal(false);
+  protected readonly exportReminder = computed(() => {
+    const r = this.session.user()?.exportReminder;
+    return r?.due && !this.reminderClosed() ? r : null;
+  });
 
   private readonly themeMeta = [...this.document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')];
   private readonly themeOriginal = this.themeMeta.map((m) => m.content);

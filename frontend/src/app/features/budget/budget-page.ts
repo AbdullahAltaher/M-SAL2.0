@@ -6,6 +6,7 @@ import { parseLedgerAmount, toLatinDigits } from '../../core/util/amounts';
 import { Dialogs } from '../../shared/sheet/dialogs';
 import { Sheets } from '../../shared/sheet/sheets';
 import { Toasts } from '../../shared/toast/toast';
+import { ImportExport } from '../settings/import-export';
 import { LedgerGroup, LedgerStore, displayRaw } from './ledger-store';
 
 const NF = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
@@ -21,6 +22,7 @@ const NF = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 })
 export class BudgetPage {
   protected readonly ledger = inject(LedgerStore);
+  protected readonly io = inject(ImportExport);
   private readonly budgets = inject(BudgetsStore);
   private readonly dialogs = inject(Dialogs);
   private readonly sheets = inject(Sheets);

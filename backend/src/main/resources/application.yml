@@ -13,6 +13,11 @@ spring:
     password: ${DB_PASSWORD:msal_local}
     hikari:
       maximum-pool-size: 5
+  # The import file limit (SRV-007-E003, API.md SRV-007)
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
   # Flyway alone changes the tables (CLAUDE.md rule 3); Hibernate only validates them
   flyway:
     schemas: msal

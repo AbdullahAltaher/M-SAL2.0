@@ -593,7 +593,7 @@ state
 | R-RCP-01 | `receipt/ReceiptModel` | `ReceiptModelTest`، و`EntryApiTest` | |
 | R-RCP-02 | | **Angular** | يُرسم من `GET /budgets/{id}` |
 | R-IO-01 | `me/ExportReminder` | `ExportReminderTest` | |
-| R-IO-02 إلى R-IO-04 | | **المرحلة 6** | مع اختبارات `migration.test.js` |
+| R-IO-02 إلى R-IO-04 | `importer/ImportParser`، و`ImportService`، و`ExportService` | `ImportParserTest`، و`ImportApiTest` | منقولة من `migration.test.js` و`expenses.test.js` (parseImport وcountState وmergeStates) |
 | R-IO-05 | `system/audit/AuditService` | `MeApiTest` | |
 
 **اختبارات M-SAL القديمة التي لم تُنقل، ولماذا:**

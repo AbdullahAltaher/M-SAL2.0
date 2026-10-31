@@ -236,3 +236,42 @@ export interface AuditPage {
   size: number;
   total: number;
 }
+
+/** M-SAL's countState, for a file and for what the user has now (API.md SRV-007). */
+export interface ImportCounts {
+  profiles: number;
+  blocks: number;
+  rows: number;
+  accounts: number;
+  cycles: number;
+  entries: number;
+  deleted: number;
+}
+
+export interface ImportWarning {
+  code: string;
+  count: number;
+  message: string;
+}
+
+export type ImportMode = 'MERGE' | 'REPLACE';
+
+export interface ImportPreview {
+  /** STATE: a full export. SINGLE: an old one-person file (budget only) */
+  kind: 'STATE' | 'SINGLE';
+  newer: boolean;
+  counts: ImportCounts;
+  current: ImportCounts;
+  warnings: ImportWarning[];
+  /** The budget a SINGLE file goes into */
+  target: { id: string; name: string } | null;
+}
+
+export interface ImportRecord {
+  id: string;
+  fileName: string | null;
+  mode: ImportMode;
+  counts: ImportCounts;
+  warnings: ImportWarning[];
+  createdAt: string;
+}
