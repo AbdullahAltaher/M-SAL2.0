@@ -753,8 +753,8 @@ alter table push_subscriptions enable row level security;
 
 ## 8. ملاحظات لمرحلة التنفيذ
 
-1. **إصدار Postgres:** `on delete set null (column)` يحتاج **Postgres 15 أو أحدث**. Supabase يستخدم إصداراً أحدث، والـ Docker المحلي يجب أن يستخدم نفس الإصدار.
-2. **الاتصال بـ Supabase:** عن طريق **Session pooler** (منفذ 5432) لأنه يدعم IPv4. Flyway لا يعمل جيداً مع Transaction pooler (منفذ 6543).
+1. **إصدار Postgres:** `on delete set null (column)` يحتاج **Postgres 15 أو أحدث**. مشروع Supabase يعمل على **Postgres 17.11** (تم التحقق 2026-10-31)، فالـ Docker المحلي يستخدم صورة **`postgres:17`**.
+2. **الاتصال بـ Supabase:** عن طريق **Session pooler** (منفذ 5432) لأنه يدعم IPv4. Flyway لا يعمل جيداً مع Transaction pooler (منفذ 6543). العنوان: `aws-0-ap-southeast-1.pooler.supabase.com`، والاتصال من `.env` **تم اختباره ونجح**.
 3. **في Java:**
    - المبالغ `BigDecimal`، والتواريخ `LocalDate`، والأوقات `Instant` أو `OffsetDateTime`.
    - `type` و`status` و`mode` كـ `enum` في Java، ونصوص في قاعدة البيانات.

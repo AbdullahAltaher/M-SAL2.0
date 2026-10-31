@@ -30,7 +30,12 @@
 ### المنطقة والإعدادات (تقررت 2026-10-31)
 
 - **Supabase:** مشروع `M-SAL2.0` في **Southeast Asia (Singapore)**. **Data API معطّل** (لا API عام على قاعدة البيانات)، وGitHub غير مربوط، ونوع Postgres الافتراضي.
+  - **أُنشئ:** 2026-10-31، والحجم NANO (المجاني).
+  - **Project ref:** `bzdzveckpxmmdoqcfewv`، والرابط `https://bzdzveckpxmmdoqcfewv.supabase.co`. هذا **ليس سراً**، فهو يظهر في Angular أصلاً.
+  - "Last migration" في لوحة Supabase ستبقى "No migrations"، لأن Flyway يسجّل في جدوله الخاص `msal.flyway_schema_history`. و"Last backup" ستبقى فارغة في الخطة المجانية، ونسخنا الاحتياطية من GitHub Actions (القسم 12).
 - **Railway:** يجب أن يكون السيرفر في **Singapore** أيضاً، حتى يكون قريباً من قاعدة البيانات.
+  - **الحساب لم يُنشأ بعد، عن قصد:** التجربة المجانية تبدأ من التسجيل، فيُنشأ في المرحلة 8 فقط.
+  - **ملاحظة 2026-10-31:** التسجيل في Railway كان **موقوفاً مؤقتاً** بعد حادثة عندهم في 21 أكتوبر. يُتأكد منه في المرحلة 8. وإذا ما زال موقوفاً، البديل بنفس صورة Docker بدون تغيير الكود: **Fly.io** (حوالي 3–5 دولار) أو **Oracle Cloud Free** (القسم "لماذا Railway؟").
 - **supabase-js في Angular** يُستخدم **لتسجيل الدخول فقط**، ولا يتأثر بتعطيل Data API. كل البيانات تمر عبر Spring Boot.
 
 ### لماذا Railway؟
