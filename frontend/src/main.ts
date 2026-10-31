@@ -5,17 +5,17 @@ import { isStandalone } from './app/core/pwa/device';
 
 /**
  * The animated start in index.html fades out once Angular is up. In the installed app it plays
- * to the end (about 1.4s from launch); in a browser tab, or with "reduce motion", it waits for
- * nothing.
+ * to the end (about 2.6s from launch, then a 0.9s fade); in a browser tab, or with "reduce
+ * motion", it waits for nothing.
  */
 function hideBoot(): void {
   const boot = document.getElementById('boot');
   if (!boot) return;
   const reduced = matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const minimum = isStandalone() && !reduced ? 1400 : 0;
+  const minimum = isStandalone() && !reduced ? 2600 : 0;
   setTimeout(() => {
     boot.classList.add('out');
-    setTimeout(() => boot.remove(), 400);
+    setTimeout(() => boot.remove(), 1000);
   }, Math.max(0, minimum - performance.now()));
 }
 
