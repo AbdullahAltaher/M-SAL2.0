@@ -8,7 +8,7 @@ A rebuild of [M-SAL](https://github.com/AbdullahAltaher/M-SAL) on a proper archi
 
 ## Stack
 
-Angular (PWA) · Spring Boot (Java 21) · Supabase Postgres + Auth · Flyway · Docker · Railway · GitHub Pages
+Angular (PWA) · Spring Boot (Java 21) · Supabase Postgres + Auth · Flyway · Docker · Render · GitHub Pages
 
 ## Status
 
