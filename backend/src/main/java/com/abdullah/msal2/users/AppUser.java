@@ -90,6 +90,10 @@ public class AppUser extends VersionedEntity {
 		return status;
 	}
 
+	public void setStatus(UserStatus status) {
+		this.status = status;
+	}
+
 	public UUID getLastBudgetId() {
 		return lastBudgetId;
 	}
@@ -104,5 +108,10 @@ public class AppUser extends VersionedEntity {
 
 	public Set<String> getRoles() {
 		return Set.copyOf(roles);
+	}
+
+	public void setRoles(Set<String> roles) {
+		this.roles.clear();
+		this.roles.addAll(roles);
 	}
 }

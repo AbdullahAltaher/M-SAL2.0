@@ -57,6 +57,12 @@ public class GlobalExceptionHandler {
 		return new ApiError.Detail(fieldError.getField(), code.code(), code.message());
 	}
 
+	@ExceptionHandler(InvalidRequestException.class)
+	ResponseEntity<ApiError> handleInvalidPatch(InvalidRequestException e) {
+		ErrorCode top = ErrorCode.fromCode(e.details().getFirst().code()).orElse(ErrorCode.SYS_E006);
+		return errors.response(top, e.details());
+	}
+
 	@ExceptionHandler({ HttpMessageNotReadableException.class, HandlerMethodValidationException.class,
 			MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class })
 	ResponseEntity<ApiError> handleBadRequest(Exception e) {

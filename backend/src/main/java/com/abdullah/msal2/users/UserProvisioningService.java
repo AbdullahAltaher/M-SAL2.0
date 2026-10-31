@@ -17,6 +17,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.abdullah.msal2.budget.Budget;
+import com.abdullah.msal2.budget.BudgetService;
 import com.abdullah.msal2.system.MsalProperties;
 import com.abdullah.msal2.system.access.CurrentUser;
 import com.abdullah.msal2.system.access.CurrentUserResolver;
@@ -24,6 +26,7 @@ import com.abdullah.msal2.system.audit.AuditAction;
 import com.abdullah.msal2.system.audit.AuditService;
 import com.abdullah.msal2.system.error.ApiException;
 import com.abdullah.msal2.system.error.ErrorCode;
+import com.abdullah.msal2.system.time.Today;
 
 /**
  * Finds the user of a request, and creates it on the first sign-in (API.md 2.4):
@@ -41,15 +44,18 @@ public class UserProvisioningService implements CurrentUserResolver {
 
 	private final AppUserRepository users;
 	private final InvitationRepository invitations;
+	private final BudgetService budgets;
 	private final AuditService audit;
 	private final MsalProperties properties;
 	private final TransactionTemplate tx;
 	private final Clock clock;
 
-	public UserProvisioningService(AppUserRepository users, InvitationRepository invitations, AuditService audit,
+	public UserProvisioningService(AppUserRepository users, InvitationRepository invitations, BudgetService budgets,
+			AuditService audit,
 			MsalProperties properties, TransactionTemplate tx, Clock clock) {
 		this.users = users;
 		this.invitations = invitations;
+		this.budgets = budgets;
 		this.audit = audit;
 		this.properties = properties;
 		this.tx = tx;
@@ -99,8 +105,11 @@ public class UserProvisioningService implements CurrentUserResolver {
 			throw new ApiException(ErrorCode.SRV_000_E001);
 		}
 
-		// The default budget "الأساسي" is created here with SRV-002 in phase 3 (API.md 2.4, R-BUD-06)
 		AppUser user = users.saveAndFlush(new AppUser(id, email, roles));
+		// Every new user starts with the budget "الأساسي" (API.md 2.4, R-BUD-06)
+		Budget first = budgets.createWithDefaults(id, BudgetService.FIRST_BUDGET_NAME, Today.of(now, user.getTimeZone()));
+		user.setLastBudgetId(first.getId());
+		users.saveAndFlush(user);
 		Map<String, Object> after = new LinkedHashMap<>();
 		after.put("email", email);
 		after.put("roles", roles);

@@ -41,7 +41,19 @@ public class Invitation extends TimestampedEntity {
 	@Column(name = "accepted_at")
 	private Instant acceptedAt;
 
+	@Column(name = "auth_user_id")
+	private UUID authUserId;
+
 	protected Invitation() {
+	}
+
+	public Invitation(String email, String roleCode, UUID invitedBy, Instant expiresAt) {
+		this.id = UUID.randomUUID();
+		this.email = email;
+		this.roleCode = roleCode;
+		this.status = InvitationStatus.PENDING;
+		this.invitedBy = invitedBy;
+		this.expiresAt = expiresAt;
 	}
 
 	public UUID getId() {
@@ -60,6 +72,26 @@ public class Invitation extends TimestampedEntity {
 		return status;
 	}
 
+	public UUID getInvitedBy() {
+		return invitedBy;
+	}
+
+	public Instant getExpiresAt() {
+		return expiresAt;
+	}
+
+	public Instant getAcceptedAt() {
+		return acceptedAt;
+	}
+
+	public UUID getAuthUserId() {
+		return authUserId;
+	}
+
+	public void setAuthUserId(UUID authUserId) {
+		this.authUserId = authUserId;
+	}
+
 	public boolean isExpired(Instant now) {
 		return !expiresAt.isAfter(now);
 	}
@@ -67,5 +99,13 @@ public class Invitation extends TimestampedEntity {
 	public void accept(Instant now) {
 		status = InvitationStatus.ACCEPTED;
 		acceptedAt = now;
+	}
+
+	public void revoke() {
+		status = InvitationStatus.REVOKED;
+	}
+
+	public void expire() {
+		status = InvitationStatus.EXPIRED;
 	}
 }

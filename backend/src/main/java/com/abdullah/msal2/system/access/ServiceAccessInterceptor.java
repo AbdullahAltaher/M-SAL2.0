@@ -26,7 +26,8 @@ import com.abdullah.msal2.system.error.ErrorCode;
  * <li>the JWT is valid (already checked by Spring Security, {@code SYS-E001});</li>
  * <li>the user exists or may be created ({@code SRV-000-E001}), and is not disabled ({@code SYS-E009});</li>
  * <li>the controller's service is enabled ({@code SYS-E003});</li>
- * <li>{@code GET} needs read, every other method needs write ({@code SYS-E002}).</li>
+ * <li>{@code GET} needs read, every other method needs write ({@code SYS-E002});</li>
+ * <li>the user is within the request limit ({@code SYS-E007}, API.md section 7).</li>
  * </ol>
  * A controller without {@link ServiceCode} is refused: access fails closed.
  */
@@ -39,10 +40,13 @@ public class ServiceAccessInterceptor implements HandlerInterceptor {
 
 	private final CurrentUserResolver users;
 	private final PermissionRepository permissions;
+	private final RateLimiter rateLimiter;
 
-	public ServiceAccessInterceptor(CurrentUserResolver users, PermissionRepository permissions) {
+	public ServiceAccessInterceptor(CurrentUserResolver users, PermissionRepository permissions,
+			RateLimiter rateLimiter) {
 		this.users = users;
 		this.permissions = permissions;
+		this.rateLimiter = rateLimiter;
 	}
 
 	@Override
@@ -72,6 +76,9 @@ public class ServiceAccessInterceptor implements HandlerInterceptor {
 		boolean allowed = READ_METHODS.contains(request.getMethod()) ? access.canRead() : access.canWrite();
 		if (!allowed) {
 			throw new ApiException(ErrorCode.SYS_E002);
+		}
+		if (!rateLimiter.tryAcquire(user.id(), method.hasMethodAnnotation(StrictRateLimit.class))) {
+			throw new ApiException(ErrorCode.SYS_E007);
 		}
 
 		request.setAttribute(CURRENT_USER, user);

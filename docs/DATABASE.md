@@ -1,7 +1,7 @@
 # قاعدة بيانات M-SAL2.0
 
 > نتيجة جلسة التخطيط 2 (2026-10-31). مبنية على [BUSINESS_RULES.md](BUSINESS_RULES.md).
-> ملفات SQL هنا نُسخت كما هي في مرحلة التنفيذ 1 إلى `backend/src/main/resources/db/migration/` (V1–V6)، وهناك المرجع الآن. **لا تُعدَّل بعد تطبيقها** (القاعدة 3): أي تغيير يكون بملف جديد بالرقم التالي (`V7`، ثم `V8`...).
+> ملفات SQL هنا نُسخت كما هي في مرحلة التنفيذ 1 إلى `backend/src/main/resources/db/migration/` (V1–V6)، وهناك المرجع الآن. **لا تُعدَّل بعد تطبيقها** (القاعدة 3): أي تغيير يكون بملف جديد بالرقم التالي. **`V7__add_invitation_auth_user.sql`** أُضيف في المرحلة 3 (عمود `invitations.auth_user_id`)، فصار ملف الإشعارات `V8`.
 
 ## المحتويات
 
@@ -407,7 +407,8 @@ spring:
 | `V4__create_expenses.sql` | الفئات الافتراضية، والحسابات، والفئات، والدورات، والمصاريف |
 | `V5__seed_category_templates.sql` | الفئات الـ 20 الافتراضية |
 | `V6__create_imports.sql` | ملفات الاستيراد |
-| `V7__create_push_subscriptions.sql` | اشتراكات الإشعارات ووقت التذكير اليومي. **يُضاف في مرحلة التنفيذ 7** (أُضيف في جلسة التخطيط 4، انظر [SCREENS.md](SCREENS.md) القسم 7) |
+| `V7__add_invitation_auth_user.sql` | عمود `auth_user_id` في `invitations`: مستخدم Supabase الذي أُنشئ مع الدعوة، حتى يُحذف عند إلغاء دعوة لم تُستخدم (`API.md` 2.3). **أُضيف في مرحلة التنفيذ 3** |
+| `V8__create_push_subscriptions.sql` | اشتراكات الإشعارات ووقت التذكير اليومي. **يُضاف في مرحلة التنفيذ 7** (أُضيف في جلسة التخطيط 4، انظر [SCREENS.md](SCREENS.md) القسم 7) |
 
 ### V1__create_system.sql
 ```sql
@@ -730,7 +731,12 @@ create index ix_imports_user on imports (user_id, created_at desc);
 alter table imports enable row level security;
 ```
 
-### V7__create_push_subscriptions.sql (مرحلة التنفيذ 7)
+### V7__add_invitation_auth_user.sql (مرحلة التنفيذ 3)
+```sql
+alter table invitations add column auth_user_id uuid;
+```
+
+### V8__create_push_subscriptions.sql (مرحلة التنفيذ 7)
 ```sql
 alter table app_users add column daily_reminder_time time;   -- null = التذكير متوقف
 

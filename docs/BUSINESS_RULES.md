@@ -569,28 +569,28 @@ state
 | R-GEN-04، R-GEN-05، R-GEN-06 | | **Angular** (المرحلة 4 و5) | إدخال وعرض. السيرفر يقبل الصيغة الموحّدة فقط (`API.md` القسم 1) |
 | R-BUD-01، R-BUD-02 | `budget/BudgetTotals` | `BudgetTotalsTest` | |
 | R-BUD-03 | | **Angular** | تحليل الإدخال |
-| R-BUD-04، R-BUD-06 | | **المرحلة 3** (اختبارات الـ API) | إنشاء وحذف |
-| R-BUD-05 | `budget/MonthLabel` | `BudgetTotalsTest` | والمسح نفسه في المرحلة 3 |
+| R-BUD-04، R-BUD-06 | `budget/BudgetService` | `BudgetApiTest` | الميزانية الافتراضية، وآخر ميزانية، وحذف المجموعة والبند |
+| R-BUD-05 | `budget/MonthLabel`، و`BudgetService.newMonth` | `BudgetTotalsTest`، و`BudgetApiTest` | |
 | R-CYC-01 | `cycles/Cycles` | `CyclesTest` | |
 | R-CYC-02 | `Cycles.prefill` | `CyclesTest` | الرسالة في Angular |
-| R-CYC-03 | `Cycles.isDuplicateDate` | `CyclesTest` | ورسائل الأخطاء في المرحلة 3 |
-| R-CYC-04، R-CYC-05 | `cycles/CycleSummary` | `CycleSummaryTest` | ومنها "الحالة المبلّغ عنها" (122.37 و109.08) |
+| R-CYC-03 | `Cycles.isDuplicateDate`، و`CycleService` | `CyclesTest`، و`CycleApiTest` | كل أكواد الأخطاء |
+| R-CYC-04، R-CYC-05 | `cycles/CycleSummary` | `CycleSummaryTest`، و`EntryApiTest` (`/home`) | ومنها "الحالة المبلّغ عنها" (122.37 و109.08) |
 | R-CYC-06 | | **Angular** | البيانات من `/home` (المرحلة 3) |
 | R-CYC-07 | `Cycles.movedEntryCount` | `CyclesTest` | |
 | R-CYC-08 | `Cycles.bucket` | `CyclesTest` | |
-| R-ENT-01، R-ENT-02، R-ENT-08 | `expenses/EntryRules` | `EntriesTest` | ترتيب رسائل R-ENT-02 في المرحلة 3 |
+| R-ENT-01، R-ENT-02، R-ENT-08 | `expenses/EntryRules`، و`EntryService` | `EntriesTest`، و`EntryApiTest` | ترتيب رسائل R-ENT-02 مختبر |
 | R-ENT-03 | | **Angular** | تحليل الإدخال |
 | R-ENT-04، R-ENT-05 | | **Angular** | |
-| R-ENT-06، R-ENT-07، R-ENT-09 | | **المرحلة 3** | عمليات على قاعدة البيانات |
+| R-ENT-06، R-ENT-07، R-ENT-09 | `expenses/EntryService` | `EntryApiTest` | |
 | R-ENT-10 | `expenses/EntryDays` | `EntriesTest` | |
 | R-ENT-11 | `expenses/EntrySearch` | `EntriesTest` | |
 | R-ENT-12 | `expenses/NameSuggestions` | `NameSuggestionsTest` | |
 | R-ENT-13 | | لا ينطبق | `entries.account_id` إلزامي مع FK، فلا يوجد مصروف بدون حساب |
-| R-ACC | `accounts/AccountRules` | `AccountRulesTest` | |
-| R-CAT | | **المرحلة 3** | |
-| R-STA-01 إلى R-STA-05 | `stats/Stats`، و`stats/CategoryTotals` | `StatsTest` | |
+| R-ACC | `accounts/AccountRules`، و`AccountService` | `AccountRulesTest`، و`AccountCategoryApiTest` | |
+| R-CAT | `categories/CategoryService` | `AccountCategoryApiTest` | |
+| R-STA-01 إلى R-STA-05 | `stats/Stats`، و`stats/CategoryTotals` | `StatsTest`، و`EntryApiTest` | |
 | R-STA-06 | | **Angular** | عرض |
-| R-RCP-01 | `receipt/ReceiptModel` | `ReceiptModelTest` | |
+| R-RCP-01 | `receipt/ReceiptModel` | `ReceiptModelTest`، و`EntryApiTest` | |
 | R-RCP-02 | | **Angular** | يُرسم من `GET /budgets/{id}` |
 | R-IO-01 | `me/ExportReminder` | `ExportReminderTest` | |
 | R-IO-02 إلى R-IO-04 | | **المرحلة 6** | مع اختبارات `migration.test.js` |

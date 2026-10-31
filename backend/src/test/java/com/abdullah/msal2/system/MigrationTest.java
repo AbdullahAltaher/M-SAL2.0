@@ -21,7 +21,7 @@ class MigrationTest extends IntegrationTest {
 				// version is null on Flyway's own "create schema" row
 				"select version from msal.flyway_schema_history where success and version is not null order by installed_rank",
 				String.class))
-				.containsExactly("1", "2", "3", "4", "5", "6");
+				.containsExactly("1", "2", "3", "4", "5", "6", "7");
 	}
 
 	@Test

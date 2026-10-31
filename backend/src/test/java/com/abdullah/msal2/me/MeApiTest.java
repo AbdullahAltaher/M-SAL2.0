@@ -69,10 +69,11 @@ class MeApiTest extends IntegrationTest {
 				.andExpect(jsonPath("$.services['SRV-009'].read").value(true))
 				.andExpect(jsonPath("$.exportReminder.due").value(false))
 				.andExpect(jsonPath("$.exportReminder.never").value(true))
-				.andExpect(jsonPath("$.version").value(0));
+				.andExpect(jsonPath("$.lastBudgetId").isNotEmpty());
 
 		Map<String, Object> audit = jdbc.queryForMap(
-				"select service_code, action, entity_type, after_data::text as after from msal.audit_log where user_id = ?",
+				"select service_code, action, entity_type, after_data::text as after from msal.audit_log "
+						+ "where user_id = ? and entity_type = 'app_user'",
 				id);
 		assertThat(audit).containsEntry("service_code", "SRV-000").containsEntry("action", "CREATE")
 				.containsEntry("entity_type", "app_user");

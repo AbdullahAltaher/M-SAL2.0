@@ -37,10 +37,15 @@ services:
       DB_USER: ${LOCAL_DB_USER}
       DB_PASSWORD: ${LOCAL_DB_PASSWORD}
       SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY}
+      # dev turns on Swagger at http://localhost:8080/swagger-ui.html
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       MSAL_BOOTSTRAP_ADMIN_EMAIL: ${MSAL_BOOTSTRAP_ADMIN_EMAIL}
     ports:
       - "8080:8080"
+    # Same as Render Starter: 512MB and 0.5 CPU (CLAUDE.md rule 13)
     mem_limit: 512m
+    cpus: 0.5
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
       interval: 10s

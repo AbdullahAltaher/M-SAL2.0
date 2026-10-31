@@ -415,7 +415,7 @@ frontend/src/app/
 ### التذكير اليومي يحتاج إضافة صغيرة للسيرفر
 
 الإشعارات على الآيفون تُرسل **من السيرفر** (Web Push)، فتحتاج:
-- **جدول جديد** `push_subscriptions`، وعمود `daily_reminder_time` في `app_users` (ملف Flyway `V7`، انظر [DATABASE.md](DATABASE.md) القسم 7).
+- **جدول جديد** `push_subscriptions`، وعمود `daily_reminder_time` في `app_users` (ملف Flyway `V8`، انظر [DATABASE.md](DATABASE.md) القسم 7).
 - **طلبات جديدة** تحت SRV-000 (انظر [API.md](API.md)).
 - **مهمة مجدولة** في Spring Boot (`@Scheduled`) ترسل التذكير في وقته **فقط إذا لم يسجّل المستخدم أي مصروف اليوم**.
 - **مجاني:** Web Push لا يحتاج خدمة مدفوعة.

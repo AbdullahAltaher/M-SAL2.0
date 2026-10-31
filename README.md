@@ -12,15 +12,16 @@ Angular (PWA) · Spring Boot (Java 21) · Supabase Postgres + Auth · Flyway · 
 
 ## Status
 
-Phases 0 (setup), 1 (backend foundation) and 2 (business logic) complete. Next: phase 3, the API.
+Phases 0 to 3 complete: the backend API is done. Next: phase 4, the Angular foundation.
 
 ## Run locally
 
 Requires Docker Desktop, Java 21 and Node 22. Copy `.env.example` to `.env` first.
 
 ```bash
-docker compose up -d --build   # Postgres on :5433, Spring Boot on :8080
+docker compose up -d --build   # Postgres on :5433, Spring Boot on :8080 (512MB, 0.5 CPU)
 curl localhost:8080/actuator/health
+# Swagger (dev profile, the compose default): http://localhost:8080/swagger-ui.html
 ```
 
 ```bash

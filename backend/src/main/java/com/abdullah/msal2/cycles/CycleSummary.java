@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 
 import com.abdullah.msal2.expenses.EntryData;
 import com.abdullah.msal2.system.money.Money;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * The figures of one cycle (R-CYC-05) and "how much can I spend today" (R-CYC-04), from
@@ -34,7 +35,7 @@ public record CycleSummary(
 		BigDecimal spent,
 		BigDecimal remaining,
 		BigDecimal spentToday,
-		BigDecimal progress,
+		@JsonFormat(shape = JsonFormat.Shape.NUMBER) BigDecimal progress,
 		long daysElapsed,
 		Long totalDays,
 		Long daysLeft,

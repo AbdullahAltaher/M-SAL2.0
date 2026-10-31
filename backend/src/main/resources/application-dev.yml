@@ -1,0 +1,7 @@
+# Local development: SPRING_PROFILES_ACTIVE=dev
+# Swagger UI at http://localhost:8080/swagger-ui.html (API.md section 1)
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

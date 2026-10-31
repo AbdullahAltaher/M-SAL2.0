@@ -39,6 +39,13 @@ management:
       probes:
         enabled: true
 
+# Swagger only in the dev profile (application-dev.yml, API.md section 1)
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 logging:
   pattern:
     level: "%5p [%X{service:-}] [user=%X{user:-}] [req=%X{requestId:-}]"
@@ -46,8 +53,13 @@ logging:
 msal:
   # Not secret: the project URL is public (PLAN.md section 2)
   supabase-url: ${SUPABASE_URL:https://bzdzveckpxmmdoqcfewv.supabase.co}
+  # Secret: only from the environment (CLAUDE.md rule 16)
+  supabase-secret-key: ${SUPABASE_SECRET_KEY:}
   # The first sign-in with this email, while no user exists, becomes ADMIN (API.md 2.5)
   bootstrap-admin-email: ${MSAL_BOOTSTRAP_ADMIN_EMAIL:}
+  rate-limit:
+    per-minute: 120
+    strict-per-minute: 10
   cors-origins:
     - http://localhost:4200
     - https://abdullahaltaher.github.io
