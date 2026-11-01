@@ -43,136 +43,150 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
   <style>
-    /* The animated start (SCREENS.md section 7). It follows iOS's plain paper launch image, then
-       brings the app's two looks together: the Budget's paper ledger in front, the Expenses' blue
-       glass card sliding out behind it, a blue tide rising under the paper, then a slow fade into
-       the app. Hidden by main.ts once Angular has started. */
+    /* The animated start (SCREENS.md section 7), in the app icon's own look: a glass wallet on
+       dark navy, the Budget's green card and the Expenses' blue card coming out of it. It follows
+       iOS's navy launch image, then fades slowly into the app. Hidden by main.ts once Angular has
+       started. The same in light and dark, like the icon. */
     #boot {
-      --paper: #F5F2EA; --surface: #FFFCF5; --border: #DED9CD; --green: #38594A; --brass: #B99A5B; --brass-hi: #F3DFAF;
-      --blue0: #E3EBF8; --blue1: #F5F8FD; --blob: rgba(110, 160, 245, .38); --accent: #2459C8; --dot: rgba(60, 110, 210, .55);
-      --glass: rgba(255, 255, 255, .72); --glass-line: rgba(60, 100, 180, .22); --track: rgba(30, 60, 130, .14);
-      --glow: rgba(185, 154, 91, .22);
-      position: fixed; inset: 0; z-index: 2000; overflow: hidden; background: var(--paper);
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.4vh;
-      padding-bottom: 12vh; transition: opacity .9s ease, transform .9s cubic-bezier(.4, 0, .2, 1);
-    }
-    @media (prefers-color-scheme: dark) {
-      #boot {
-        --paper: #1B1A16; --surface: #242320; --border: #38362F; --green: #8FB4A0; --brass: #C2A66B; --brass-hi: #FFF0C8;
-        --blue0: #0B1426; --blue1: #131C33; --blob: rgba(61, 120, 235, .34); --accent: #4D8DF0; --dot: rgba(170, 200, 255, .85);
-        --glass: rgba(22, 34, 62, .82); --glass-line: rgba(120, 160, 255, .28); --track: rgba(255, 255, 255, .13);
-        --glow: rgba(194, 166, 107, .16);
-      }
+      --navy: #040A1C; --blue: #2F6BFF; --blue-ink: #4D8DF0; --teal: #4FC7A8; --mint: #9BE7CB;
+      position: fixed; inset: 0; z-index: 2000; overflow: hidden; background: var(--navy);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3vh;
+      padding-bottom: 10vh; transition: opacity .9s ease, transform .9s cubic-bezier(.4, 0, .2, 1);
     }
     #boot.out { opacity: 0; transform: scale(1.06); pointer-events: none; }
-
-    /* the blue tide under the paper, and the glass section's soft lights */
-    #boot .b-tide { position: absolute; inset: 0; opacity: 0; transform: translateY(35%);
-      background: linear-gradient(172deg, transparent 0%, transparent 34%, var(--blue0) 72%, var(--blue1) 100%);
-      animation: b-tide 1.6s .25s cubic-bezier(.3, .7, .2, 1) forwards; }
-    #boot .b-blob { position: absolute; width: 120vmax; height: 120vmax; border-radius: 50%; opacity: 0;
-      background: radial-gradient(closest-side, var(--blob), transparent 70%); animation: b-blob 2.4s .4s ease-out forwards; }
-    #boot .b-blob.l { left: -70vmax; bottom: -70vmax; }
-    #boot .b-blob.r { right: -80vmax; bottom: -40vmax; animation-delay: .7s; }
-    #boot .b-glow { position: absolute; width: 90vmax; height: 90vmax; left: 50%; top: -55vmax; margin-left: -45vmax; border-radius: 50%;
-      background: radial-gradient(closest-side, var(--glow), transparent 70%); opacity: 0; animation: b-fade 1.2s .1s forwards; }
-    /* rising sparks: blue from the Expenses, brass from the Budget */
-    #boot .b-spark { position: absolute; bottom: -10px; width: 5px; height: 5px; border-radius: 50%; background: var(--dot); opacity: 0;
-      animation: b-spark 2.6s ease-out forwards; }
-    #boot .b-spark.g { background: var(--brass); }
-
-    #boot .b-art { position: relative; width: min(64vw, 290px); height: auto; overflow: visible; }
-    #boot .b-art * { transform-box: fill-box; transform-origin: center; }
-    #boot .b-glass { opacity: 0; transform: translate(70px, 12px) rotate(0deg);
-      animation: b-slide .85s .55s cubic-bezier(.2, .9, .25, 1.15) forwards; }
-    #boot .b-glass-card { fill: var(--glass); stroke: var(--glass-line); stroke-width: 1.5; }
-    #boot .b-track { fill: none; stroke: var(--track); stroke-width: 9; }
-    #boot .b-arc { fill: none; stroke: var(--accent); stroke-width: 9; stroke-linecap: round; stroke-dasharray: 151; stroke-dashoffset: 151;
-      transform: rotate(-90deg); animation: b-arc 1s 1.15s cubic-bezier(.6, 0, .2, 1) forwards; }
-    #boot .b-plus { fill: var(--accent); }
-    #boot .b-plus-ink { stroke: #fff; stroke-width: 2.4; stroke-linecap: round; }
-    #boot .b-front { opacity: 0; animation: b-card .6s cubic-bezier(.2, .8, .2, 1) forwards, b-float 3s 1.2s ease-in-out infinite alternate; }
-    #boot .b-card { fill: var(--surface); stroke: var(--border); stroke-width: 2; }
-    #boot .b-rule { stroke: var(--green); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 88; stroke-dashoffset: 88;
-      animation: b-draw .6s .45s cubic-bezier(.6, 0, .2, 1) forwards; }
-    #boot .b-dots { stroke: var(--border); stroke-width: 2; stroke-dasharray: 2 5; opacity: 0; animation: b-fade .35s forwards; }
-    #boot .b-dots.d1 { animation-delay: .9s; }
-    #boot .b-dots.d2 { animation-delay: 1.05s; }
-    #boot .b-cur { font: 700 26px 'IBM Plex Sans Arabic', 'Noto Sans Arabic', sans-serif; opacity: 0;
-      animation: b-rise .5s 1.3s cubic-bezier(.2, .8, .2, 1) forwards; }
-    #boot .b-name { margin: 0; font: 700 min(7vw, 30px) 'IBM Plex Sans Arabic', sans-serif; opacity: 0;
-      background: linear-gradient(90deg, var(--accent), var(--green) 70%); -webkit-background-clip: text; background-clip: text; color: transparent;
-      animation: b-rise .6s 1.6s cubic-bezier(.2, .8, .2, 1) forwards; }
-    #boot .b-tags { display: flex; gap: 14px; font: 500 min(3.6vw, 14px) 'IBM Plex Sans Arabic', sans-serif; opacity: 0;
-      animation: b-rise .6s 1.85s cubic-bezier(.2, .8, .2, 1) forwards; }
-    #boot .b-tags span { display: inline-flex; align-items: center; gap: 6px; color: var(--green); }
-    #boot .b-tags span::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-    #boot .b-tags .x { color: var(--accent); }
-
-    @keyframes b-tide { to { opacity: 1; transform: none; } }
-    @keyframes b-blob { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: none; } }
-    @keyframes b-fade { to { opacity: 1; } }
-    @keyframes b-spark { 0% { opacity: 0; transform: translate(0, 0); } 15% { opacity: .9; }
-      100% { opacity: 0; transform: translate(var(--dx, 10px), -70vh); } }
-    @keyframes b-card { from { opacity: 0; transform: scale(.82) translateY(14px); } to { opacity: 1; transform: none; } }
-    @keyframes b-float { to { transform: translateY(-4px); } }
-    @keyframes b-slide { to { opacity: 1; transform: translate(0, 0) rotate(-8deg); } }
-    @keyframes b-draw { to { stroke-dashoffset: 0; } }
-    @keyframes b-arc { to { stroke-dashoffset: 46; } }
-    @keyframes b-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    #boot .w-glow { position: absolute; width: 110vmax; height: 110vmax; border-radius: 50%; opacity: 0;
+      animation: w-in 1.6s .05s ease-out forwards; }
+    #boot .w-glow.b { left: -65vmax; bottom: -60vmax; background: radial-gradient(closest-side, rgba(47, 107, 255, .42), transparent 70%); }
+    #boot .w-glow.g { right: -70vmax; bottom: -55vmax; background: radial-gradient(closest-side, rgba(79, 199, 168, .36), transparent 70%);
+      animation-delay: .3s; }
+    #boot .w-art { position: relative; width: min(66vw, 300px); height: auto; overflow: visible; }
+    /* only the moving parts: the card groups keep their own rotate(angle x y) */
+    #boot :is(.w-float, .w-tile, .w-green, .w-blue, .w-bar, .w-wallet, .w-strap, .w-btn, .w-sheen) { transform-box: fill-box; transform-origin: center; }
+    #boot .w-tile { opacity: 0; animation: w-pop .8s .15s cubic-bezier(.2, .9, .25, 1.2) forwards; }
+    #boot .w-sheen { transform: translateX(-260px) skewX(-18deg); animation: w-sheen 1s 2s cubic-bezier(.5, 0, .3, 1) forwards; }
+    #boot .w-green { opacity: 0; transform: translateY(70px); animation: w-out .7s 1s cubic-bezier(.2, .9, .25, 1.15) forwards; }
+    #boot .w-blue { opacity: 0; transform: translateY(80px); animation: w-out .75s 1.2s cubic-bezier(.2, .9, .25, 1.15) forwards; }
+    #boot .w-bar { transform-origin: bottom; transform: scaleY(0); animation: w-bar .45s cubic-bezier(.2, .9, .25, 1.2) forwards; }
+    #boot .w-bar.b1 { animation-delay: 1.65s; }
+    #boot .w-bar.b2 { animation-delay: 1.78s; }
+    #boot .w-bar.b3 { animation-delay: 1.91s; }
+    #boot .w-wallet { opacity: 0; transform: translateY(46px); animation: w-out .75s .55s cubic-bezier(.2, .9, .25, 1.12) forwards; }
+    #boot .w-strap { opacity: 0; transform: translateX(-34px); animation: w-strap .45s 1.75s cubic-bezier(.2, .9, .25, 1.2) forwards; }
+    #boot .w-btn { transform: scale(0); animation: w-click .4s 2.1s cubic-bezier(.2, .9, .25, 1.5) forwards; }
+    #boot .w-float { animation: w-float 3s 2.4s ease-in-out infinite alternate; }
+    #boot .w-name { margin: 0; font: 700 min(7.5vw, 32px) 'IBM Plex Sans Arabic', sans-serif; opacity: 0;
+      background: linear-gradient(90deg, var(--teal), var(--blue-ink) 75%); -webkit-background-clip: text; background-clip: text; color: transparent;
+      animation: w-rise .6s 2.1s cubic-bezier(.2, .8, .2, 1) forwards; }
+    #boot .w-tags { display: flex; gap: 16px; font: 500 min(3.7vw, 15px) 'IBM Plex Sans Arabic', sans-serif; opacity: 0;
+      animation: w-rise .6s 2.3s cubic-bezier(.2, .8, .2, 1) forwards; }
+    #boot .w-tags span { display: inline-flex; align-items: center; gap: 7px; color: var(--mint); }
+    #boot .w-tags span::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    #boot .w-tags .x { color: #8DB4FF; }
+    @keyframes w-in { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: none; } }
+    @keyframes w-pop { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: none; } }
+    @keyframes w-sheen { to { transform: translateX(260px) skewX(-18deg); } }
+    @keyframes w-out { to { opacity: 1; transform: none; } }
+    @keyframes w-bar { to { transform: scaleY(1); } }
+    @keyframes w-strap { to { opacity: 1; transform: none; } }
+    @keyframes w-click { to { transform: scale(1); } }
+    @keyframes w-float { to { transform: translateY(-5px); } }
+    @keyframes w-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
     @media (prefers-reduced-motion: reduce) {
       #boot, #boot * { animation: none !important; transition: none !important; }
-      #boot .b-tide, #boot .b-blob, #boot .b-glow, #boot .b-front, #boot .b-dots, #boot .b-cur, #boot .b-name, #boot .b-tags { opacity: 1; transform: none; }
-      #boot .b-glass { opacity: 1; transform: rotate(-8deg); }
-      #boot .b-rule { stroke-dashoffset: 0; }
-      #boot .b-arc { stroke-dashoffset: 46; }
-      #boot .b-spark { display: none; }
+      #boot .w-glow, #boot .w-tile, #boot .w-green, #boot .w-blue, #boot .w-wallet, #boot .w-strap, #boot .w-name, #boot .w-tags { opacity: 1; transform: none; }
+      #boot .w-bar, #boot .w-btn { transform: none; }
+      #boot .w-sheen { display: none; }
     }
   </style>
 </head>
 <body>
   <div id="boot" aria-hidden="true">
-    <div class="b-glow"></div>
-    <div class="b-tide"></div>
-    <div class="b-blob l"></div>
-    <div class="b-blob r"></div>
-    <i class="b-spark" style="left:12%;--dx:14px;animation-delay:.6s"></i>
-    <i class="b-spark g" style="left:24%;--dx:-10px;animation-delay:1s"></i>
-    <i class="b-spark" style="left:37%;--dx:8px;animation-delay:.8s"></i>
-    <i class="b-spark g" style="left:52%;--dx:-16px;animation-delay:1.3s"></i>
-    <i class="b-spark" style="left:63%;--dx:12px;animation-delay:.7s"></i>
-    <i class="b-spark g" style="left:76%;--dx:-8px;animation-delay:1.1s"></i>
-    <i class="b-spark" style="left:88%;--dx:10px;animation-delay:.9s"></i>
-    <svg class="b-art" viewBox="0 0 240 190">
+    <div class="w-glow b"></div>
+    <div class="w-glow g"></div>
+    <!-- the app icon's glass wallet (icons-src/app-icon.webp), drawn so its parts can move -->
+    <svg class="w-art" viewBox="0 0 300 300">
       <defs>
-        <!-- a gleam passing over "د.إ" -->
-        <linearGradient id="b-shine" gradientUnits="userSpaceOnUse" x1="120" y1="0" x2="190" y2="0">
-          <stop offset="0" style="stop-color: var(--brass)"/>
-          <stop offset=".5" style="stop-color: var(--brass-hi)"/>
-          <stop offset="1" style="stop-color: var(--brass)"/>
-          <animateTransform attributeName="gradientTransform" type="translate" from="-90 0" to="90 0" begin="1.9s" dur="1s" fill="freeze"/>
+        <linearGradient id="w-tile" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#2B5BF2"/>
+          <stop offset=".45" stop-color="#0D1F78"/>
+          <stop offset="1" stop-color="#3FB59A"/>
         </linearGradient>
+        <radialGradient id="w-tile-glow" cx=".85" cy=".2" r=".7">
+          <stop offset="0" stop-color="#7FE0C6" stop-opacity=".55"/>
+          <stop offset="1" stop-color="#7FE0C6" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="w-edge" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#9DB8FF" stop-opacity=".9"/>
+          <stop offset="1" stop-color="#9BE7CB" stop-opacity=".7"/>
+        </linearGradient>
+        <linearGradient id="w-green" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#A8F0D6"/>
+          <stop offset="1" stop-color="#4FB896"/>
+        </linearGradient>
+        <linearGradient id="w-blue" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#3B7BFF"/>
+          <stop offset="1" stop-color="#1A3FCB"/>
+        </linearGradient>
+        <linearGradient id="w-wallet" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#D9D3FF" stop-opacity=".78"/>
+          <stop offset=".55" stop-color="#5F6FE0" stop-opacity=".62"/>
+          <stop offset="1" stop-color="#2A3C9E" stop-opacity=".7"/>
+        </linearGradient>
+        <radialGradient id="w-btn" cx=".35" cy=".3" r=".75">
+          <stop offset="0" stop-color="#FFFFFF"/>
+          <stop offset=".6" stop-color="#C9D0E6"/>
+          <stop offset="1" stop-color="#7D86A6"/>
+        </radialGradient>
+        <linearGradient id="w-sheen" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#FFFFFF" stop-opacity="0"/>
+          <stop offset=".5" stop-color="#FFFFFF" stop-opacity=".28"/>
+          <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+        </linearGradient>
+        <clipPath id="w-tile-clip"><rect x="24" y="24" width="252" height="252" rx="62"/></clipPath>
       </defs>
-      <!-- Expenses: the blue glass card, sliding out from behind -->
-      <g class="b-glass">
-        <rect class="b-glass-card" x="22" y="30" width="122" height="122" rx="18"/>
-        <circle class="b-track" cx="83" cy="80" r="24"/>
-        <circle class="b-arc" cx="83" cy="80" r="24"/>
-        <rect class="b-plus" x="59" y="118" width="48" height="20" rx="10"/>
-        <path class="b-plus-ink" d="M83 122.5v11M77.5 128h11"/>
-      </g>
-      <!-- Budget: the paper ledger page in front -->
-      <g class="b-front">
-        <rect class="b-card" x="96" y="40" width="122" height="122" rx="14"/>
-        <!-- drawn from the right, as Arabic is written -->
-        <line class="b-rule" x1="200" y1="76" x2="114" y2="76"/>
-        <line class="b-dots d1" x1="114" y1="99" x2="200" y2="99"/>
-        <line class="b-dots d2" x1="114" y1="118" x2="200" y2="118"/>
-        <text class="b-cur" x="157" y="150" text-anchor="middle" fill="url(#b-shine)">د.إ</text>
+      <g class="w-float">
+        <!-- the glass tile -->
+        <g class="w-tile">
+          <rect x="24" y="24" width="252" height="252" rx="62" fill="url(#w-tile)"/>
+          <rect x="24" y="24" width="252" height="252" rx="62" fill="url(#w-tile-glow)"/>
+          <rect x="25.5" y="25.5" width="249" height="249" rx="60.5" fill="none" stroke="url(#w-edge)" stroke-width="3" opacity=".7"/>
+        </g>
+        <!-- Budget: the green card, behind -->
+        <g transform="rotate(12 196 126)">
+          <g class="w-green">
+            <rect x="152" y="86" width="88" height="80" rx="11" fill="url(#w-green)" opacity=".92"/>
+            <rect x="174" y="102" width="52" height="7" rx="3.5" fill="#3E9C7E" opacity=".75"/>
+            <rect x="174" y="117" width="42" height="7" rx="3.5" fill="#3E9C7E" opacity=".6"/>
+          </g>
+        </g>
+        <!-- Expenses: the blue card with its chart -->
+        <g transform="rotate(-9 134 110)">
+          <g class="w-blue">
+            <rect x="70" y="64" width="128" height="92" rx="13" fill="url(#w-blue)"/>
+            <rect class="w-bar b1" x="110" y="96" width="13" height="18" rx="3" fill="#5C97FF"/>
+            <rect class="w-bar b2" x="129" y="86" width="13" height="28" rx="3" fill="#5C97FF"/>
+            <rect class="w-bar b3" x="148" y="74" width="13" height="40" rx="3" fill="#6FA4FF"/>
+          </g>
+        </g>
+        <!-- the glass wallet in front -->
+        <g class="w-wallet">
+          <rect x="46" y="128" width="200" height="124" rx="30" fill="url(#w-wallet)" stroke="#E4E2FF" stroke-opacity=".55" stroke-width="2"/>
+          <path d="M48 152 C 110 142, 190 154, 244 168" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="2"/>
+          <path d="M48 232 C 120 240, 180 200, 246 194 L 246 222 Q 246 252 216 252 L 76 252 Q 48 252 48 232 Z" fill="#1E2F8F" opacity=".35"/>
+        </g>
+        <!-- the strap and its button, closing last -->
+        <g class="w-strap">
+          <rect x="196" y="162" width="70" height="52" rx="22" fill="url(#w-wallet)" stroke="#E4E2FF" stroke-opacity=".6" stroke-width="2"/>
+          <circle class="w-btn" cx="234" cy="188" r="12" fill="url(#w-btn)"/>
+        </g>
+        <!-- a gleam crossing the glass -->
+        <g clip-path="url(#w-tile-clip)">
+          <rect class="w-sheen" x="110" y="0" width="70" height="300" fill="url(#w-sheen)"/>
+        </g>
       </g>
     </svg>
-    <p class="b-name">ميزانية الشهر</p>
-    <div class="b-tags" dir="rtl"><span>الميزانية</span><span class="x">المصاريف</span></div>
+    <p class="w-name">ميزانية الشهر</p>
+    <div class="w-tags" dir="rtl"><span>الميزانية</span><span class="x">المصاريف</span></div>
   </div>
   <app-root></app-root>
 </body>
