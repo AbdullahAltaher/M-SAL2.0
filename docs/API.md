@@ -83,7 +83,7 @@
 | SMTP | **خدمة إيميل خارجية مجانية** (مثل Resend أو Brevo)، لأن إيميل Supabase الافتراضي محدود جداً ومخصص للتجربة |
 | قالب الإيميل | بالعربي، ويعرض الرمز `{{ .Token }}` بدل الرابط: [`docs/supabase/otp-email.html`](supabase/otp-email.html). **الخطة المجانية لا تسمح بتعديل القالب إلا مع SMTP خاص**، فيُطبّق مع SMTP |
 
-**طُبّق (2026-10-31):** التسجيل مقفل، والرمز 6 أرقام وصالح 10 دقائق (`mailer_otp_exp: 600`)، وSite URL `https://abdullahaltaher.github.io/M-SAL2.0/`، والروابط المسموحة `localhost:4200` وGitHub Pages. **لم يُطبّق:** القالب وSMTP.
+**طُبّق (2026-10-31):** التسجيل مقفل، والرمز 6 أرقام وصالح 10 دقائق (`mailer_otp_exp: 600`)، وSite URL `https://abdullahaltaher.github.io/M-SAL2.0/`، والروابط المسموحة `localhost:4200` وGitHub Pages. **وطُبّق (2026-11-01، المرحلة 10):** SMTP عن طريق **Gmail المالك** بكلمة مرور تطبيق (Resend المجاني بدون دومين يرسل للمالك فقط)، والمرسل "ميزانية الشهر"، والقالب العربي بالرمز (`docs/supabase/otp-email.html`)، و`rate_limit_email_sent: 30` في الساعة (كان 2 مع إيميل Supabase). يطبّقها `scripts/apply-auth-email.mjs` الذي يشغّله المالك. **جُرّب:** وصل الرمز على الآيفون ودخل به.
 
 ### 2.3 خطوات الدعوة (SRV-009)
 

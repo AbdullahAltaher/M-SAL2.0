@@ -1,14 +1,17 @@
 <!--
   Supabase Auth "Magic link" email template for M-SAL2.0 (API.md 2.2).
-  signInWithOtp sends this template; it shows the 6-digit code instead of a link.
-  Subject: رمز الدخول إلى M-SAL2.0
-  Apply with PATCH /v1/projects/{ref}/config/auth (mailer_subjects_magic_link,
-  mailer_templates_magic_link_content). The free tier refuses template changes
-  until a custom SMTP provider is configured (phase 10).
+  signInWithOtp sends this template; it shows the 6-digit code instead of a link, so the code is
+  typed in the app (also the installed iPhone app, where a link would open Safari instead).
+  Subject: رمز الدخول إلى ميزانية الشهر
+  Applied by scripts/apply-auth-email.mjs with the custom SMTP (the free tier refuses template
+  changes until a custom SMTP provider is set). Plain inline styles: mail apps drop <style>.
 -->
-<div dir="rtl" style="font-family:Tahoma,Arial,sans-serif;text-align:right">
-<h2>رمز الدخول</h2>
-<p>اكتب هذا الرمز في تطبيق M-SAL2.0:</p>
-<p style="font-size:28px;font-weight:bold;letter-spacing:6px" dir="ltr">{{ .Token }}</p>
-<p>الرمز صالح لمدة 10 دقائق ولمرة واحدة فقط. إذا لم تطلبه، تجاهل هذه الرسالة.</p>
+<div dir="rtl" style="font-family:Tahoma,Arial,sans-serif;text-align:right;background:#F5F2EA;padding:24px">
+  <div style="max-width:420px;margin:0 auto;background:#FFFCF5;border:1px solid #DED9CD;border-radius:14px;padding:24px">
+    <p style="margin:0;color:#B99A5B;font:600 11px Arial,sans-serif;letter-spacing:3px" dir="ltr">M-SAL</p>
+    <h2 style="margin:6px 0 16px;color:#24231F;font-size:20px">ميزانية الشهر</h2>
+    <p style="margin:0 0 8px;color:#5C5A52;font-size:15px">رمز الدخول:</p>
+    <p style="margin:0 0 16px;color:#38594A;font-size:32px;font-weight:bold;letter-spacing:8px;text-align:center" dir="ltr">{{ .Token }}</p>
+    <p style="margin:0;color:#5C5A52;font-size:13px;line-height:1.6">اكتبه في التطبيق. صالح لمدة 10 دقائق ولمرة واحدة فقط. إذا لم تطلبه، تجاهل هذه الرسالة.</p>
+  </div>
 </div>
