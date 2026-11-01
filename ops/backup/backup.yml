@@ -56,7 +56,8 @@ jobs:
           gzip -9 -c dump.sql | age -r "$AGE_RECIPIENT" -o "backups/msal-$day.sql.gz.age"
           rm -f dump.sql
           # 60 days, and the 1st of every month for good
-          ls backups/msal-*.sql.gz.age | sort | head -n -60 | grep -v -- '-01\.sql\.gz\.age$' | xargs -r git rm -q --
+          # (grep finds nothing while there are under 60, which is fine)
+          ls backups/msal-*.sql.gz.age | sort | head -n -60 | { grep -v -- '-01\.sql\.gz\.age$' || true; } | xargs -r git rm -q --
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add backups
