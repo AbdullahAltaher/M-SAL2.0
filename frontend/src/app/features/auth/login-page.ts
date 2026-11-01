@@ -26,6 +26,8 @@ export class LoginPage implements OnDestroy {
   protected readonly step = signal<'email' | 'code'>('email');
   protected readonly email = signal('');
   protected readonly code = signal('');
+  /** The code box came from "أرسل الرمز", not from "عندي رمز" */
+  protected readonly sent = signal(false);
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(this.session.lastFailure());
   protected readonly waitSeconds = signal(0);
@@ -45,8 +47,22 @@ export class LoginPage implements OnDestroy {
       return;
     }
     this.code.set('');
+    this.sent.set(true);
     this.step.set('code');
     this.startWait();
+  }
+
+  /**
+   * "عندي رمز": the code box without sending an email, for a code that is already on its way or
+   * made by scripts/dev-sign-in-link.mjs. Supabase's own email allows only 2 an hour until SMTP
+   * (phase 10).
+   */
+  protected haveCode(): void {
+    if (!this.email().trim() || this.busy()) return;
+    this.error.set(null);
+    this.code.set('');
+    this.sent.set(false);
+    this.step.set('code');
   }
 
   /** Keeps only digits (Arabic ones too), and checks the code as soon as it has 6. */

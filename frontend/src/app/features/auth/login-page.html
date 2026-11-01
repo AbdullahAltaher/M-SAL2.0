@@ -11,10 +11,17 @@
         <input id="email" name="email" type="email" dir="ltr" autocomplete="email" inputmode="email" required
                [ngModel]="email()" (ngModelChange)="email.set($event)" [disabled]="busy()">
         <button type="submit" class="primary" [disabled]="busy() || !email().trim()">أرسل الرمز</button>
+        <div class="row">
+          <button type="button" class="link" (click)="haveCode()" [disabled]="busy() || !email().trim()">عندي رمز</button>
+        </div>
       </form>
     } @else {
       <form (ngSubmit)="verify()">
-        <p class="hint">أرسلنا رمزًا من 6 أرقام إلى <bdi dir="ltr">{{ email() }}</bdi></p>
+        @if (sent()) {
+          <p class="hint">أرسلنا رمزًا من 6 أرقام إلى <bdi dir="ltr">{{ email() }}</bdi></p>
+        } @else {
+          <p class="hint">اكتب الرمز (6 أرقام) لـ <bdi dir="ltr">{{ email() }}</bdi></p>
+        }
         <label for="code">الرمز</label>
         <input id="code" name="code" class="code num" type="text" dir="ltr" inputmode="numeric"
                autocomplete="one-time-code" maxlength="6" placeholder="••••••"

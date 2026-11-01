@@ -55,6 +55,20 @@ describe('LoginPage (S-01)', () => {
     expect(auth.verifyCode).toHaveBeenCalledWith('sara@test.local', '123456');
   });
 
+  it('"عندي رمز" opens the code box without sending an email', async () => {
+    const fixture = TestBed.createComponent(LoginPage);
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+    const page = fixture.componentInstance as unknown as { email: { set(v: string): void } };
+    page.email.set('sara@test.local');
+    await fixture.whenStable();
+    const button = [...el.querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent?.trim() === 'عندي رمز')!;
+    button.click();
+    await fixture.whenStable();
+    expect(auth.sendCode).not.toHaveBeenCalled();
+    expect(el.querySelector('input#code')).not.toBeNull();
+  });
+
   it('shows why the user was sent back to sign-in', async () => {
     TestBed.inject(SessionStore).clear('هذا البريد غير مدعو لاستخدام التطبيق.');
     const fixture = TestBed.createComponent(LoginPage);
