@@ -1,0 +1,64 @@
+# The daily backup (PLAN.md section 12). This file is the template: it runs from the PRIVATE
+# repository AbdullahAltaher/M-SAL2.0-backups (.github/workflows/backup.yml there), and the
+# backups are stored only there, never in the public M-SAL2.0 repository.
+#
+# Every day: pg_dump of the msal schema from Supabase (the same Postgres 17), gzip, then age
+# encryption to the owner's public key. Only the private key, which never leaves the owner,
+# can open them (docs/BACKUP.md). Keeps 60 days, and the 1st of every month for good.
+#
+# Set by scripts/setup-backups.mjs, run by the owner: the secret DB_PASSWORD, and the variables
+# DB_HOST, DB_USER and AGE_RECIPIENT (the public key).
+name: Daily backup
+
+on:
+  schedule:
+    - cron: '30 23 * * *'   # 03:30 in Dubai
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DB_HOST: ${{ vars.DB_HOST }}
+      DB_USER: ${{ vars.DB_USER }}
+      AGE_RECIPIENT: ${{ vars.AGE_RECIPIENT }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Dump the msal schema (Postgres 17, as Supabase)
+        env:
+          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for v in DB_HOST DB_USER AGE_RECIPIENT PGPASSWORD; do
+            [ -n "${!v}" ] || { echo "Missing $v (run scripts/setup-backups.mjs)"; exit 1; }
+          done
+          docker run --rm -e PGPASSWORD postgres:17-alpine pg_dump \
+            "host=$DB_HOST port=5432 dbname=postgres user=$DB_USER sslmode=require" \
+            --schema=msal --no-owner --no-privileges > dump.sql
+          grep -q "CREATE TABLE msal.entries" dump.sql
+          echo "Dump: $(wc -c < dump.sql) bytes"
+
+      - name: Encrypt and keep
+        run: |
+          set -euo pipefail
+          sudo apt-get install -y -qq age > /dev/null
+          day=$(TZ=Asia/Dubai date +%F)
+          mkdir -p backups
+          gzip -9 -c dump.sql | age -r "$AGE_RECIPIENT" -o "backups/msal-$day.sql.gz.age"
+          rm -f dump.sql
+          # 60 days, and the 1st of every month for good
+          ls backups/msal-*.sql.gz.age | sort | head -n -60 | grep -v -- '-01\.sql\.gz\.age$' | xargs -r git rm -q --
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backups
+          git commit -qm "Backup $day" || echo "Nothing new"
+          git push -q
