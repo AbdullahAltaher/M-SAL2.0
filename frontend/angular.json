@@ -53,6 +53,7 @@
                 }
               ],
               "outputHashing": "all",
+              "optimization": { "scripts": true, "styles": { "minify": true, "inlineCritical": false }, "fonts": true },
               "baseHref": "/M-SAL2.0/",
               "serviceWorker": "ngsw-config.json"
             },
