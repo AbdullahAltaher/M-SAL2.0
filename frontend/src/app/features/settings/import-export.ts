@@ -83,8 +83,19 @@ export class ImportExport {
     input.click();
   }
 
-  /** SH-09: the preview, then the chosen way (R-IO-02, R-IO-03). */
-  async open(file: File): Promise<void> {
+  /**
+   * SH-09: the preview, then the chosen way (R-IO-02, R-IO-03). The file is read once, at once:
+   * the iPhone may no longer read a picked file by the time it is sent again for the import,
+   * which then arrives without it (SYS-E006).
+   */
+  async open(picked: File): Promise<void> {
+    let file: File;
+    try {
+      file = new File([await picked.arrayBuffer()], picked.name, { type: 'application/json' });
+    } catch {
+      this.toasts.show('تعذّرت قراءة الملف. لم يتغيّر شيء.');
+      return;
+    }
     let preview: ImportPreview;
     try {
       preview = await this.api.previewImport(file);

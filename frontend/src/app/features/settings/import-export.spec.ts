@@ -73,7 +73,7 @@ describe('ImportExport', () => {
   it('a refused file changes nothing and says why', async () => {
     const toasts = TestBed.inject(Toasts);
     const done = io.open(file);
-    http.expectOne(`${environment.apiUrl}/imports/preview`)
+    (await vi.waitFor(() => http.expectOne(`${environment.apiUrl}/imports/preview`)))
       .flush({ code: 'SRV-007-E002', message: 'صيغة الملف غير معروفة.' }, { status: 400, statusText: 'Bad Request' });
     await done;
     expect(toasts.current()?.text).toBe('صيغة الملف غير معروفة. لم يتغيّر شيء.');
@@ -86,7 +86,7 @@ describe('ImportExport', () => {
     const dialogs = TestBed.inject(Dialogs);
     const confirm = vi.spyOn(dialogs, 'confirm').mockResolvedValueOnce(false);
     const done = io.open(file);
-    const preview = http.expectOne(`${environment.apiUrl}/imports/preview`);
+    const preview = await vi.waitFor(() => http.expectOne(`${environment.apiUrl}/imports/preview`));
     expect(preview.request.body).toBeInstanceOf(FormData);
     preview.flush(PREVIEW);
     await vi.waitFor(() => expect(sheets.current()?.component).toBe(ImportSheet));
@@ -98,6 +98,37 @@ describe('ImportExport', () => {
     sheets.close();
     await done;
     http.expectNone(`${environment.apiUrl}/imports?mode=REPLACE`);
+  });
+
+  it('reads the picked file once and sends that copy twice (the iPhone may not read it again)', async () => {
+    const sheets = TestBed.inject(Sheets);
+    const bytes = new TextEncoder().encode('{"profiles":[]}');
+    const arrayBuffer = vi.fn(async () => bytes.buffer as ArrayBuffer);
+    const picked = { name: 'ميزانية.json', arrayBuffer } as unknown as File;
+    const sent = async (body: unknown) => {
+      const part = (body as FormData).get('file') as File;
+      return [part.name, await part.text()];
+    };
+
+    const done = io.open(picked);
+    const preview = await vi.waitFor(() => http.expectOne(`${environment.apiUrl}/imports/preview`));
+    expect(await sent(preview.request.body)).toEqual(['ميزانية.json', '{"profiles":[]}']);
+    preview.flush(PREVIEW);
+    await vi.waitFor(() => expect(sheets.current()?.component).toBe(ImportSheet));
+    sheets.close('MERGE');
+    sheets.finishClose();
+    const imported = await vi.waitFor(() => http.expectOne(`${environment.apiUrl}/imports?mode=MERGE`));
+    expect(await sent(imported.request.body)).toEqual(['ميزانية.json', '{"profiles":[]}']);
+    expect(arrayBuffer).toHaveBeenCalledOnce();
+    imported.flush({ code: 'SYS-E008', message: 'حدث خطأ غير متوقع.' }, { status: 500, statusText: 'Error' });
+    await done;
+  });
+
+  it('a file that cannot be read says so and sends nothing', async () => {
+    const picked = { name: 'x.json', arrayBuffer: () => Promise.reject(new DOMException('gone', 'NotReadableError')) } as unknown as File;
+    await io.open(picked);
+    expect(TestBed.inject(Toasts).current()?.text).toBe('تعذّرت قراءة الملف. لم يتغيّر شيء.');
+    http.expectNone(`${environment.apiUrl}/imports/preview`);
   });
 
   it('the file name is today in the user\'s time zone', () => {
