@@ -10,7 +10,6 @@ import { Icon } from '../../shared/components/icon';
 import { CardPhotoSheet } from '../../shared/components/card-photo-sheet';
 import { CountTo } from '../../shared/components/count-to';
 import { MoneyView } from '../../shared/components/money';
-import { Collapse } from '../../shared/directives/collapse';
 import { Sheets } from '../../shared/sheet/sheets';
 import { DayStrip } from './day-strip';
 import { EntryRow } from './entry-row';
@@ -26,7 +25,7 @@ import { ExpensesStore } from './expenses-store';
  */
 @Component({
   selector: 'app-home-view',
-  imports: [Icon, MoneyView, EntryRow, RouterLink, CountTo, Collapse, DayStrip],
+  imports: [Icon, MoneyView, EntryRow, RouterLink, CountTo, DayStrip],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home-view.html',
 })

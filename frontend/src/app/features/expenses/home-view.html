@@ -56,10 +56,10 @@
 
   @if (summary(); as s) {
     <!-- The days strip (R-ENT-16): hidden until "اليوم" (or "الأيام") is tapped -->
-    @if (h.selected.cycle; as c) {
-      <div class="g-col" [appCollapse]="daysOpen()">
-        <app-day-strip [cycle]="c" [today]="h.today" [days]="dayList()" [selected]="selectedDay()" (pick)="pickDay($event)" />
-      </div>
+    <!-- Shown at once, not unfolded: on the iPhone the frosted card below kept its old place over a
+         strip that grew in height, until the app was reopened -->
+    @if (daysOpen() && h.selected.cycle; as c) {
+      <app-day-strip [cycle]="c" [today]="h.today" [days]="dayList()" [selected]="selectedDay()" (pick)="pickDay($event)" />
     }
 
     @if (dayView(); as v) {

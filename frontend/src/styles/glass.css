@@ -510,3 +510,12 @@ button.st-row:active{background:var(--x-field)}
 @keyframes fadeIn{from{opacity:0}}
 .g-use .g-bar>i{animation:growX .8s var(--ease-out) both}
 @keyframes growX{from{width:0}}
+/* ---- fixes after the first try on the iPhone (2026-11-07) ---- */
+/* the days strip appears with a short slide instead of unfolding */
+app-day-strip{display:block;animation:stripIn .28s var(--ease-out)}
+@keyframes stripIn{from{opacity:0;transform:translateY(-8px)}}
+/* room under the last item for the floating bar and its + button */
+/* the page already keeps 48px and the safe area at its foot (.wrap); with the 14px gap this clears the bar and the raised + */
+.xbar-space{height:56px}
+/* English descriptions sit on the right like Arabic ones, so the list reads in one line */
+.x-name,.x-sub,.es-name{text-align:right}

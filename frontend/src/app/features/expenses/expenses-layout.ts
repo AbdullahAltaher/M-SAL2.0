@@ -32,6 +32,8 @@ const TITLES: Record<string, string> = { entries: 'المصاريف', stats: 'ا
     }
 
     <router-outlet />
+    <!-- room under the last item ("وصل الراتب" on the home screen) for the floating bar -->
+    <div class="xbar-space" aria-hidden="true"></div>
 
     <nav class="xbar" aria-label="التنقل في المصاريف">
       <a class="xi" routerLink="/expenses/home" aria-label="الرئيسية" [attr.aria-current]="view() === 'home' ? 'page' : null">
