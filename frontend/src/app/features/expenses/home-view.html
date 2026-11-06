@@ -46,64 +46,109 @@
   </div>
 
   @if (summary(); as s) {
-    @switch (daily()?.kind) {
-      @case ('prompt') {
-        <button class="g-prompt" type="button" (click)="sheets.cycleOrNew()">
-          <span class="ic"><app-icon name="calendar" [size]="22" /></span>
-          <span class="tx" dir="rtl">حدّد تاريخ الراتب القادم لتعرف كم تقدر تصرف كل يوم</span>
-          <span class="ch"><app-icon name="chevL" [size]="20" /></span>
-        </button>
-      }
-      @case ('closed') {
-        <section class="g-card g-daily">
-          <div class="g-card-head"><span class="g-card-title" dir="rtl">متوسط الصرف اليومي</span></div>
-          <div class="g-big"><bdi class="n" dir="ltr">{{ fmt(s.dailyAverage) }}</bdi><span class="u" dir="rtl">{{ unit }}</span></div>
-          <div class="g-line"><span dir="rtl">مدة الدورة</span><span class="grp"><bdi dir="ltr">{{ s.totalDays }}</bdi><span dir="rtl">يوم</span></span></div>
-        </section>
-      }
-      @case ('open') {
-        @if (daily(); as d) {
-          @if (d.kind === 'open') {
-            <section class="g-card g-daily">
-              <div class="g-card-head">
-                <span class="g-card-title" dir="rtl">{{ d.over ? 'تجاوزت اليوم' : 'تقدر تصرف اليوم' }}</span>
-                <span class="g-pill"><span dir="rtl">باقي</span><bdi dir="ltr">{{ s.daysLeft }}</bdi><span dir="rtl">يوم</span></span>
-              </div>
-              <div class="g-big" [class.over]="d.over"><bdi class="n" dir="ltr"><app-count [value]="+(d.value ?? 0)" /></bdi><span class="u" dir="rtl">{{ unit }}</span></div>
-              <div class="g-bar" [class.over]="d.over" role="progressbar" aria-label="المصروف اليوم من ميزانية اليوم" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="pct(d.frac)">
-                <i [style.width.%]="pct(d.frac)"></i>
-              </div>
-              <div class="g-line">
-                <span class="grp"><span dir="rtl">صرفت</span><app-money [value]="s.spentToday" /></span>
-                <span class="grp"><span dir="rtl">من</span><app-money [value]="d.dayBudget" /></span>
-              </div>
-              @if (d.over && s.tomorrow !== null) {
-                <div class="g-line"><span dir="rtl">بكرة تقدر تصرف</span><app-money [value]="s.tomorrow" /></div>
-              }
-            </section>
+    <!-- The days strip (R-ENT-16): hidden until "اليوم" (or "الأيام") is tapped -->
+    @if (h.selected.cycle; as c) {
+      <div class="g-col" [appCollapse]="daysOpen()">
+        <app-day-strip [cycle]="c" [today]="h.today" [days]="dayList()" [selected]="selectedDay()" (pick)="pickDay($event)" />
+      </div>
+    }
+
+    @if (dayView(); as v) {
+      <section class="g-card g-daily">
+        <div class="g-card-head">
+          <span class="g-card-title" dir="rtl">صرفت يوم
+            <button class="day-tog" type="button" [attr.aria-expanded]="daysOpen()" (click)="toggleDays()">{{ v.label }}<app-icon name="chevD" [size]="14" [sw]="2.4" /></button>
+          </span>
+          <button class="g-link" type="button" (click)="pickDay(h.today)">رجوع لليوم</button>
+        </div>
+        <div class="g-big over"><bdi class="n" dir="ltr"><app-count [value]="v.spent" /></bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+        <div class="g-line">
+          <span dir="rtl">{{ v.count === 0 ? 'لا مصاريف في هذا اليوم' : v.count === 1 ? 'مصروف واحد' : v.count === 2 ? 'مصروفان' : v.count <= 10 ? v.count + ' مصاريف' : v.count + ' مصروفًا' }}</span>
+          @if (v.extra > 0) {
+            <span class="grp"><span dir="rtl">ودخل</span><app-money [value]="v.extra" /></span>
+          }
+        </div>
+      </section>
+    } @else {
+      @switch (daily()?.kind) {
+        @case ('prompt') {
+          <button class="g-prompt" type="button" (click)="sheets.cycleOrNew()">
+            <span class="ic"><app-icon name="calendar" [size]="22" /></span>
+            <span class="tx" dir="rtl">حدّد تاريخ الراتب القادم لتعرف كم تقدر تصرف كل يوم</span>
+            <span class="ch"><app-icon name="chevL" [size]="20" /></span>
+          </button>
+        }
+        @case ('closed') {
+          <section class="g-card g-daily">
+            <div class="g-card-head">
+              <span class="g-card-title" dir="rtl">متوسط الصرف اليومي</span>
+              <button class="day-tog" type="button" [attr.aria-expanded]="daysOpen()" (click)="toggleDays()">الأيام<app-icon name="chevD" [size]="14" [sw]="2.4" /></button>
+            </div>
+            <div class="g-big"><bdi class="n" dir="ltr">{{ fmt(s.dailyAverage) }}</bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+            <div class="g-line"><span dir="rtl">مدة الدورة</span><span class="grp"><bdi dir="ltr">{{ s.totalDays }}</bdi><span dir="rtl">يوم</span></span></div>
+          </section>
+        }
+        @case ('open') {
+          @if (daily(); as d) {
+            @if (d.kind === 'open') {
+              <section class="g-card g-daily">
+                <div class="g-card-head">
+                  <span class="g-card-title" dir="rtl">{{ d.over ? 'تجاوزت' : 'تقدر تصرف' }}
+                    <button class="day-tog" type="button" [attr.aria-expanded]="daysOpen()" aria-label="اليوم، أيام الدورة" (click)="toggleDays()">اليوم<app-icon name="chevD" [size]="14" [sw]="2.4" /></button>
+                  </span>
+                  <span class="g-pill"><span dir="rtl">باقي</span><bdi dir="ltr">{{ s.daysLeft }}</bdi><span dir="rtl">يوم</span></span>
+                </div>
+                <div class="g-big" [class.over]="d.over"><bdi class="n" dir="ltr"><app-count [value]="+(d.value ?? 0)" /></bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+                <div class="g-bar" [class.over]="d.over" role="progressbar" aria-label="المصروف اليوم من ميزانية اليوم" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="pct(d.frac)">
+                  <i [style.width.%]="pct(d.frac)"></i>
+                </div>
+                <div class="g-line">
+                  <span class="grp"><span dir="rtl">صرفت</span><app-money [value]="s.spentToday" /></span>
+                  <span class="grp"><span dir="rtl">من</span><app-money [value]="d.dayBudget" /></span>
+                </div>
+                @if (d.over && s.tomorrow !== null) {
+                  <div class="g-line"><span dir="rtl">بكرة تقدر تصرف</span><app-money [value]="s.tomorrow" /></div>
+                }
+              </section>
+            }
           }
         }
       }
     }
   }
 
-  <section class="x-day" aria-label="آخر المصاريف">
-    <div class="x-dayhead">
-      <h2 class="x-dayname" dir="rtl">آخر المصاريف</h2>
-      @if (h.recent.length) {
-        <a class="g-link" routerLink="/expenses/entries">عرض الكل</a>
+  @if (dayView(); as v) {
+    <section class="x-day" [attr.aria-label]="'مصاريف يوم ' + v.label">
+      <div class="x-dayhead"><h2 class="x-dayname" dir="rtl">مصاريف يوم {{ v.label }}</h2></div>
+      @if (v.entries.length) {
+        <ul class="x-rows">
+          @for (e of v.entries; track e.id) {
+            <li app-entry-row [entry]="e" [today]="h.today"></li>
+          }
+        </ul>
+      } @else {
+        <p class="g-none" dir="rtl">لا مصاريف في هذا اليوم. اضغط + لإضافة مصروف له.</p>
       }
-    </div>
-    @if (h.recent.length) {
-      <ul class="x-rows">
-        @for (e of h.recent; track e.id) {
-          <li app-entry-row [entry]="e" [showDate]="true" [today]="h.today"></li>
+    </section>
+  } @else {
+    <section class="x-day" aria-label="آخر المصاريف">
+      <div class="x-dayhead">
+        <h2 class="x-dayname" dir="rtl">آخر المصاريف</h2>
+        @if (h.recent.length) {
+          <a class="g-link" routerLink="/expenses/entries">عرض الكل</a>
         }
-      </ul>
-    } @else {
-      <p class="g-none" dir="rtl">لا توجد مصاريف في هذه الدورة بعد. اضغط + لإضافة مصروف.</p>
-    }
-  </section>
+      </div>
+      @if (h.recent.length) {
+        <ul class="x-rows">
+          @for (e of h.recent; track e.id) {
+            <li app-entry-row [entry]="e" [showDate]="true" [today]="h.today"></li>
+          }
+        </ul>
+      } @else {
+        <p class="g-none" dir="rtl">لا توجد مصاريف في هذه الدورة بعد. اضغط + لإضافة مصروف.</p>
+      }
+    </section>
+  }
 
   <button class="g-btn g-salary" type="button" (click)="sheets.newCycle()">وصل الراتب</button>
 }

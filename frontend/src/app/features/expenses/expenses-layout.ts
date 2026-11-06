@@ -4,6 +4,7 @@ import { filter } from 'rxjs';
 
 import { ApiError } from '../../core/api/api-error';
 import { BudgetsStore } from '../../core/data/budgets-store';
+import { weekdayDate } from '../../core/util/dates';
 import { Icon } from '../../shared/components/icon';
 import { Toasts } from '../../shared/toast/toast';
 import { EntrySheets } from './entry-sheets';
@@ -39,7 +40,10 @@ const TITLES: Record<string, string> = { entries: 'المصاريف', stats: 'ا
       <a class="xi" routerLink="/expenses/entries" aria-label="المصاريف" [attr.aria-current]="view() === 'entries' ? 'page' : null">
         <app-icon name="list" [size]="24" />
       </a>
-      <button class="fab" type="button" aria-label="إضافة مصروف" (click)="sheets.add()"><app-icon name="plus" [size]="30" [sw]="2.2" /></button>
+      @if (addsTo(); as day) {
+        <span class="fab-hint" dir="rtl" aria-hidden="true">+ يضيف إلى {{ day }}</span>
+      }
+      <button class="fab" type="button" [attr.aria-label]="addsTo() ? 'إضافة مصروف إلى ' + addsTo() : 'إضافة مصروف'" (click)="sheets.add()"><app-icon name="plus" [size]="30" [sw]="2.2" /></button>
       <span class="xgap" aria-hidden="true"></span>
       <a class="xi" routerLink="/expenses/stats" aria-label="الإحصاءات" [attr.aria-current]="view() === 'stats' ? 'page' : null">
         <app-icon name="chart" [size]="24" />
@@ -57,6 +61,11 @@ export class ExpensesLayout {
 
   protected readonly view = signal(this.viewOf(this.router.url));
   protected readonly title = computed(() => TITLES[this.view()] ?? '');
+  /** "+ يضيف إلى X" while another day is chosen (R-ENT-16) */
+  protected readonly addsTo = computed(() => {
+    const day = this.store.day();
+    return day && day !== this.store.home()?.today ? weekdayDate(day) : null;
+  });
   /** The account, when there is more than one */
   protected readonly subtitle = computed(() => (this.store.activeAccounts().length > 1 ? this.store.account()?.name ?? '' : ''));
 

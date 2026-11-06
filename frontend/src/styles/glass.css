@@ -423,3 +423,23 @@ app-entry-sheet .g-chips{flex-wrap:nowrap}
 app-entry-sheet .g-savebar{background:var(--x-glass-solid);border-top:1px solid var(--x-line-soft);padding-top:12px}
 app-entry-sheet .x-amtrow{padding:10px 20px}
 app-entry-sheet .es-key{min-height:46px}
+/* ---- the days strip (R-ENT-16, D-19, D-23) ---- */
+.day-tog{display:inline-flex;align-items:center;gap:3px;padding:2px 4px;margin:-2px 0;background:none;border:none;border-bottom:1.5px dashed color-mix(in srgb,var(--x-accent-ink) 60%,transparent);color:var(--x-accent-ink);font:inherit;cursor:pointer}
+.day-tog svg{transition:transform .25s var(--ease-out)}
+.day-tog[aria-expanded="true"] svg{transform:rotate(180deg)}
+.ds{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.ds::-webkit-scrollbar{display:none}
+.ds-d{flex:0 0 46px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 0 6px;border-radius:14px;background:var(--x-field);border:1px solid var(--x-line);color:var(--x-text);cursor:pointer;transition:transform .12s var(--ease-out),background .15s}
+.ds-d:active:not(:disabled){transform:scale(.95)}
+.ds-w{font:500 10px var(--ar);color:var(--x-muted)}
+.ds-n{font:600 16px var(--num)}
+.ds-dot{width:5px;height:5px;border-radius:50%;background:transparent}
+.ds-dot.on{background:var(--x-exp)}
+.ds-d.today{border-color:var(--x-accent)}
+.ds-d[aria-selected="true"]{background:linear-gradient(180deg,var(--x-btn-a),var(--x-btn-b));border-color:rgba(255,255,255,.2);color:#fff}
+.ds-d[aria-selected="true"] .ds-w{color:rgba(255,255,255,.85)}
+.ds-d[aria-selected="true"] .ds-dot.on{background:#fff}
+.ds-d.future{opacity:.35;cursor:default}
+/* "+ يضيف إلى X" above the + button */
+.fab-hint{position:fixed;z-index:31;left:50%;transform:translateX(-50%);bottom:calc(98px + env(safe-area-inset-bottom));padding:5px 12px;border-radius:999px;background:var(--x-inc);color:#06301E;font:600 12px var(--ar);white-space:nowrap;box-shadow:0 8px 18px -8px rgba(0,0,0,.5);pointer-events:none;animation:hintIn .3s var(--ease-out)}
+@keyframes hintIn{from{opacity:0;transform:translate(-50%,6px)}}

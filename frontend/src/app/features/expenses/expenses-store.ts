@@ -49,7 +49,10 @@ export class ExpensesStore {
     this.accounts.set(accounts);
     this.categories.set(categories);
     this.budgetVersion = budget.version;
-    if (this.loadedFor !== budgetId) this.cycleKey.set('latest');
+    if (this.loadedFor !== budgetId) {
+      this.cycleKey.set('latest');
+      this.day.set(null);
+    }
     this.loadedFor = budgetId;
     // M-SAL's curAccount: the last used one if still active, else the first active one
     const active = accounts.filter((a) => !a.isArchived);
@@ -66,8 +69,12 @@ export class ExpensesStore {
     return this.categories().find((c) => c.id === id) ?? OTHER;
   }
 
+  /** The day chosen in the days strip (R-ENT-16), or null for today */
+  readonly day = signal<string | null>(null);
+
   setCycle(key: string): void {
     this.cycleKey.set(key);
+    this.day.set(null);
     this.changed.update((n) => n + 1);
   }
 
@@ -76,6 +83,7 @@ export class ExpensesStore {
     if (id === this.accountId()) return;
     this.accountId.set(id);
     this.cycleKey.set('latest');
+    this.day.set(null);
     this.changed.update((n) => n + 1);
     const budgetId = this.budgetId();
     if (!budgetId) return;

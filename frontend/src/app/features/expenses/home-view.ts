@@ -1,13 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { Api } from '../../core/api/api';
-import { CycleSummary } from '../../core/api/models';
-import { shortArabicDate } from '../../core/util/dates';
+import { CycleSummary, Day } from '../../core/api/models';
+import { shortArabicDate, weekdayDate } from '../../core/util/dates';
 import { AED, formatMoney } from '../../core/util/money';
 import { Icon } from '../../shared/components/icon';
 import { CountTo } from '../../shared/components/count-to';
 import { MoneyView } from '../../shared/components/money';
+import { Collapse } from '../../shared/directives/collapse';
+import { DayStrip } from './day-strip';
 import { EntryRow } from './entry-row';
 import { EntrySheets } from './entry-sheets';
 import { ExpensesStore } from './expenses-store';
@@ -16,10 +18,12 @@ import { ExpensesStore } from './expenses-store';
  * S-20: the Expenses home (M-SAL's renderHome, R-CYC-04 to R-CYC-06), as the owner uses it
  * (DESIGN.md D-18): the account card with what was spent of what is available, "can spend today",
  * the last 5 entries, then "salary arrived". The two big numbers count to their new value.
+ * Tapping "اليوم" opens the days strip (R-ENT-16, D-19, D-23): a chosen day shows what was spent
+ * that day and its entries, and new entries go to it.
  */
 @Component({
   selector: 'app-home-view',
-  imports: [Icon, MoneyView, EntryRow, RouterLink, CountTo],
+  imports: [Icon, MoneyView, EntryRow, RouterLink, CountTo, Collapse, DayStrip],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home-view.html',
 })
@@ -37,6 +41,48 @@ export class HomeView {
     return s ? { start: shortArabicDate(s.start, true), end: s.lastDay ? shortArabicDate(s.lastDay, true) : 'الآن' } : null;
   });
   protected readonly daily = computed(() => this.dailyCard(this.summary()));
+
+  /** The days strip is open (hidden by default, D-19) */
+  protected readonly daysOpen = signal(false);
+  /** The cycle's days, loaded only when the strip or a chosen day needs them */
+  protected readonly dayList = signal<Day[]>([]);
+  protected readonly selectedDay = computed(() => this.store.day() ?? this.home()?.today ?? '');
+  /** A day other than today: what was spent that day and its entries (R-ENT-16) */
+  protected readonly dayView = computed(() => {
+    const date = this.store.day();
+    const today = this.home()?.today;
+    if (!date || date === today) return null;
+    const day = this.dayList().find((d) => d.date === date);
+    const entries = day?.entries ?? [];
+    return {
+      date,
+      label: weekdayDate(date),
+      spent: Number(day?.spent ?? 0),
+      extra: Number(day?.extra ?? 0),
+      entries,
+      count: entries.filter((e) => e.type === 'EXPENSE').length,
+    };
+  });
+
+  constructor() {
+    effect(() => {
+      this.store.changed();
+      const want = this.daysOpen() || !!this.store.day();
+      const accountId = this.store.accountId();
+      const key = this.store.selectedKey();
+      if (!want || !accountId || !key || key === 'none') return;
+      void this.api.entries(accountId, key).then((r) => this.dayList.set(r.days)).catch(() => this.dayList.set([]));
+    });
+  }
+
+  protected toggleDays(): void {
+    this.daysOpen.update((open) => !open);
+  }
+
+  /** Today is the normal view; another day is shown on its own (R-ENT-16). */
+  protected pickDay(date: string): void {
+    this.store.day.set(date === this.home()?.today ? null : date);
+  }
 
   private sx: number | null = null;
   private sy = 0;

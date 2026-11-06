@@ -103,6 +103,9 @@ export class EntrySheet implements OnInit {
     } else {
       this.type.set(this.presetType());
       this.accountId.set(this.store.accountId());
+      // the day chosen in the days strip (R-ENT-04, R-ENT-16)
+      const day = this.store.day();
+      if (day) this.date.set(day);
     }
     this.setTitle();
     const budgetId = this.store.budgetId();
