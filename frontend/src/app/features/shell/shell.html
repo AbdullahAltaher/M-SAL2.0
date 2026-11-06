@@ -1,32 +1,46 @@
-<!-- The glass background and the header copied from M-SAL index.html lines 715-751 -->
+<!-- The glass background (M-SAL index.html lines 715-751), now for the whole app; the floating
+     wallet shows on the home screen only (DESIGN.md D-09) -->
 <div class="xbg" aria-hidden="true">
   <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
-  <i style="left:12%;top:8%;--dx:30px;--dy:-60px;animation-duration:48s;animation-delay:-24s"></i>
-  <i style="left:70%;top:22%;--dx:-24px;--dy:-50px;animation-duration:61s;animation-delay:-30s"></i>
-  <i style="left:30%;top:35%;--dx:20px;--dy:-80px;animation-duration:55s;animation-delay:-27s"></i>
-  <i style="left:86%;top:48%;--dx:-30px;--dy:-60px;animation-duration:70s;animation-delay:-35s"></i>
-  <i style="left:18%;top:60%;--dx:26px;--dy:-70px;animation-duration:44s;animation-delay:-22s"></i>
-  <i style="left:52%;top:72%;--dx:-20px;--dy:-90px;animation-duration:66s;animation-delay:-33s"></i>
-  <i style="left:8%;top:83%;--dx:34px;--dy:-50px;animation-duration:58s;animation-delay:-29s"></i>
-  <i style="left:44%;top:15%;--dx:-26px;--dy:-70px;animation-duration:50s;animation-delay:-25s"></i>
-  <i style="left:76%;top:90%;--dx:22px;--dy:-60px;animation-duration:64s;animation-delay:-32s"></i>
-  <i style="left:62%;top:55%;--dx:-34px;--dy:-80px;animation-duration:47s;animation-delay:-23s"></i>
-  <i style="left:92%;top:29%;--dx:28px;--dy:-60px;animation-duration:72s;animation-delay:-36s"></i>
-  <i style="left:38%;top:66%;--dx:-22px;--dy:-50px;animation-duration:53s;animation-delay:-26s"></i>
+  @if (home()) {
+    <app-floating-wallet class="xwallet" />
+  }
 </div>
 
 <div class="wrap">
   <header class="top" id="topHeader" [class.on-exp]="expenses() || admin()" [class.shrunk]="shrunk()">
     <div class="top-row">
-      <select id="profileSelect" dir="rtl" aria-label="اختيار الشخص" #sel (change)="onSelect(sel)">
-        @for (b of budgets.list(); track b.id) {
-          <option [value]="b.id" [selected]="b.id === budgets.currentId()">{{ b.name }}</option>
-        }
-        <option [value]="addValue">＋ شخص جديد…</option>
-      </select>
-      <button class="icon-btn" id="btnRenameProfile" type="button" aria-label="إعادة تسمية الشخص" (click)="rename()">✎</button>
-      <button class="icon-btn" id="btnDeleteProfile" type="button" aria-label="حذف الشخص" (click)="remove()">×</button>
-      <span class="saved" id="savedDot" dir="rtl" [class.on]="savedOn() || ledger.failed()">{{ ledger.failed() ? 'لم يُحفظ' : 'محفوظ ✓' }}</span>
+      <button class="who" type="button" aria-haspopup="menu" [attr.aria-expanded]="menuOpen()"
+              aria-label="الشخص، وإضافة أو تعديل الأشخاص" (click)="toggleMenu()">
+        <span class="nm" dir="auto">{{ budgets.current()?.name }}</span>
+        <app-icon name="chevD" [size]="18" [sw]="2.2" />
+      </button>
+      @if (!expenses() && !admin()) {
+        <span class="saved" id="savedDot" dir="rtl" role="status" [class.on]="savedOn()" [class.bad]="ledger.failed()">
+          <app-icon [name]="ledger.failed() ? 'alert' : 'cloudOk'" [size]="16" />
+          {{ ledger.failed() ? 'لم يُحفظ' : 'محفوظ' }}
+        </span>
+      }
+      @if (menuOpen()) {
+        <div class="who-menu" role="menu" aria-label="الأشخاص" dir="rtl" (keydown.escape)="closeMenu()">
+          @for (b of budgets.list(); track b.id) {
+            <button class="wm-item" type="button" role="menuitemradio" [attr.aria-checked]="b.id === budgets.currentId()" (click)="pick(b.id)">
+              <span class="ck">@if (b.id === budgets.currentId()) {<app-icon name="check" [size]="18" [sw]="2.4" />}</span>
+              <span class="nm" dir="auto">{{ b.name }}</span>
+            </button>
+          }
+          <div class="wm-sep" role="separator"></div>
+          <button class="wm-item" type="button" role="menuitem" (click)="add()">
+            <span class="ck"><app-icon name="userPlus" [size]="18" /></span><span class="nm">شخص جديد</span>
+          </button>
+          <button class="wm-item" type="button" role="menuitem" (click)="rename()">
+            <span class="ck"><app-icon name="edit" [size]="17" /></span><span class="nm">إعادة تسمية</span>
+          </button>
+          <button class="wm-item danger" type="button" role="menuitem" (click)="remove()">
+            <span class="ck"><app-icon name="trash" [size]="18" /></span><span class="nm">حذف</span>
+          </button>
+        </div>
+      }
     </div>
     @if (ledger.state(); as s) {
       <div class="top-row ledger-only">
@@ -34,12 +48,12 @@
                (input)="ledger.editBudget('monthLabel', ml.value)" (blur)="ledger.editBudget('monthLabel', ml.value, true)">
       </div>
     }
-    <span class="eyebrow head-eyebrow ledger-only">M-SAL</span>
     <div class="balance-line ledger-only">
       <span class="balance-caption" dir="rtl">المتبقي</span>
       <span id="finalBalance" dir="ltr" [class.neg]="(final()?.final ?? 0) < 0">@if (final()?.finalApprox) {<span class="approx">~</span>}{{ format(final()?.final ?? 0) }}</span>
     </div>
-    <div class="tabs" role="tablist" dir="rtl" aria-label="الأقسام">
+    <div class="tabs" role="tablist" dir="rtl" aria-label="الأقسام" [attr.data-at]="admin() ? 'none' : expenses() ? 'expenses' : 'budget'">
+      <span class="tab-pill" aria-hidden="true"></span>
       <button class="tab" type="button" role="tab" [attr.aria-selected]="!expenses() && !admin()" [attr.tabindex]="expenses() || admin() ? -1 : 0" (click)="show('budget')">الميزانية</button>
       <button class="tab" type="button" role="tab" [attr.aria-selected]="expenses()" [attr.tabindex]="expenses() ? 0 : -1" (click)="show('expenses')">المصاريف</button>
     </div>

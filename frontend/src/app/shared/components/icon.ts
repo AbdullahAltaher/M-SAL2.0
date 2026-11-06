@@ -20,6 +20,12 @@ const ICONS: Record<string, string[]> = {
   receipt: ['M6 3h12v18l-3-2-3 2-3-2-3 2z', 'M9 8h6', 'M9 12h6'],
   sliders: ['M4 7h9', 'M17 7h3', 'M4 17h3', 'M11 17h9', 'M15 4v6', 'M9 14v6'],
   share: ['M12 15V4', 'M8 8l4-4 4 4', 'M5 13v6h14v-6'],
+  // added with the new design (DESIGN.md)
+  chevD: ['M6 9l6 6 6-6'],
+  check: ['M5 12.5l4.5 4.5L19 7.5'],
+  cloudOk: ['M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.1 4.7 4.7 0 0 0 7 18.5z', 'M9.5 13.8l2 2 3.5-3.6'],
+  alert: ['M12 4l9 16H3z', 'M12 10v4', 'M12 17h.01'],
+  userPlus: ['M9.5 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z', 'M3 20a6.5 6.5 0 0 1 13 0', 'M19 8v6', 'M16 11h6'],
 };
 
 @Component({

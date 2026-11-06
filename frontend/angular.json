@@ -30,11 +30,10 @@
               }
             ],
             "styles": [
-              "src/styles/tokens-ledger.css",
-              "src/styles/tokens-expenses.css",
+              "src/styles/tokens.scss",
               "src/styles/base.css",
               "src/styles/ledger.css",
-              "src/styles/expenses.css",
+              "src/styles/glass.css",
               "src/styles.scss"
             ]
           },

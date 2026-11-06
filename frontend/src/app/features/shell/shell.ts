@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, effect, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 
@@ -9,6 +9,8 @@ import { BudgetsStore } from '../../core/data/budgets-store';
 import { AppLock } from '../../core/pwa/app-lock';
 import { AppStatus } from '../../core/pwa/app-status';
 import { SessionStore } from '../../core/session/session-store';
+import { FloatingWallet } from '../../shared/components/floating-wallet';
+import { Icon } from '../../shared/components/icon';
 import { Dialogs } from '../../shared/sheet/dialogs';
 import { SheetHost } from '../../shared/sheet/sheet-host';
 import { ToastHost, Toasts } from '../../shared/toast/toast';
@@ -17,19 +19,20 @@ import { LockScreen } from '../lock/lock-screen';
 import { ImportExport } from '../settings/import-export';
 import { LastTab } from './last-tab';
 
-const ADD_VALUE = '__add__';
 const NF = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 
 /**
- * The signed-in frame, with M-SAL's markup (index.html lines 715-790): the glass background,
- * the shared header (people menu, saved mark, month, remaining, tabs), the sheet host, the
- * toast host and the keyboard proxy. The Expenses section adds body.x-on, as in M-SAL.
+ * The signed-in frame: the glass background, the shared header, the sheet host, the toast host
+ * and the keyboard proxy. The header (DESIGN.md D-08, D-14) shows only the person's name, which
+ * opens the people menu, the saved mark in the budget, and the section switch (D-03), whose pill
+ * slides while the page slides with it (D-32, app.config.ts).
  */
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, SheetHost, ToastHost, LockScreen],
+  imports: [RouterOutlet, SheetHost, ToastHost, LockScreen, Icon, FloatingWallet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shell.html',
+  host: { '(document:pointerdown)': 'outside($event)' },
 })
 export class Shell {
   protected readonly budgets = inject(BudgetsStore);
@@ -42,11 +45,14 @@ export class Shell {
   private readonly toasts = inject(Toasts);
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  protected readonly addValue = ADD_VALUE;
   protected readonly expenses = signal(false);
   /** The admin screen belongs to neither tab, and hides the budget-only header parts */
   protected readonly admin = signal(false);
+  /** The Expenses home screen, the only one with the floating wallet (D-09) */
+  protected readonly home = signal(false);
+  protected readonly menuOpen = signal(false);
   protected readonly shrunk = signal(false);
   protected readonly savedOn = signal(false);
   protected readonly final = computed(() => this.ledger.totals());
@@ -58,9 +64,6 @@ export class Shell {
     return r?.due && !this.reminderClosed() ? r : null;
   });
 
-  private readonly themeMeta = [...this.document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')];
-  private readonly themeOriginal = this.themeMeta.map((m) => m.content);
-
   constructor() {
     void this.budgets.load().catch((e: ApiError) => this.toasts.show(e.message));
     this.applySection(this.router.url);
@@ -71,7 +74,11 @@ export class Shell {
     const onScroll = () => this.shrunk.set(window.scrollY > 12);
     window.addEventListener('scroll', onScroll, { passive: true });
 
-    // "محفوظ ✓" lights up briefly after each save
+    // Nothing in the background moves while the app is not on screen
+    const onVisibility = () => this.document.documentElement.classList.toggle('x-paused', this.document.hidden);
+    this.document.addEventListener('visibilitychange', onVisibility);
+
+    // "محفوظ" lights up briefly after each save
     let timer: ReturnType<typeof setTimeout> | null = null;
     effect(() => {
       if (!this.budgets.savedAt()) return;
@@ -83,8 +90,8 @@ export class Shell {
     inject(DestroyRef).onDestroy(() => {
       sub.unsubscribe();
       window.removeEventListener('scroll', onScroll);
-      this.document.body.classList.remove('x-on');
-      this.syncThemeColor(false);
+      this.document.removeEventListener('visibilitychange', onVisibility);
+      this.document.documentElement.classList.remove('x-paused');
     });
   }
 
@@ -104,18 +111,36 @@ export class Shell {
     void this.router.navigateByUrl(tab === 'budget' ? '/budget' : '/expenses/home');
   }
 
-  protected async onSelect(select: HTMLSelectElement): Promise<void> {
-    if (select.value === ADD_VALUE) {
-      select.value = this.budgets.currentId() ?? '';
-      const name = await this.dialogs.prompt('اسم الشخص الجديد:', '', 'شخص جديد');
-      if (name) await this.run(() => this.ledger.flushAll().then(() => this.budgets.create(name)));
-      return;
-    }
+  protected toggleMenu(): void {
+    this.menuOpen.update((open) => !open);
+  }
+
+  protected closeMenu(): void {
+    this.menuOpen.set(false);
+  }
+
+  /** A tap anywhere outside the name and its menu closes the menu. */
+  protected outside(event: Event): void {
+    if (!this.menuOpen()) return;
+    const row = this.host.nativeElement.querySelector('.top-row');
+    if (!row?.contains(event.target as Node)) this.closeMenu();
+  }
+
+  protected async pick(id: string): Promise<void> {
+    this.closeMenu();
+    if (id === this.budgets.currentId()) return;
     await this.ledger.flushAll();
-    await this.run(() => this.budgets.select(select.value));
+    await this.run(() => this.budgets.select(id));
+  }
+
+  protected async add(): Promise<void> {
+    this.closeMenu();
+    const name = await this.dialogs.prompt('اسم الشخص الجديد:', '', 'شخص جديد');
+    if (name) await this.run(() => this.ledger.flushAll().then(() => this.budgets.create(name)));
   }
 
   protected async rename(): Promise<void> {
+    this.closeMenu();
     const current = this.budgets.current();
     if (!current) return;
     const name = await this.dialogs.prompt('الاسم الجديد:', current.name, 'إعادة تسمية');
@@ -128,6 +153,7 @@ export class Shell {
 
   /** The last budget cannot be deleted (R-BUD-06). */
   protected async remove(): Promise<void> {
+    this.closeMenu();
     const current = this.budgets.current();
     if (!current) return;
     if (this.budgets.list().length <= 1) {
@@ -150,14 +176,8 @@ export class Shell {
     const expenses = url.startsWith('/expenses');
     this.expenses.set(expenses);
     this.admin.set(url.startsWith('/admin'));
-    this.document.body.classList.toggle('x-on', expenses);
-    this.syncThemeColor(expenses);
+    this.home.set(url.startsWith('/expenses/home'));
+    this.menuOpen.set(false);
     if (url.startsWith('/budget') || expenses) LastTab.remember(expenses ? 'expenses' : 'budget');
-  }
-
-  /** The status bar follows the Expenses background (M-SAL's syncThemeColor). */
-  private syncThemeColor(on: boolean): void {
-    const light = matchMedia?.('(prefers-color-scheme: light)').matches;
-    this.themeMeta.forEach((m, i) => (m.content = on ? (light ? '#E3EBF8' : '#0B1426') : this.themeOriginal[i]));
   }
 }

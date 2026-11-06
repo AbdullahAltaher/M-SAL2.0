@@ -10,13 +10,14 @@ import { AppLock } from '../../core/pwa/app-lock';
 import { DailyReminder } from '../../core/pwa/daily-reminder';
 import { canLock } from '../../core/pwa/device';
 import { SessionStore } from '../../core/session/session-store';
+import { Theme, ThemeMode } from '../../core/theme/theme';
 import { Dialogs } from '../../shared/sheet/dialogs';
 import { Sheets } from '../../shared/sheet/sheets';
 import { Toasts } from '../../shared/toast/toast';
 import { ImportExport } from './import-export';
 
 /**
- * SH-08: data and settings (SCREENS.md 4.2): the account, the data (export, import and its
+ * SH-08: data and settings (SCREENS.md 4.2): light or dark (DESIGN.md D-07), the account, the data (export, import and its
  * history, in place of M-SAL's storage status and snapshots), the Face ID lock, the daily
  * reminder, and the app (version, install steps, sign-out).
  */
@@ -25,6 +26,13 @@ import { ImportExport } from './import-export';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (me(); as m) {
+      <h3 class="sub-h" dir="rtl">المظهر</h3>
+      <div class="seg" role="group" aria-label="الألوان">
+        @for (o of themes; track o.mode) {
+          <button class="seg-b" type="button" [attr.aria-pressed]="theme.mode() === o.mode" (click)="theme.set(o.mode)">{{ o.label }}</button>
+        }
+      </div>
+      <p class="hint" dir="rtl">«تلقائي» يتبع إعداد الجهاز (فاتح أو داكن).</p>
       <h3 class="sub-h" dir="rtl">الحساب</h3>
       <ul class="m-list">
         <li class="m-row"><span class="m-name" dir="rtl">البريد</span><bdi class="m-sub" dir="ltr">{{ m.email }}</bdi></li>
@@ -117,6 +125,10 @@ export class SettingsSheet {
   protected readonly io = inject(ImportExport);
   protected readonly lock = inject(AppLock);
   protected readonly reminder = inject(DailyReminder);
+  protected readonly theme = inject(Theme);
+  protected readonly themes: { mode: ThemeMode; label: string }[] = [
+    { mode: 'auto', label: 'تلقائي' }, { mode: 'light', label: 'فاتح' }, { mode: 'dark', label: 'داكن' },
+  ];
   protected readonly version = environment.version;
   protected readonly lockAvailable = signal(false);
 
