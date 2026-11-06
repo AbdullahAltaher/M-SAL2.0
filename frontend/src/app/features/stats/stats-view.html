@@ -18,7 +18,7 @@
         <svg viewBox="0 0 120 120" class="g-donut-svg" role="img" aria-label="توزيع المصروف حسب الفئة">
           <circle cx="60" cy="60" r="42" fill="none" class="g-donut-track" stroke-width="14" />
           @for (sl of slices(); track $index) {
-            <circle cx="60" cy="60" r="42" fill="none" stroke-width="14" [style.stroke]="sl.color"
+            <circle cx="60" cy="60" r="42" fill="none" stroke-width="14" class="g-slice" [style.stroke]="sl.color"
                     [attr.stroke-dasharray]="sl.dash" [attr.stroke-dashoffset]="sl.offset" transform="rotate(-90 60 60)" />
           }
         </svg>
@@ -68,8 +68,8 @@
             </defs>
             <line x1="12" [attr.y1]="trend().base" x2="288" [attr.y2]="trend().base" class="g-axis" />
             @if (trend().line) {
-              <path [attr.d]="trend().area" fill="url(#gGradArea)" />
-              <path [attr.d]="trend().line" fill="none" class="g-curve" />
+              <path [attr.d]="trend().area" fill="url(#gGradArea)" class="g-area" />
+              <path [attr.d]="trend().line" fill="none" class="g-curve" pathLength="1" />
             }
             @for (p of trend().points; track $index) {
               @if (p.last) {

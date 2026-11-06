@@ -1,83 +1,123 @@
+// S-01 in the glass identity (DESIGN.md D-28, D-29)
 .login {
   min-height: 100dvh;
   justify-content: center;
+  gap: 20px;
   padding-top: calc(24px + env(safe-area-inset-top));
+  max-width: 420px;
 }
 .brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  margin-bottom: 4px;
-  .eyebrow {
-    text-align: center;
-    font: 500 11px var(--lat);
-    letter-spacing: 0.3em;
-    color: var(--brass);
-  }
+  gap: 6px;
   h1 {
     font: 700 26px var(--ar);
-    color: var(--ink);
+    color: var(--x-text);
   }
+}
+.login-wallet {
+  --w-opacity: 1;
+  width: 150px;
+  margin-bottom: 4px;
+  transition: width 0.35s var(--ease-out);
+  &.small {
+    width: 92px;
+  }
+}
+.hint {
+  color: var(--x-muted);
+  font: 500 14px var(--ar);
 }
 form {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-label {
-  font: 500 14px var(--ar);
-  color: var(--sec);
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
 }
-input {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 14px;
-  font-size: 17px;
-  min-height: 44px;
-  &:focus {
-    border-color: var(--green);
-    outline: none;
-  }
-}
-.code {
+.field {
+  min-height: 54px;
+  border-radius: 18px;
   text-align: center;
-  font-size: 28px;
-  letter-spacing: 0.4em;
+  font-size: 17px;
 }
-.primary {
-  min-height: 44px;
-  border: none;
-  border-radius: 10px;
-  background: var(--green);
-  color: var(--on-green);
-  font: 600 17px var(--ar);
-  cursor: pointer;
+.g-btn {
+  width: 100%;
+  min-height: 54px;
+  font-size: 17px;
   &:disabled {
     opacity: 0.5;
+    box-shadow: none;
+    cursor: default;
+  }
+}
+.link {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 6px;
+  background: none;
+  border: none;
+  color: var(--x-accent-ink);
+  font: 500 15px var(--ar);
+  cursor: pointer;
+  &:disabled {
+    color: var(--x-muted);
     cursor: default;
   }
 }
 .row {
   display: flex;
-  justify-content: space-between;
-}
-.link {
-  min-height: 44px;
-  background: none;
-  border: none;
-  color: var(--green);
-  font: 500 15px var(--ar);
-  cursor: pointer;
-  &:disabled {
-    color: var(--sec);
-    cursor: default;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  .dot {
+    color: var(--x-muted);
   }
 }
-.hint {
-  color: var(--sec);
-  font-size: 15px;
+// the code: one real field, invisible, over six boxes
+.otp {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin: 4px 0 6px;
+}
+.otp-in {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  opacity: 0;
+  font-size: 17px;
+  caret-color: transparent;
+}
+.otp-box {
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--x-field);
+  border: 1px solid var(--x-line);
+  color: var(--x-text);
+  font: 600 26px var(--num);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  &.full {
+    border-color: color-mix(in srgb, var(--x-accent) 55%, var(--x-line));
+  }
+  &.on {
+    border-color: var(--x-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--x-accent) 30%, transparent);
+  }
 }
 .error {
-  margin-top: 12px;
-  color: var(--neg);
-  font-size: 15px;
+  text-align: center;
+  color: var(--x-exp);
+  font: 500 15px var(--ar);
 }

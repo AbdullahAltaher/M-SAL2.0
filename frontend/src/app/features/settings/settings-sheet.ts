@@ -10,106 +10,141 @@ import { AppLock } from '../../core/pwa/app-lock';
 import { DailyReminder } from '../../core/pwa/daily-reminder';
 import { canLock } from '../../core/pwa/device';
 import { SessionStore } from '../../core/session/session-store';
+import { BudgetsStore } from '../../core/data/budgets-store';
+import { accountPhotoKey, budgetPhotoKey } from '../../core/photos/card-photos';
 import { Theme, ThemeMode } from '../../core/theme/theme';
 import { Dialogs } from '../../shared/sheet/dialogs';
 import { Sheets } from '../../shared/sheet/sheets';
 import { Toasts } from '../../shared/toast/toast';
+import { CardPhotoSheet } from '../../shared/components/card-photo-sheet';
+import { Icon } from '../../shared/components/icon';
+import { ExpensesStore } from '../expenses/expenses-store';
 import { ImportExport } from './import-export';
 
 /**
- * SH-08: data and settings (SCREENS.md 4.2): light or dark (DESIGN.md D-07), the account, the data (export, import and its
- * history, in place of M-SAL's storage status and snapshots), the Face ID lock, the daily
- * reminder, and the app (version, install steps, sign-out).
+ * SH-08: data and settings (SCREENS.md 4.2), as iPhone-style groups with a coloured icon per row
+ * (DESIGN.md D-34): appearance (light or dark, D-07, and the cards' photos, D-15), security and
+ * the daily reminder, the data (export, import and its history, in place of M-SAL's storage
+ * status and snapshots), and the account (email, name, time zone, version, install steps,
+ * sign-out).
  */
 @Component({
   selector: 'app-settings-sheet',
+  imports: [Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (me(); as m) {
-      <h3 class="sub-h" dir="rtl">المظهر</h3>
-      <div class="seg" role="group" aria-label="الألوان">
-        @for (o of themes; track o.mode) {
-          <button class="seg-b" type="button" [attr.aria-pressed]="theme.mode() === o.mode" (click)="theme.set(o.mode)">{{ o.label }}</button>
+      <h3 class="st-sec" dir="rtl">المظهر</h3>
+      <div class="st-grp">
+        <div class="st-row">
+          <span class="st-ic" style="--c:#6B4FD8"><app-icon name="moon" [size]="16" /></span>
+          <span class="st-l">الألوان</span>
+          <div class="st-seg" role="group" aria-label="الألوان">
+            @for (o of themes; track o.mode) {
+              <button type="button" [attr.aria-pressed]="theme.mode() === o.mode" (click)="theme.set(o.mode)">{{ o.label }}</button>
+            }
+          </div>
+        </div>
+        @if (budgetName(); as name) {
+          <button class="st-row" type="button" (click)="photo('budget')">
+            <span class="st-ic" style="--c:#E07A4F"><app-icon name="photo" [size]="16" /></span>
+            <span class="st-l">صورة بطاقة الميزانية</span><span class="st-v" dir="auto">{{ name }}</span><app-icon name="chevL" [size]="16" />
+          </button>
+        }
+        @if (accountName(); as name) {
+          <button class="st-row" type="button" (click)="photo('account')">
+            <span class="st-ic" style="--c:#E07A4F"><app-icon name="photo" [size]="16" /></span>
+            <span class="st-l">صورة بطاقة المصاريف</span><span class="st-v" dir="auto">{{ name }}</span><app-icon name="chevL" [size]="16" />
+          </button>
         }
       </div>
-      <p class="hint" dir="rtl">«تلقائي» يتبع إعداد الجهاز (فاتح أو داكن).</p>
-      <h3 class="sub-h" dir="rtl">الحساب</h3>
-      <ul class="m-list">
-        <li class="m-row"><span class="m-name" dir="rtl">البريد</span><bdi class="m-sub" dir="ltr">{{ m.email }}</bdi></li>
-        <li class="m-row">
-          <span class="m-name" dir="rtl">الاسم الظاهر</span>
-          <span class="m-sub" dir="auto">{{ m.displayName || '—' }}</span>
-          <button class="ab" type="button" aria-label="تعديل الاسم الظاهر" (click)="rename()">✎</button>
-        </li>
-        <li class="m-row">
-          <span class="m-name" dir="rtl">المنطقة الزمنية</span>
-          <select #tz class="field" dir="ltr" aria-label="المنطقة الزمنية" (change)="setZone(tz.value)">
+      <p class="st-note" dir="rtl">«تلقائي» يتبع إعداد الجهاز (فاتح أو داكن).</p>
+
+      <h3 class="st-sec" dir="rtl">الأمان والتذكير</h3>
+      <div class="st-grp">
+        @if (lockAvailable()) {
+          <div class="st-row">
+            <span class="st-ic" style="--c:#17A673"><app-icon name="faceId" [size]="16" /></span>
+            <span class="st-l">قفل Face ID</span>
+            <button class="st-switch" type="button" role="switch" [attr.aria-checked]="lock.enabled()" aria-label="قفل Face ID" (click)="toggleLock()"></button>
+          </div>
+        }
+        <div class="st-row">
+          <span class="st-ic" style="--c:#D85A30"><app-icon name="bell" [size]="16" /></span>
+          <span class="st-l">التذكير اليومي</span>
+          @if (reminder.time(); as t) {
+            <input #rt class="st-time" type="time" dir="ltr" aria-label="وقت التذكير" [value]="t" (change)="setReminderTime(rt.value)">
+          }
+          <button class="st-switch" type="button" role="switch" [attr.aria-checked]="!!reminder.time()" aria-label="التذكير اليومي"
+                  (click)="reminder.time() ? reminderOff() : reminderOn()"></button>
+        </div>
+      </div>
+      <p class="st-note" dir="rtl">
+        @if (lockAvailable()) {القفل يُطلب عند فتح التطبيق وبعد 5 دقائق في الخلفية، ولا يغني عن تسجيل الدخول. }
+        والتذكير «سجّلت مصاريف اليوم؟» يصل فقط إذا لم تسجّل أي مصروف ذلك اليوم.
+      </p>
+
+      <h3 class="st-sec" dir="rtl">البيانات</h3>
+      <div class="st-grp">
+        <button class="st-row" type="button" (click)="exportAll()">
+          <span class="st-ic" style="--c:#2F6BE0"><app-icon name="share" [size]="16" /></span>
+          <span class="st-l">تصدير كل البيانات</span><span class="st-v">آخر مرة: {{ lastExport() }}</span>
+        </button>
+        <button class="st-row" type="button" (click)="importFile()">
+          <span class="st-ic" style="--c:#2F6BE0"><app-icon name="download" [size]="16" /></span>
+          <span class="st-l">استيراد</span><app-icon name="chevL" [size]="16" />
+        </button>
+        @if (io.canShare()) {
+          <button class="st-row" type="button" (click)="io.share()">
+            <span class="st-ic" style="--c:#2F6BE0"><app-icon name="share" [size]="16" /></span>
+            <span class="st-l">مشاركة الملف</span><app-icon name="chevL" [size]="16" />
+          </button>
+        }
+      </div>
+      <p class="st-note" dir="rtl">التصدير يشمل كل الأشخاص (الميزانية والمصاريف) في ملف واحد باسم التاريخ.</p>
+      @if (imports().length) {
+        <h3 class="st-sec" dir="rtl">سجل الاستيراد</h3>
+        <div class="st-grp">
+          @for (i of imports(); track i.id) {
+            <div class="st-row">
+              <span class="st-l" dir="auto">{{ i.fileName || 'ملف' }}</span>
+              <span class="st-v" dir="rtl">{{ i.mode === 'MERGE' ? 'دمج' : 'استبدال' }} · <bdi dir="ltr">{{ when(i.createdAt) }}</bdi></span>
+            </div>
+          }
+        </div>
+      }
+
+      <h3 class="st-sec" dir="rtl">الحساب</h3>
+      <div class="st-grp">
+        <div class="st-row">
+          <span class="st-ic" style="--c:#566A8E"><app-icon name="mail" [size]="16" /></span>
+          <span class="st-l" dir="rtl">البريد</span><bdi class="st-v" dir="ltr">{{ m.email }}</bdi>
+        </div>
+        <button class="st-row" type="button" (click)="rename()">
+          <span class="st-ic" style="--c:#566A8E"><app-icon name="edit" [size]="16" /></span>
+          <span class="st-l">الاسم الظاهر</span><span class="st-v" dir="auto">{{ m.displayName || '—' }}</span><app-icon name="chevL" [size]="16" />
+        </button>
+        <div class="st-row">
+          <span class="st-ic" style="--c:#566A8E"><app-icon name="clock" [size]="16" /></span>
+          <span class="st-l">المنطقة الزمنية</span>
+          <select #tz class="st-select" dir="ltr" aria-label="المنطقة الزمنية" (change)="setZone(tz.value)">
             @for (z of zones(); track z) {
               <option [value]="z" [selected]="z === m.timeZone">{{ z }}</option>
             }
           </select>
-        </li>
-      </ul>
-      <h3 class="sub-h" dir="rtl">البيانات</h3>
-      <div class="totals">
-        <div class="tline"><span class="lbl" dir="rtl">آخر تصدير</span><span class="val" dir="auto">{{ lastExport() }}</span></div>
-      </div>
-      <div class="toolbar">
-        <button class="pill primary" type="button" (click)="exportAll()">تصدير كل البيانات</button>
-        <button class="pill" type="button" (click)="importFile()">استيراد</button>
-        @if (io.canShare()) {
-          <button class="pill" type="button" (click)="io.share()">مشاركة الملف</button>
-        }
-      </div>
-      <p class="hint" dir="rtl">التصدير يشمل كل الأشخاص (الميزانية والمصاريف) في ملف واحد باسم التاريخ.</p>
-      <h3 class="sub-h" dir="rtl">سجل الاستيراد</h3>
-      @if (imports().length) {
-        <ul class="m-list">
-          @for (i of imports(); track i.id) {
-            <li class="m-row">
-              <div class="m-main">
-                <div class="m-name" dir="auto">{{ i.fileName || 'ملف' }}</div>
-                <div class="m-sub" dir="rtl">{{ i.mode === 'MERGE' ? 'دمج' : 'استبدال' }} · <bdi dir="ltr">{{ when(i.createdAt) }}</bdi></div>
-              </div>
-            </li>
-          }
-        </ul>
-      } @else {
-        <p class="x-none" dir="rtl">لا يوجد استيراد بعد.</p>
-      }
-      <h3 class="sub-h" dir="rtl">الأمان</h3>
-      @if (lockAvailable()) {
-        <ul class="m-list">
-          <li class="m-row">
-            <span class="m-name" dir="rtl">قفل Face ID</span>
-            <span class="m-sub" dir="rtl">{{ lock.enabled() ? 'مفعّل' : 'متوقف' }}</span>
-            <button class="pill sm" type="button" (click)="toggleLock()">{{ lock.enabled() ? 'إيقاف' : 'تفعيل' }}</button>
-          </li>
-        </ul>
-        <p class="hint" dir="rtl">قفل خصوصية على هذا الجهاز: يُطلب عند فتح التطبيق وبعد 5 دقائق في الخلفية. لا يغني عن تسجيل الدخول.</p>
-      } @else {
-        <p class="x-none" dir="rtl">قفل Face ID غير متاح على هذا الجهاز.</p>
-      }
-      <h3 class="sub-h" dir="rtl">التذكير</h3>
-      <ul class="m-list">
-        <li class="m-row">
-          <span class="m-name" dir="rtl">تذكير يومي بتسجيل المصاريف</span>
-          @if (reminder.time(); as t) {
-            <input #rt class="field" type="time" dir="ltr" aria-label="وقت التذكير" [value]="t" (change)="setReminderTime(rt.value)">
-            <button class="pill sm" type="button" (click)="reminderOff()">إيقاف</button>
-          } @else {
-            <button class="pill sm" type="button" (click)="reminderOn()">تفعيل</button>
-          }
-        </li>
-      </ul>
-      <p class="hint" dir="rtl">إشعار «سجّلت مصاريف اليوم؟» في الوقت الذي تختاره، فقط إذا لم تسجّل أي مصروف ذلك اليوم.</p>
-      <h3 class="sub-h" dir="rtl">التطبيق</h3>
-      <div class="totals">
-        <div class="tline"><span class="lbl" dir="rtl">الإصدار</span><span class="val" dir="ltr">{{ version }}</span></div>
-      </div>
-      <div class="toolbar">
-        <button class="pill" type="button" (click)="installHelp()">تعليمات التثبيت</button>
-        <button class="pill" type="button" (click)="signOut()">تسجيل الخروج</button>
+        </div>
+        <div class="st-row">
+          <span class="st-ic" style="--c:#566A8E"><app-icon name="info" [size]="16" /></span>
+          <span class="st-l">الإصدار</span><span class="st-v" dir="ltr">{{ version }}</span>
+        </div>
+        <button class="st-row" type="button" (click)="installHelp()">
+          <span class="st-ic" style="--c:#566A8E"><app-icon name="phone" [size]="16" /></span>
+          <span class="st-l">تعليمات التثبيت</span><app-icon name="chevL" [size]="16" />
+        </button>
+        <button class="st-row danger" type="button" (click)="signOut()">
+          <span class="st-ic" style="--c:#C73A2E"><app-icon name="logout" [size]="16" /></span>
+          <span class="st-l">تسجيل الخروج</span>
+        </button>
       </div>
     }
   `,
@@ -131,6 +166,11 @@ export class SettingsSheet {
   ];
   protected readonly version = environment.version;
   protected readonly lockAvailable = signal(false);
+  private readonly budgets = inject(BudgetsStore);
+  private readonly expenses = inject(ExpensesStore);
+  /** The open person and account, whose cards' photos these rows change */
+  protected readonly budgetName = computed(() => this.budgets.current()?.name ?? '');
+  protected readonly accountName = computed(() => this.expenses.account()?.name ?? '');
 
   protected readonly me = this.session.user;
   protected readonly imports = signal<ImportRecord[]>([]);
@@ -198,6 +238,13 @@ export class SettingsSheet {
     } catch (e) {
       this.toasts.show((e as ApiError).message);
     }
+  }
+
+  protected photo(card: 'budget' | 'account'): void {
+    const id = card === 'budget' ? this.budgets.currentId() : this.expenses.accountId();
+    if (!id) return;
+    const photoKey = card === 'budget' ? budgetPhotoKey(id) : accountPhotoKey(id);
+    void this.sheets.open(CardPhotoSheet, 'صورة البطاقة', { photoKey });
   }
 
   protected installHelp(): void {

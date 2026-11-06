@@ -5,14 +5,16 @@ import { Router } from '@angular/router';
 import { SupabaseAuth } from '../../core/auth/supabase-auth';
 import { SessionStore } from '../../core/session/session-store';
 import { toLatinDigits } from '../../core/util/amounts';
+import { FloatingWallet } from '../../shared/components/floating-wallet';
 
 /**
- * S-01: sign-in with a 6-digit code by email (SCREENS.md section 3, API.md 2.1).
- * Step 1 asks for the email, step 2 for the code, which iOS can fill from the email.
+ * S-01: sign-in with a 6-digit code by email (SCREENS.md section 3, API.md 2.1), in the glass
+ * identity with the floating wallet as the logo (DESIGN.md D-28). Step 1 asks for the email,
+ * step 2 for the code in six boxes, which iOS can still fill from the email (D-29).
  */
 @Component({
   selector: 'app-login-page',
-  imports: [FormsModule],
+  imports: [FormsModule, FloatingWallet],
   templateUrl: './login-page.html',
   styleUrl: './login-page.scss',
 })
@@ -32,6 +34,13 @@ export class LoginPage implements OnDestroy {
   protected readonly error = signal<string | null>(this.session.lastFailure());
   protected readonly waitSeconds = signal(0);
   protected readonly canResend = computed(() => this.waitSeconds() === 0 && !this.busy());
+  protected readonly boxes = [0, 1, 2, 3, 4, 5];
+  protected readonly codeFocus = signal(false);
+  /** "a***@gmail.com": enough to recognise it on a shared screen */
+  protected readonly masked = computed(() => {
+    const [name, domain] = this.email().trim().split('@');
+    return domain ? name.slice(0, 1) + '***@' + domain : this.email().trim();
+  });
 
   private timer: ReturnType<typeof setInterval> | null = null;
 
