@@ -8,7 +8,7 @@
 </div>
 
 <div class="wrap">
-  <header class="top" id="topHeader" [class.on-exp]="expenses() || admin()" [class.shrunk]="shrunk()">
+  <header class="top" id="topHeader" [class.shrunk]="shrunk()">
     <div class="top-row">
       <button class="who" type="button" aria-haspopup="menu" [attr.aria-expanded]="menuOpen()"
               aria-label="الشخص، وإضافة أو تعديل الأشخاص" (click)="toggleMenu()">
@@ -41,16 +41,6 @@
           </button>
         </div>
       }
-    </div>
-    @if (ledger.state(); as s) {
-      <div class="top-row ledger-only">
-        <input id="monthLabel" dir="rtl" aria-label="اسم الشهر" placeholder="اسم الشهر" [value]="s.monthLabel" #ml
-               (input)="ledger.editBudget('monthLabel', ml.value)" (blur)="ledger.editBudget('monthLabel', ml.value, true)">
-      </div>
-    }
-    <div class="balance-line ledger-only">
-      <span class="balance-caption" dir="rtl">المتبقي</span>
-      <span id="finalBalance" dir="ltr" [class.neg]="(final()?.final ?? 0) < 0">@if (final()?.finalApprox) {<span class="approx">~</span>}{{ format(final()?.final ?? 0) }}</span>
     </div>
     <div class="tabs" role="tablist" dir="rtl" aria-label="الأقسام" [attr.data-at]="admin() ? 'none' : expenses() ? 'expenses' : 'budget'">
       <span class="tab-pill" aria-hidden="true"></span>

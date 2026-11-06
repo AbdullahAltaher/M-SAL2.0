@@ -1,61 +1,112 @@
 @if (ledger.state(); as s) {
-  <section class="panel" id="salaryPanel">
-    <span class="plate-num">00</span>
-    <div class="block-head">
-      <input class="title-input" id="salaryLabel" dir="rtl" aria-label="مسمى الراتب" placeholder="الراتب"
-             [value]="s.salaryLabel" #sl (input)="ledger.editBudget('salaryLabel', sl.value)" (blur)="ledger.editBudget('salaryLabel', sl.value, true)">
-      <input class="amount-input" id="salaryAmount" dir="ltr" inputmode="decimal" aria-label="مبلغ الراتب" placeholder="0"
-             [value]="shown('salary', s.salaryRaw)" #sa
-             (focus)="focusAmount('salary', s.salaryRaw, sa)" (input)="ledger.editSalary(typed(sa))" (blur)="blurAmount('salary', sa)">
-    </div>
-  </section>
+  <!-- The remaining card (DESIGN.md D-05, D-14): the month, the tools, the remaining, the salary -->
+  <div class="b-top">
+    <section class="g-hero b-hero" id="salaryPanel">
+      <div class="g-hero-top">
+        <label class="b-month">
+          <input id="monthLabel" dir="rtl" aria-label="اسم الشهر" placeholder="اسم الشهر" [value]="s.monthLabel" #ml
+                 [style.width.ch]="fieldWidth(s.monthLabel, 8)"
+                 (input)="ledger.editBudget('monthLabel', ml.value)" (blur)="ledger.editBudget('monthLabel', ml.value, true)">
+          <app-icon name="edit" [size]="15" />
+        </label>
+        <button class="g-circ on-hero b-tools" type="button" aria-label="أدوات الميزانية" aria-haspopup="menu"
+                [attr.aria-expanded]="toolsOpen()" (click)="toolsOpen.set(!toolsOpen())">
+          <app-icon name="more" [size]="22" [sw]="3" />
+        </button>
+      </div>
 
-  <div style="display:flex;flex-direction:column;gap:14px">
-    @for (g of s.groups; track g.id; let gi = $index) {
-      <section class="panel" [attr.data-block]="g.id">
-        <span class="plate-num">{{ plate(gi) }}</span>
-        <div class="block-head">
-          <input class="title-input" dir="rtl" placeholder="اسم المجموعة" aria-label="اسم المجموعة"
-                 [value]="g.title" #ti (input)="ledger.editTitle(g.id, ti.value)" (blur)="ledger.editTitle(g.id, ti.value, true)">
-          <button class="icon-btn" type="button" aria-label="حذف المجموعة" (click)="deleteGroup(g)">×</button>
+      <div class="g-hero-label" dir="rtl">المتبقي</div>
+      @if (ledger.totals(); as t) {
+        <div class="g-hero-big" id="finalBalance" [class.over]="t.final < 0">
+          <span>@if (t.finalApprox) {<span class="approx">~</span>}{{ value(t.final) }}</span>
         </div>
-        <ul class="rows">
-          @for (r of g.items; track r.id) {
-            <li class="row" [class.done]="r.isDone" [attr.data-row]="r.id">
-              <button class="toggle" type="button" [class.done]="r.isDone" aria-label="تم الصرف" [attr.aria-pressed]="r.isDone"
-                      (click)="ledger.toggleDone(r.id)"></button>
-              <input class="name-input" dir="rtl" placeholder="البند" aria-label="اسم البند"
-                     [value]="r.name" #ni (input)="ledger.editName(r.id, ni.value)" (blur)="ledger.editName(r.id, ni.value, true)">
-              <input class="amount-input" dir="ltr" inputmode="decimal" placeholder="0" aria-label="المبلغ"
-                     [value]="shown(r.id, r.raw)" #ai
-                     (focus)="focusAmount(r.id, r.raw, ai)" (input)="ledger.editAmount(r.id, typed(ai))" (blur)="blurAmount(r.id, ai)">
-              <button class="icon-btn" type="button" aria-label="حذف البند" (click)="ledger.deleteItem(r.id)">×</button>
-            </li>
-          }
-        </ul>
-        <button class="add-row-btn" type="button" (click)="addItem(g.id)">+ بند</button>
-        @if (ledger.totals()?.groups?.[gi]; as t) {
-          <div class="totals">
-            <div class="tline">
-              <span class="lbl" dir="rtl">المجموع</span>
-              <span class="val sub-val" dir="ltr" [class.neg]="t.subtotal < 0">@if (t.subtotalApprox) {<span class="approx">~</span>}{{ value(t.subtotal) }}</span>
-            </div>
-            <div class="tline rest">
-              <span class="lbl" dir="rtl">المتبقي بعده</span>
-              <span class="val rest-val" dir="ltr" [class.neg]="t.balanceAfter < 0">@if (t.balanceApprox) {<span class="approx">~</span>}{{ value(t.balanceAfter) }}</span>
-            </div>
-          </div>
+      }
+
+      <div class="b-hero-row">
+        <label class="b-salary">
+          <input class="b-salary-label" id="salaryLabel" dir="rtl" aria-label="مسمى الراتب" placeholder="الراتب"
+                 [value]="s.salaryLabel" #sl [style.width.ch]="fieldWidth(s.salaryLabel, 4)"
+                 (input)="ledger.editBudget('salaryLabel', sl.value)" (blur)="ledger.editBudget('salaryLabel', sl.value, true)">
+          <input class="b-salary-amount" id="salaryAmount" dir="ltr" inputmode="decimal" aria-label="مبلغ الراتب" placeholder="0"
+                 [value]="shown('salary', s.salaryRaw)" #sa [style.width.ch]="fieldWidth(shown('salary', s.salaryRaw), 3)"
+                 (focus)="focusAmount('salary', s.salaryRaw, sa)" (input)="ledger.editSalary(typed(sa))" (blur)="blurAmount('salary', sa)">
+        </label>
+        @if (progress().total) {
+          <span class="b-done" dir="rtl">صُرف <bdi dir="ltr">{{ progress().done }}</bdi> من <bdi dir="ltr">{{ progress().total }}</bdi> بنود</span>
         }
-      </section>
+      </div>
+      <div class="g-bar" role="progressbar" aria-label="البنود المصروفة" aria-valuemin="0" [attr.aria-valuemax]="progress().total" [attr.aria-valuenow]="progress().done">
+        <i [style.width.%]="progress().total ? (progress().done / progress().total) * 100 : 0"></i>
+      </div>
+    </section>
+    <!-- outside the card, which clips its content -->
+    @if (toolsOpen()) {
+      <div class="who-menu b-tools-menu" role="menu" aria-label="أدوات الميزانية" dir="rtl" (keydown.escape)="toolsOpen.set(false)">
+        <button class="wm-item" type="button" role="menuitem" (click)="tool('newMonth')">
+          <span class="ck"><app-icon name="calendar" [size]="18" /></span><span class="nm">شهر جديد</span>
+        </button>
+        <button class="wm-item" type="button" role="menuitem" (click)="tool('receipt')">
+          <span class="ck"><app-icon name="receipt" [size]="18" /></span><span class="nm">إيصال</span>
+        </button>
+        <div class="wm-sep" role="separator"></div>
+        <button class="wm-item" type="button" role="menuitem" (click)="tool('export')">
+          <span class="ck"><app-icon name="share" [size]="18" /></span><span class="nm">تصدير</span>
+        </button>
+        <button class="wm-item" type="button" role="menuitem" (click)="tool('import')">
+          <span class="ck"><app-icon name="download" [size]="18" /></span><span class="nm">استيراد</span>
+        </button>
+      </div>
     }
   </div>
 
-  <nav class="toolbar" aria-label="أدوات">
-    <button class="pill" type="button" (click)="addBudget()">+ شخص</button>
-    <button class="pill primary" type="button" (click)="addGroup()">+ مجموعة</button>
-    <button class="pill" type="button" (click)="newMonth()">شهر جديد</button>
-    <button class="pill primary" type="button" (click)="receipt()">إيصال</button>
-    <button class="pill" type="button" (click)="io.export()">تصدير</button>
-    <button class="pill" type="button" (click)="io.pick()">استيراد</button>
-  </nav>
+  <!-- The groups (D-05): glass cards that fold, their subtotal in the head -->
+  <div class="b-groups">
+    @for (g of s.groups; track g.id; let gi = $index) {
+      @let t = ledger.totals()?.groups?.[gi];
+      <section class="g-card b-group" [class.open]="isOpen(g.id)" [attr.data-block]="g.id">
+        <div class="b-ghead">
+          <button class="b-chev" type="button" [attr.aria-expanded]="isOpen(g.id)"
+                  [attr.aria-label]="(isOpen(g.id) ? 'طي ' : 'فتح ') + (g.title || 'المجموعة')" (click)="toggle(g.id)">
+            <app-icon name="chevD" [size]="18" [sw]="2.2" />
+          </button>
+          <input class="title-input" dir="rtl" placeholder="اسم المجموعة" aria-label="اسم المجموعة"
+                 [value]="g.title" #ti (input)="ledger.editTitle(g.id, ti.value)" (blur)="ledger.editTitle(g.id, ti.value, true)">
+          @if (t) {
+            <button class="b-gsum" type="button" dir="ltr" tabindex="-1" aria-hidden="true" [class.neg]="t.subtotal < 0" (click)="toggle(g.id)">
+              @if (t.subtotalApprox) {<span class="approx">~</span>}{{ value(t.subtotal) }}
+            </button>
+          }
+        </div>
+        <div class="g-col" [appCollapse]="isOpen(g.id)">
+          <div class="b-gbody">
+            <ul class="rows">
+              @for (r of g.items; track r.id) {
+                <li class="row" [class.done]="r.isDone" [attr.data-row]="r.id">
+                  <button class="toggle" type="button" [class.done]="r.isDone" aria-label="تم الصرف" [attr.aria-pressed]="r.isDone"
+                          (click)="ledger.toggleDone(r.id)"></button>
+                  <input class="name-input" dir="rtl" placeholder="البند" aria-label="اسم البند"
+                         [value]="r.name" #ni (input)="ledger.editName(r.id, ni.value)" (blur)="ledger.editName(r.id, ni.value, true)">
+                  <input class="amount-input" dir="ltr" inputmode="decimal" placeholder="0" aria-label="المبلغ"
+                         [value]="shown(r.id, r.raw)" #ai
+                         (focus)="focusAmount(r.id, r.raw, ai)" (input)="ledger.editAmount(r.id, typed(ai))" (blur)="blurAmount(r.id, ai)">
+                  <button class="icon-btn" type="button" aria-label="حذف البند" (click)="ledger.deleteItem(r.id)">×</button>
+                </li>
+              }
+            </ul>
+            <div class="b-gfoot">
+              <button class="add-row-btn" type="button" (click)="addItem(g.id)">+ بند</button>
+              <button class="b-gdel" type="button" (click)="deleteGroup(g)">حذف المجموعة</button>
+            </div>
+            @if (t) {
+              <div class="tline rest">
+                <span class="lbl" dir="rtl">المتبقي بعده</span>
+                <span class="val rest-val" dir="ltr" [class.neg]="t.balanceAfter < 0">@if (t.balanceApprox) {<span class="approx">~</span>}{{ value(t.balanceAfter) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+    <button class="b-addgroup" type="button" (click)="addGroup()">+ مجموعة</button>
+  </div>
 }

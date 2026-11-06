@@ -19,7 +19,6 @@ import { LockScreen } from '../lock/lock-screen';
 import { ImportExport } from '../settings/import-export';
 import { LastTab } from './last-tab';
 
-const NF = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 
 /**
  * The signed-in frame: the glass background, the shared header, the sheet host, the toast host
@@ -55,7 +54,6 @@ export class Shell {
   protected readonly menuOpen = signal(false);
   protected readonly shrunk = signal(false);
   protected readonly savedOn = signal(false);
-  protected readonly final = computed(() => this.ledger.totals());
   protected readonly io = inject(ImportExport);
   /** M-SAL's export banner (R-IO-01): until an export, or closed for this visit */
   protected readonly reminderClosed = signal(false);
@@ -101,10 +99,6 @@ export class Shell {
     this.session.clear();
     await this.auth.signOut();
     await this.router.navigateByUrl('/login');
-  }
-
-  protected format(n: number): string {
-    return NF.format(n);
   }
 
   protected show(tab: 'budget' | 'expenses'): void {

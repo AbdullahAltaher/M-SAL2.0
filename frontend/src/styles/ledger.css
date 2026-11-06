@@ -9,11 +9,6 @@
   padding:18px 18px 16px;
   box-shadow:0 1px 2px rgba(36,35,31,.05);
 }
-.plate-num{
-  position:absolute;top:12px;left:16px;
-  direction:ltr;unicode-bidi:isolate;
-  font:500 11px var(--lat);letter-spacing:.22em;color:var(--brass);
-}
 .eyebrow{
   display:block;direction:ltr;unicode-bidi:isolate;text-align:right;
   font:500 10px var(--lat);letter-spacing:.3em;color:var(--brass);
@@ -25,7 +20,7 @@
   padding:12px 14px calc(48px + env(safe-area-inset-bottom));
   display:flex;flex-direction:column;gap:14px;
 }
-/* ================= sticky balance header ================= */
+/* ================= sticky header ================= */
 header.top{
   position:sticky;top:0;z-index:5;
   margin:0 -14px 2px;
@@ -37,32 +32,13 @@ header.top{
   transition:padding .28s cubic-bezier(.23,1,.32,1);
 }
 .top-row{display:flex;align-items:center;gap:6px}
-#monthLabel{
-  background:none;border:none;border-bottom:1px solid transparent;
-  color:var(--sec);
-  font:500 17px/1.3 var(--ar);
-  width:100%;padding:6px 0 2px;
-}
-.head-eyebrow{margin-top:6px}
-.balance-line{display:flex;align-items:baseline;gap:12px;margin-top:0}
-.balance-caption{color:var(--sec);font:500 15px var(--ar)}
-#finalBalance{
-  direction:ltr;unicode-bidi:isolate;
-  font-family:var(--num);
-  font-weight:600;font-size:46px;letter-spacing:-0.015em;
-  font-variant-numeric:tabular-nums;font-feature-settings:"tnum";
-  color:var(--green);
-  transition:font-size .28s cubic-bezier(.23,1,.32,1);
-}
-#finalBalance.neg{color:var(--neg)}
 .approx{color:var(--sec);font-weight:400}
 header.top.shrunk{padding-top:calc(7px + env(safe-area-inset-top));padding-bottom:9px}
-header.top.shrunk #finalBalance{font-size:28px}
 /* ================= inputs: quiet at rest, clear on focus ================= */
 .title-input,.name-input,.amount-input{
   background:none;border:none;border-bottom:1px solid transparent;border-radius:0;
 }
-.title-input:focus,.name-input:focus,.amount-input:focus,#monthLabel:focus{
+.title-input:focus,.name-input:focus,.amount-input:focus{
   border-bottom-color:var(--green);
 }
 /* ================= salary + groups ================= */
@@ -155,7 +131,6 @@ header.top.shrunk #finalBalance{font-size:28px}
 /* ================= section tabs ================= */
 .view{display:flex;flex-direction:column;gap:14px}
 .view[hidden]{display:none}
-header.top.on-exp .ledger-only{display:none}
 /* ================= expenses ================= */
 [hidden]{display:none !important}
 html.noscroll,html.noscroll body{overflow:hidden}

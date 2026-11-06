@@ -346,7 +346,6 @@ header.top .top-row{position:relative;min-height:44px}
 }
 /* ================= small screens ================= */
 @media (max-width:359px){
-  #finalBalance{font-size:38px}
   .amount-input{width:88px}
 }
 /* ================= the new design (DESIGN.md) ================= */
@@ -378,3 +377,37 @@ html[data-motion="fade"]::view-transition-new(page){animation:.3s var(--ease-out
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
   .g-card,.panel{-webkit-backdrop-filter:blur(20px) saturate(150%);backdrop-filter:blur(20px) saturate(150%)}
 }
+/* ---- the budget (D-05, D-06, D-14): the remaining card, then groups that fold ---- */
+.b-top{position:relative}
+.b-hero .g-hero-top{margin-bottom:8px}
+.g-hero .approx{color:var(--x-on-hero-muted)}
+.b-month{display:inline-flex;align-items:center;gap:6px;min-width:0;color:var(--x-on-hero-muted);cursor:text}
+.b-month svg{flex:none;opacity:.8}
+.b-month input,.b-salary input{min-width:0;max-width:100%;padding:2px 0;background:none;border:none;border-bottom:1px solid transparent;border-radius:0;color:#fff;outline:none}
+.b-month input{font:600 16px var(--ar)}
+.b-month input:focus,.b-salary input:focus{border-bottom-color:rgba(255,255,255,.8)}
+.b-month input::placeholder,.b-salary input::placeholder{color:rgba(255,255,255,.6)}
+/* the tools menu, under ⋯ on the card's left (the app is right-to-left) */
+.b-tools-menu{top:58px;inset-inline-start:auto;inset-inline-end:10px;transform-origin:top left}
+.b-hero-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;color:var(--x-on-hero-muted);font:500 14px var(--ar)}
+.b-salary{display:inline-flex;align-items:baseline;gap:6px;min-width:0;cursor:text}
+.b-salary .b-salary-label{font:500 14px var(--ar);color:var(--x-on-hero-muted)}
+.b-salary .b-salary-amount{font:600 17px var(--num);font-variant-numeric:tabular-nums;text-align:left;border-bottom:1px dashed rgba(255,255,255,.55)}
+.b-done{white-space:nowrap}
+.b-groups{display:flex;flex-direction:column;gap:12px}
+.b-group{padding:4px 14px 4px 8px;border-radius:22px}
+.b-ghead{display:flex;align-items:center;gap:2px;min-height:54px}
+.b-chev{flex:none;width:40px;height:40px;display:grid;place-items:center;background:none;border:none;border-radius:50%;color:var(--x-muted);cursor:pointer;transition:transform .25s var(--ease-out)}
+.b-chev:active{background:var(--x-field)}
+.b-group:not(.open) .b-chev{transform:rotate(90deg)}
+.b-ghead .title-input{flex:1;min-width:0;font:600 17px var(--ar);color:var(--x-text)}
+.b-gsum{flex:none;padding:8px 2px 8px 0;background:none;border:none;color:var(--x-text);font:600 16px var(--num);font-variant-numeric:tabular-nums;direction:ltr;cursor:pointer}
+.b-gsum.neg{color:var(--x-exp)}
+.b-gbody{padding:0 8px 10px 0}
+.b-gbody .rows{margin-top:0}
+.b-gfoot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.b-gdel{min-height:40px;padding:0 2px;background:none;border:none;color:var(--x-muted);font:500 13px var(--ar);cursor:pointer}
+.b-gdel:active{color:var(--x-exp)}
+.b-group .tline.rest{margin-top:4px;padding-top:8px;border-top:1px solid var(--x-line-soft)}
+.b-addgroup{width:100%;min-height:54px;border:1.5px dashed var(--x-line);border-radius:22px;background:none;color:var(--x-accent-ink);font:600 15px var(--ar);cursor:pointer;transition:transform .12s var(--ease-out)}
+.b-addgroup:active{transform:scale(.98)}
