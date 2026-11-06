@@ -158,6 +158,12 @@ export interface Home {
   recent: Entry[];
 }
 
+/** R-ENT-14, R-ENT-15 */
+export interface QuickPicks {
+  shortcuts: { name: string; categoryId: string; amount: Money }[];
+  categoryOrder: string[];
+}
+
 export interface Day {
   date: string;
   spent: Money;

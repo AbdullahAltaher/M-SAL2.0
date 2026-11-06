@@ -60,6 +60,12 @@ public class CategoryService {
 		return names;
 	}
 
+	/** A budget's categories in the person's order; the caller checks the budget is theirs. */
+	@Transactional(readOnly = true)
+	public List<Category> inBudget(UUID budgetId) {
+		return categories.findByBudgetIdOrderBySortOrderAscCreatedAtAsc(budgetId);
+	}
+
 	/** The starter suggestions of a default category, or none (R-ENT-12). */
 	@Transactional(readOnly = true)
 	public List<String> starterSuggestions(Category category) {

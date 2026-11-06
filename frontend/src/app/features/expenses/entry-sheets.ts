@@ -1,4 +1,3 @@
-import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -22,22 +21,16 @@ export class EntrySheets {
   private readonly dialogs = inject(Dialogs);
   private readonly toasts = inject(Toasts);
   private readonly router = inject(Router);
-  private readonly document = inject(DOCUMENT);
 
-  /**
-   * SH-01. iOS opens the keyboard only for a focus() inside the tap, so a hidden input takes
-   * the focus now and hands it to the amount when the slide ends (SCREENS.md 4.1 point 1).
-   */
+  /** SH-01. The amount has its own keypad, so no iPhone keyboard opens (DESIGN.md D-20). */
   async add(type: EntryType = 'EXPENSE'): Promise<void> {
-    this.primeKeyboard();
     const { EntrySheet } = await import('./entry-sheet');
-    await this.sheets.open(EntrySheet, type === 'INCOME' ? 'دخل جديد' : 'مصروف جديد', { presetType: type }, { keepFocus: true });
+    await this.sheets.open(EntrySheet, type === 'INCOME' ? 'دخل جديد' : 'مصروف جديد', { presetType: type });
   }
 
   async edit(entry: Entry): Promise<void> {
-    this.primeKeyboard();
     const { EntrySheet } = await import('./entry-sheet');
-    await this.sheets.open(EntrySheet, 'تعديل', { editing: entry }, { keepFocus: true });
+    await this.sheets.open(EntrySheet, 'تعديل', { editing: entry });
   }
 
   /** SH-02 for "salary arrived", with today and the latest allowance (R-CYC-02). */
@@ -116,16 +109,5 @@ export class EntrySheets {
   admin(): void {
     this.sheets.close();
     void this.router.navigateByUrl('/admin');
-  }
-
-  private primeKeyboard(): void {
-    const proxy = this.document.getElementById('kbProxy') as HTMLInputElement | null;
-    if (!proxy) return;
-    proxy.value = '';
-    try {
-      proxy.focus({ preventScroll: true });
-    } catch {
-      // No keyboard to prime
-    }
   }
 }

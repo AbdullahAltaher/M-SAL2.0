@@ -26,9 +26,12 @@ export function motionBetween(from: string, to: string): PageMotion {
 export function pageMotion({ transition, from, to }: ViewTransitionInfo): void {
   const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const motion = reduce ? null : motionBetween(urlOf(from), urlOf(to));
-  // No movement: the transition still runs, but with nothing named and the page-wide fade
-  // turned off (glass.css) it changes at once. (Skipping it instead makes Angular log an error.)
-  if (!motion) return;
+  // No movement: skipped, so the page never waits for a frame to be painted (a hidden or busy
+  // page would hold the navigation). Angular notes the skip in the console in development only.
+  if (!motion || document.hidden) {
+    transition.skipTransition();
+    return;
+  }
   const root = document.documentElement;
   root.dataset['motion'] = motion;
   void transition.finished.finally(() => {

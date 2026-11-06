@@ -196,17 +196,10 @@ select.field{background-image:var(--chev);background-repeat:no-repeat;background
 .x-note{font:400 14px/1.5 var(--ar);color:var(--sec);margin:2px 0 8px}
 .x-note.warn{color:var(--ink);background:rgba(185,154,91,.2);border-radius:8px;padding:6px 10px}
 .x-note.bad{color:var(--neg)}
-.x-optbtn{background:none;border:none;color:var(--green);font:500 15px var(--ar);padding:8px 2px;cursor:pointer;margin-bottom:6px}
-.x-options{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{padding:7px 14px;border-radius:999px;background:var(--surface);border:1px solid var(--border);color:var(--ink);font:500 14px var(--ar);cursor:pointer;min-height:36px}
 .chip:active{transform:scale(.97)}
 .chip.danger{color:var(--neg);border-color:var(--neg)}
-.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px}
-.cat{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:68px;padding:8px 4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--ink);font:500 13px/1.25 var(--ar);text-align:center;cursor:pointer}
-.cat .e{font-size:24px;line-height:1}
-.cat:active{transform:scale(.97)}
-.cat[aria-pressed="true"]{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset}
 .m-list{list-style:none}
 .m-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dotted var(--border);flex-wrap:wrap}
 .m-row.off{opacity:.55}
@@ -221,8 +214,3 @@ select.field{background-image:var(--chev);background-repeat:no-repeat;background
 .cmp{width:100%;border-collapse:collapse;margin:10px 0;font:400 15px var(--ar)}
 .cmp th,.cmp td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:start}
 .cmp td[dir="ltr"]{font-family:var(--num);font-variant-numeric:tabular-nums;text-align:right}
-@media (max-width:359px){
-  .cat-grid{grid-template-columns:repeat(3,1fr)}
-}
-/* ================= expenses: liquid glass redesign ================= */
-/* Everything below is scoped to body.x-on (set only while the Expenses tab is active), so the ledger is untouched. */

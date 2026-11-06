@@ -22,6 +22,7 @@ import com.abdullah.msal2.expenses.EntryDtos.DaysResponse;
 import com.abdullah.msal2.expenses.EntryDtos.EntryResponse;
 import com.abdullah.msal2.expenses.EntryDtos.HomeResponse;
 import com.abdullah.msal2.expenses.EntryDtos.PurgeResponse;
+import com.abdullah.msal2.expenses.EntryDtos.QuickResponse;
 import com.abdullah.msal2.expenses.EntryDtos.SuggestionsResponse;
 import com.abdullah.msal2.expenses.EntryDtos.UpdateEntryRequest;
 import com.abdullah.msal2.system.ServiceCode;
@@ -117,5 +118,11 @@ public class EntryController {
 	@GetMapping("/budgets/{budgetId}/entries/suggestions")
 	public SuggestionsResponse suggestions(CurrentUser user, @PathVariable UUID budgetId, @RequestParam UUID categoryId) {
 		return new SuggestionsResponse(service.suggestions(user.id(), budgetId, categoryId));
+	}
+
+	/** The entry sheet's one-tap shortcuts and category order (R-ENT-14, R-ENT-15). */
+	@GetMapping("/budgets/{budgetId}/entries/quick")
+	public QuickResponse quick(CurrentUser user, @PathVariable UUID budgetId) {
+		return service.quick(user.id(), budgetId, Today.of(clock, user.timeZone()));
 	}
 }

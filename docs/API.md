@@ -361,6 +361,7 @@
 | `GET` | `/budgets/{budgetId}/entries/deleted` | المحذوفات، الأحدث حذفاً أولاً | R-ENT-09 |
 | `DELETE` | `/budgets/{budgetId}/entries/deleted` | حذف كل المحذوفات نهائياً | R-ENT-09 |
 | `GET` | `/budgets/{budgetId}/entries/suggestions?categoryId=…` | حتى 4 اقتراحات للوصف | R-ENT-12 |
+| `GET` | `/budgets/{budgetId}/entries/quick` | الاختصارات بضغطة وحدة (حتى 4) وترتيب الفئات بالاستخدام، لنافذة المصروف (أُضيف مع التصميم الجديد، DESIGN.md D-20) | R-ENT-14، R-ENT-15 |
 
 **`GET /accounts/{accountId}/home?cycle=latest` (الرد):**
 ```json
@@ -566,6 +567,7 @@
 | كل `DELETE` | `204` بدون جسم، عدا `DELETE /budgets/{id}/entries/deleted` الذي يرجع `{ "purged": 3 }` |
 | `GET .../entries/last-expense` | `204` إذا لا يوجد مصروف بعد |
 | `GET .../entries/suggestions` | `{ "suggestions": [ ... ] }` |
+| `GET .../entries/quick` | `{ "shortcuts": [ { "name": "قهوة", "categoryId": "…", "amount": "18.00" } ], "categoryOrder": [ "…" ] }`، والمبلغ نص. الفئات المخفية لا تظهر في أي منهما |
 | `POST .../entries`، و`PATCH /entries/{id}`، و`restore`، و`duplicate` | المصروف مع `cycleKey` (الدورة التي وقع فيها، أو `none`) |
 | `PUT .../categories/order` | الفئات بالترتيب الجديد |
 | `GET /admin/audit-log` | `{ items, page, size, total }`، و`size` حتى 100. **بدون `before_data` و`after_data`** |

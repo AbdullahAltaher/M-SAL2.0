@@ -22,8 +22,8 @@ import { LastTab } from './last-tab';
 
 
 /**
- * The signed-in frame: the glass background, the shared header, the sheet host, the toast host
- * and the keyboard proxy. The header (DESIGN.md D-08, D-14) shows only the person's name, which
+ * The signed-in frame: the glass background, the shared header, the sheet host and the toast
+ * host. The header (DESIGN.md D-08, D-14) shows only the person's name, which
  * opens the people menu, the saved mark in the budget or the cycle in Expenses (D-18), and the
  * section switch (D-03), whose pill slides while the page slides with it (D-32, app.config.ts).
  */

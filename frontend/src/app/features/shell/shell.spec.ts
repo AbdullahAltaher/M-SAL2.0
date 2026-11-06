@@ -43,6 +43,5 @@ describe('Shell (the shared header)', () => {
     expect(el.querySelector('.who-menu')).toBeNull();
 
     expect([...el.querySelectorAll('.tab')].map((t) => t.textContent?.trim())).toEqual(['الميزانية', 'المصاريف']);
-    expect(el.querySelector('.kb-proxy')).not.toBeNull();
   });
 });

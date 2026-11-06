@@ -4,8 +4,6 @@ export interface OpenSheet {
   component: Type<unknown>;
   inputs: Record<string, unknown>;
   title: ReturnType<typeof signal<string>>;
-  /** Leave focus where it is (the keyboard proxy) instead of focusing the sheet */
-  keepFocus: boolean;
   resolve: (result: unknown) => void;
 }
 
@@ -22,13 +20,11 @@ export class Sheets {
   /** Set by the host while the sheet slides away */
   readonly closing = signal(false);
 
-  open<R = unknown>(component: Type<unknown>, title: string, inputs: Record<string, unknown> = {},
-    options: { keepFocus?: boolean } = {}): Promise<R | undefined> {
+  open<R = unknown>(component: Type<unknown>, title: string, inputs: Record<string, unknown> = {}): Promise<R | undefined> {
     this.current()?.resolve(undefined);
     return new Promise<R | undefined>((resolve) => {
       this.closing.set(false);
-      this.current.set({ component, inputs, title: signal(title), keepFocus: !!options.keepFocus,
-        resolve: resolve as (r: unknown) => void });
+      this.current.set({ component, inputs, title: signal(title), resolve: resolve as (r: unknown) => void });
     });
   }
 

@@ -66,7 +66,7 @@ export class SheetHost {
       this.document.documentElement.classList.add('noscroll');
       requestAnimationFrame(() => requestAnimationFrame(() => {
         this.on.set(true);
-        if (!s.keepFocus) this.sheet()?.nativeElement.focus({ preventScroll: true });
+        this.sheet()?.nativeElement.focus({ preventScroll: true });
       }));
       setTimeout(() => this.settled.set(true), reducedMotion() ? 160 : OPEN_MS + 30);
     });

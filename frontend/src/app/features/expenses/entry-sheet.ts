@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, OnInit, computed, effec
 
 import { Api } from '../../core/api/api';
 import { ApiError } from '../../core/api/api-error';
-import { Cycle, Entry, EntryType } from '../../core/api/models';
+import { Cycle, Entry, EntryType, QuickPicks } from '../../core/api/models';
 import { SessionStore } from '../../core/session/session-store';
 import { parseEntryAmount, toLatinDigits } from '../../core/util/amounts';
 import { addDays, dayLabel, fullArabicDate, parseDate, shortArabicDate } from '../../core/util/dates';
@@ -15,8 +15,11 @@ import { flyCoin } from './coin-flight';
 import { ExpensesStore } from './expenses-store';
 
 /**
- * SH-01: a new entry or an edit (SCREENS.md 4.1, M-SAL's openEntrySheet). The amount comes
- * first, then one tap on a category folds the grid to one row and opens the description.
+ * SH-01: a new entry or an edit (SCREENS.md 4.1, M-SAL's openEntrySheet), with fewer steps
+ * (DESIGN.md D-20): one-tap shortcuts that save at once (R-ENT-14), the amount typed on a keypad
+ * inside the sheet so the iPhone keyboard never covers it, the categories in one row by use
+ * (R-ENT-15), and the description picked from suggestions. The keyboard opens only for "+ اكتب
+ * وصف". The description stays required (R-ENT-02).
  */
 @Component({
   selector: 'app-entry-sheet',
@@ -44,9 +47,12 @@ export class EntrySheet implements OnInit {
   protected readonly date = signal(this.today);
   protected readonly accountId = signal<string | null>(null);
   protected readonly hint = signal('');
-  protected readonly gridOpen = signal(true);
   protected readonly bad = signal(false);
-  protected readonly optionsOpen = signal(false);
+  /** The description field has the keyboard: the keypad steps aside */
+  protected readonly typing = signal(false);
+  protected readonly datesOpen = signal(false);
+  private readonly quick = signal<QuickPicks | null>(null);
+  protected readonly keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'back'];
   protected readonly suggestions = signal<string[]>([]);
   protected readonly cycles = signal<Cycle[]>([]);
   protected readonly busy = signal(false);
@@ -54,10 +60,20 @@ export class EntrySheet implements OnInit {
   protected readonly multi = computed(() => this.store.activeAccounts().length > 1);
   protected readonly accountChoices = computed(() =>
     this.store.accounts().filter((a) => !a.isArchived || a.id === this.accountId()));
-  /** Hidden categories are offered only when the edited entry uses one (4.1 point 8) */
-  protected readonly visibleCategories = computed(() =>
-    this.store.categories().filter((c) => !c.isHidden || c.id === this.editing()?.categoryId));
-  protected readonly selected = computed(() => this.store.catOf(this.categoryId()));
+  /** By use, then the person's order (R-ENT-15); a hidden one only when the edited entry has it (4.1 point 8) */
+  protected readonly orderedCategories = computed(() => {
+    const shown = this.store.categories().filter((c) => !c.isHidden || c.id === this.editing()?.categoryId);
+    const order = this.quick()?.categoryOrder ?? [];
+    const rank = (id: string) => (order.indexOf(id) < 0 ? order.length : order.indexOf(id));
+    return [...shown].sort((a, b) => rank(a.id) - rank(b.id) || a.sortOrder - b.sortOrder);
+  });
+  /** Only when adding an expense (R-ENT-14) */
+  protected readonly shortcuts = computed(() =>
+    this.editing() || this.type() !== 'EXPENSE' ? [] : this.quick()?.shortcuts ?? []);
+  protected readonly dateLabel = computed(() => {
+    const d = this.date();
+    return d === this.today ? 'اليوم' : d === this.yesterday ? 'أمس' : this.shortDate(d);
+  });
   protected readonly canSave = computed(() =>
     parseEntryAmount(this.amount()) !== null && !!this.categoryId() && this.name().trim() !== '');
   protected readonly amountWidth = computed(() => Math.max(2, this.amount().length + 0.6) + 'ch');
@@ -83,19 +99,14 @@ export class EntrySheet implements OnInit {
       this.name.set(e.name || this.store.catOf(e.categoryId).name);
       this.date.set(e.entryDate);
       this.accountId.set(e.accountId);
-      this.gridOpen.set(false);
       void this.loadSuggestions();
     } else {
       this.type.set(this.presetType());
       this.accountId.set(this.store.accountId());
     }
     this.setTitle();
-    // The slide is over: hand the keyboard from the proxy to the real field (4.1 point 1)
-    setTimeout(() => {
-      const field = this.amountField()?.nativeElement;
-      field?.focus({ preventScroll: true });
-      if (e) field?.select();
-    }, 430);
+    const budgetId = this.store.budgetId();
+    if (budgetId) void this.api.quick(budgetId).then((q) => this.quick.set(q)).catch(() => undefined);
   }
 
   protected setType(t: EntryType): void {
@@ -103,7 +114,20 @@ export class EntrySheet implements OnInit {
     this.setTitle();
   }
 
-  /** Arabic digits become Latin while typing (4.1 point 2). */
+  /** The keypad: digits, one point, two decimals at most, and delete. */
+  protected press(key: string): void {
+    const now = this.amount();
+    let next: string;
+    if (key === 'back') next = now.slice(0, -1);
+    else if (key === '.') next = now.includes('.') ? now : (now || '0') + '.';
+    else if (now.includes('.') && now.split('.')[1].length >= 2) return;
+    else if (!now.includes('.') && now.replace(/^0+/, '').length >= 9) return;
+    else next = now === '0' ? key : now + key;
+    this.amount.set(next);
+    this.hint.set('');
+  }
+
+  /** Arabic digits become Latin while typing (4.1 point 2), from a hardware keyboard. */
   protected onAmount(value: string, field: HTMLInputElement): void {
     const n = toLatinDigits(value).replace(/٫/g, '.').replace(/،/g, ',');
     if (n !== value) field.value = n;
@@ -119,12 +143,10 @@ export class EntrySheet implements OnInit {
   }
 
   protected pick(id: string): void {
-    const first = !this.categoryId();
+    if (id === this.categoryId()) return;
     this.categoryId.set(id);
     this.hint.set('');
-    this.gridOpen.set(false);
-    void this.loadSuggestions();
-    if (first || !this.name().trim()) setTimeout(() => this.nameField()?.nativeElement.focus({ preventScroll: true }), 30);
+    void this.loadSuggestions(true);
   }
 
   protected onName(value: string): void {
@@ -135,7 +157,28 @@ export class EntrySheet implements OnInit {
 
   protected useSuggestion(n: string): void {
     this.onName(n);
-    this.nameField()?.nativeElement.focus({ preventScroll: true });
+  }
+
+  /** "18.00" shows as "18" on a shortcut */
+  protected plain(amount: string): string {
+    return String(Number(amount));
+  }
+
+  /** One tap saves it, then "تراجع" removes it for good (R-ENT-14). */
+  protected async saveShortcut(s: QuickPicks['shortcuts'][number]): Promise<void> {
+    if (this.busy()) return;
+    this.busy.set(true);
+    try {
+      const saved = await this.api.createEntry(this.store.budgetId() ?? '', {
+        type: 'EXPENSE', amount: s.amount, name: s.name, categoryId: s.categoryId,
+        entryDate: this.date(), accountId: this.accountId() ?? '',
+      });
+      this.afterSave(saved, null, true);
+    } catch (error) {
+      this.hint.set((error as ApiError).message);
+    } finally {
+      this.busy.set(false);
+    }
   }
 
   protected setDate(d: string): void {
@@ -188,16 +231,7 @@ export class EntrySheet implements OnInit {
       const saved = editing
         ? await this.api.patchEntry(editing.id, { ...body, version: editing.version })
         : await this.api.createEntry(this.store.budgetId() ?? '', body);
-      this.store.jumpTo(saved);
-      this.sheets.close(saved);
-      if (!editing) {
-        this.store.markFresh(saved.id);
-        // a coin from + to the account card, then its numbers count down (DESIGN.md D-10, D-24)
-        if (saved.type === 'EXPENSE') flyCoin(document.querySelector('.xbar .fab'), document.querySelector('app-home-view .g-hero'));
-      }
-      const accName = this.store.accounts().find((a) => a.id === saved.accountId)?.name;
-      const label = editing ? 'حُفظ التعديل: ' : this.type() === 'INCOME' ? 'أُضيف دخل: ' : 'أُضيف: ';
-      this.toasts.show(label, { money: saved.amount, suffix: this.multi() && accName ? ' · ' + accName : undefined });
+      this.afterSave(saved, editing, false);
     } catch (error) {
       this.hint.set((error as ApiError).message);
     } finally {
@@ -205,16 +239,37 @@ export class EntrySheet implements OnInit {
     }
   }
 
+  private afterSave(saved: Entry, editing: Entry | null, undoable: boolean): void {
+    this.store.jumpTo(saved);
+    this.sheets.close(saved);
+    if (!editing) {
+      this.store.markFresh(saved.id);
+      // a coin from + to the account card, then its numbers count down (DESIGN.md D-10, D-24)
+      if (saved.type === 'EXPENSE') flyCoin(document.querySelector('.xbar .fab'), document.querySelector('app-home-view .g-hero'));
+    }
+    const accName = this.store.accounts().find((a) => a.id === saved.accountId)?.name;
+    const label = editing ? 'حُفظ التعديل: ' : saved.type === 'INCOME' ? 'أُضيف دخل: ' : 'أُضيف: ';
+    this.toasts.show(label, {
+      money: saved.amount,
+      suffix: this.multi() && accName ? ' · ' + accName : undefined,
+      action: undoable ? { label: 'تراجع', run: () => void this.api.purgeEntry(saved.id).then(() => this.store.refresh()) } : undefined,
+    });
+  }
+
   private setTitle(): void {
     this.sheets.setTitle(this.editing() ? 'تعديل' : this.type() === 'INCOME' ? 'دخل جديد' : 'مصروف جديد');
   }
 
-  private async loadSuggestions(): Promise<void> {
+  /** With a new category and no description yet, a single suggestion is taken at once (D-20). */
+  private async loadSuggestions(pickSingle = false): Promise<void> {
     const categoryId = this.categoryId();
     const budgetId = this.store.budgetId();
     if (!categoryId || !budgetId) return;
     try {
-      this.suggestions.set((await this.api.suggestions(budgetId, categoryId)).suggestions);
+      const list = (await this.api.suggestions(budgetId, categoryId)).suggestions;
+      if (categoryId !== this.categoryId()) return;
+      this.suggestions.set(list);
+      if (pickSingle && list.length === 1 && !this.name().trim()) this.onName(list[0]);
     } catch {
       this.suggestions.set([]);
     }

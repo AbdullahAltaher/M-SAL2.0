@@ -79,4 +79,8 @@ public final class EntryDtos {
 
 	public record SuggestionsResponse(List<String> suggestions) {
 	}
+
+	/** The entry sheet's one-tap shortcuts and category order (R-ENT-14, R-ENT-15). */
+	public record QuickResponse(List<QuickPicks.Shortcut> shortcuts, List<UUID> categoryOrder) {
+	}
 }

@@ -183,6 +183,35 @@ class EntryApiTest extends IntegrationTest {
 	}
 
 	@Test
+	void quickPicksForTheEntrySheet() throws Exception {
+		TestUser user = signUp("sara");
+		String quick = "/api/v1/budgets/" + budgetOf(user) + "/entries/quick";
+		// nothing yet: no shortcuts, the categories in their own order
+		call(user, get(quick)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.shortcuts.length()").value(0))
+				.andExpect(jsonPath("$.categoryOrder[0]").value(categoryOf(user, "cat_food")));
+
+		for (String date : new String[] { "2026-11-09", "2026-11-10" }) {
+			Map<String, Object> coffee = entry(user, "18", "قهوة", date);
+			coffee.put("categoryId", categoryOf(user, "cat_coffee"));
+			add(user, coffee);
+		}
+		add(user, entry(user, "35", "غدا", "2026-11-10"));
+
+		// R-ENT-14: coffee twice is a shortcut, lunch once is not. R-ENT-15: coffee is used most
+		call(user, get(quick)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.shortcuts.length()").value(1))
+				.andExpect(jsonPath("$.shortcuts[0].name").value("قهوة"))
+				.andExpect(jsonPath("$.shortcuts[0].amount").value("18.00"))
+				.andExpect(jsonPath("$.shortcuts[0].categoryId").value(categoryOf(user, "cat_coffee")))
+				.andExpect(jsonPath("$.categoryOrder[0]").value(categoryOf(user, "cat_coffee")))
+				.andExpect(jsonPath("$.categoryOrder[1]").value(categoryOf(user, "cat_food")));
+
+		// another person's budget is not found (CLAUDE.md rule 6)
+		call(signUp("omar"), get(quick)).andExpect(status().isNotFound());
+	}
+
+	@Test
 	void statsAndReceiptOfTheCycle() throws Exception {
 		TestUser user = signUp("sara");
 		businessRulesCycle(user);

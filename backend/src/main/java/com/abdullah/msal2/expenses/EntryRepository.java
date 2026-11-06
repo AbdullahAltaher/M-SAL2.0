@@ -1,5 +1,6 @@
 package com.abdullah.msal2.expenses;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,6 +15,8 @@ public interface EntryRepository extends JpaRepository<Entry, UUID> {
 	List<Entry> findByBudgetIdAndCategoryIdAndDeletedAtIsNull(UUID budgetId, UUID categoryId);
 
 	List<Entry> findByBudgetIdAndDeletedAtIsNotNullOrderByDeletedAtDesc(UUID budgetId);
+
+	List<Entry> findByBudgetIdAndDeletedAtIsNullAndEntryDateBetween(UUID budgetId, LocalDate from, LocalDate to);
 
 	/** The user's entry (deleted or not), if its budget is not deleted. */
 	@Query("""

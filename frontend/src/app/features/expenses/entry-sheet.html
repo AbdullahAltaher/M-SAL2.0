@@ -1,10 +1,26 @@
-<div class="seg" role="group" aria-label="النوع">
+<!-- DESIGN.md D-20: fewer steps and no iPhone keyboard for the amount -->
+<div class="seg es-type" role="group" aria-label="النوع">
   <button class="seg-b" type="button" [attr.aria-pressed]="type() === 'EXPENSE'" (click)="setType('EXPENSE')">مصروف</button>
   <button class="seg-b" type="button" [attr.aria-pressed]="type() === 'INCOME'" (click)="setType('INCOME')">دخل</button>
 </div>
 
+@if (shortcuts().length) {
+  <div class="g-sec es-quick">
+    <div class="g-lab">بضغطة وحدة</div>
+    <div class="g-chips" role="group" aria-label="اختصارات تُحفظ بضغطة">
+      @for (s of shortcuts(); track $index) {
+        <button class="g-fchip es-short" type="button" [disabled]="busy()" [attr.aria-label]="'احفظ ' + s.name + ' ' + plain(s.amount)"
+                (click)="saveShortcut(s)">
+          <span class="e" aria-hidden="true">{{ store.catOf(s.categoryId).emoji }}</span>
+          <span dir="auto">{{ s.name }}</span><span class="es-dot" aria-hidden="true">·</span><bdi dir="ltr">{{ plain(s.amount) }}</bdi>
+        </button>
+      }
+    </div>
+  </div>
+}
+
 <div class="x-amtrow" (click)="amountField.focus({ preventScroll: true })">
-  <input #amountField class="x-amount" type="text" inputmode="decimal" autocomplete="off" autocapitalize="off"
+  <input #amountField class="x-amount" type="text" inputmode="none" autocomplete="off" autocapitalize="off"
          autocorrect="off" enterkeyhint="next" dir="ltr" placeholder="0" aria-label="المبلغ"
          [value]="amount()" [style.width]="amountWidth()"
          (input)="onAmount(amountField.value, amountField)" (keydown.enter)="amountEnter($event)">
@@ -13,69 +29,68 @@
 
 <div class="g-sec">
   <div class="g-lab">التصنيف</div>
-  <div class="g-col" [appCollapse]="gridOpen()">
-    <div class="cat-grid" role="group" aria-label="التصنيف" [class.has-sel]="!!categoryId()">
-      @for (c of visibleCategories(); track c.id) {
-        <button class="cat" type="button" [attr.aria-pressed]="c.id === categoryId()" (click)="pick(c.id)">
-          <span class="e" aria-hidden="true">{{ c.emoji }}</span><span class="n" dir="rtl">{{ c.name }}</span>
-        </button>
-      }
-    </div>
-  </div>
-  <div class="g-col" [appCollapse]="!gridOpen() && !!categoryId()">
-    <button class="g-catrow" type="button" [attr.aria-label]="'التصنيف: ' + selected().name + '، تغيير'" (click)="gridOpen.set(true)">
-      <span class="g-tile" aria-hidden="true">{{ selected().emoji }}</span>
-      <span class="nm" dir="auto">{{ selected().name }}</span>
-      <span class="chg" dir="rtl">تغيير</span>
-    </button>
+  <div class="g-chips es-cats" role="group" aria-label="التصنيف">
+    @for (c of orderedCategories(); track c.id) {
+      <button class="g-fchip" type="button" [attr.aria-pressed]="c.id === categoryId()" (click)="pick(c.id)">
+        <span class="e" aria-hidden="true">{{ c.emoji }}</span><span dir="rtl">{{ c.name }}</span>
+      </button>
+    }
   </div>
 </div>
 
 <div class="g-col" [appCollapse]="!!categoryId()">
   <div class="g-sec">
     <div class="g-lab">الوصف</div>
-    <input #nameField class="field g-field g-name-in" type="text" dir="auto" enterkeyhint="done" autocomplete="off"
-           placeholder="وصف المصروف" aria-label="وصف المصروف" [class.bad]="bad()" [class.shake]="bad()"
-           [value]="name()" (input)="onName(nameField.value)" (keydown.enter)="$event.preventDefault(); commit()">
-    <div class="g-sugg" role="group" aria-label="اقتراحات الوصف">
+    <div class="g-sugg es-sugg" role="group" aria-label="اقتراحات الوصف">
       @for (s of suggestions(); track s) {
-        <button class="g-fchip" type="button" (click)="useSuggestion(s)"><span dir="auto">{{ s }}</span></button>
+        <button class="g-fchip" type="button" [attr.aria-pressed]="name() === s" (click)="useSuggestion(s)"><span dir="auto">{{ s }}</span></button>
       }
     </div>
+    <input #nameField class="field g-field g-name-in es-name" type="text" dir="auto" enterkeyhint="done" autocomplete="off"
+           placeholder="+ اكتب وصف" aria-label="وصف المصروف" [class.bad]="bad()" [class.shake]="bad()"
+           [value]="name()" (input)="onName(nameField.value)" (focus)="typing.set(true)" (blur)="typing.set(false)"
+           (keydown.enter)="$event.preventDefault(); commit()">
   </div>
 </div>
 
-<div class="g-sec">
-  <div class="g-lab">التاريخ</div>
-  <div class="g-dchips" role="group" aria-label="التاريخ">
-    <button class="g-dchip" type="button" [attr.aria-pressed]="date() === today" (click)="setDate(today)">اليوم</button>
-    <button class="g-dchip" type="button" [attr.aria-pressed]="date() === yesterday" (click)="setDate(yesterday)">أمس</button>
-    <label class="g-dchip" [attr.data-on]="otherDate() ? '1' : '0'">
-      <span dir="rtl">{{ otherDate() ? shortDate(date()) : 'تاريخ آخر' }}</span>
-      <input #dateField class="g-date-in" type="date" dir="ltr" aria-label="تاريخ آخر" [value]="date()"
-             (click)="openPicker(dateField)" (change)="setDate(dateField.value)">
-    </label>
-  </div>
-  <div class="x-note {{ note().cls }}" dir="rtl">{{ note().text }}</div>
+<div class="g-sec es-when">
+  <button class="g-dchip es-datechip" type="button" [attr.aria-expanded]="datesOpen()" (click)="datesOpen.set(!datesOpen())">
+    <app-icon name="calendar" [size]="16" /><span dir="rtl">{{ dateLabel() }}</span>
+  </button>
+  @if (multi()) {
+    <select #acct class="field es-acct" dir="rtl" aria-label="الحساب" (change)="accountId.set(acct.value)">
+      @for (a of accountChoices(); track a.id) {
+        <option [value]="a.id" [selected]="a.id === accountId()">{{ a.name }}</option>
+      }
+    </select>
+  }
 </div>
-
-@if (multi()) {
-  <div class="g-sec">
-    <button class="x-optbtn" type="button" [attr.aria-expanded]="optionsOpen()" (click)="optionsOpen.set(!optionsOpen())">
-      <span dir="rtl">خيارات أخرى</span><app-icon name="chevL" [size]="18" />
-    </button>
-    <div class="x-options" [hidden]="!optionsOpen()">
-      <select #acct class="field g-field x-select" dir="rtl" aria-label="الحساب" (change)="accountId.set(acct.value)">
-        @for (a of accountChoices(); track a.id) {
-          <option [value]="a.id" [selected]="a.id === accountId()">{{ a.name }}</option>
-        }
-      </select>
+<div class="g-col" [appCollapse]="datesOpen()">
+  <div class="es-dates">
+    <div class="g-dchips" role="group" aria-label="التاريخ">
+      <button class="g-dchip" type="button" [attr.aria-pressed]="date() === today" (click)="setDate(today)">اليوم</button>
+      <button class="g-dchip" type="button" [attr.aria-pressed]="date() === yesterday" (click)="setDate(yesterday)">أمس</button>
+      <label class="g-dchip" [attr.data-on]="otherDate() ? '1' : '0'">
+        <span dir="rtl">{{ otherDate() ? shortDate(date()) : 'تاريخ آخر' }}</span>
+        <input #dateField class="g-date-in" type="date" dir="ltr" aria-label="تاريخ آخر" [value]="date()"
+               (click)="openPicker(dateField)" (change)="setDate(dateField.value)">
+      </label>
     </div>
   </div>
-}
+</div>
+<div class="x-note {{ note().cls }}" dir="rtl">{{ note().text }}</div>
 
 <div class="x-hint" role="alert" dir="rtl">{{ hint() }}</div>
 
 <div class="g-savebar">
+  @if (!typing()) {
+    <div class="es-pad" role="group" aria-label="أرقام المبلغ" dir="ltr">
+      @for (k of keys; track k) {
+        <button class="es-key" type="button" [attr.aria-label]="k === 'back' ? 'حذف رقم' : k" (click)="press(k)">
+          @if (k === 'back') {<app-icon name="backspace" [size]="22" />} @else { {{ k }} }
+        </button>
+      }
+    </div>
+  }
   <button class="g-btn primary g-save" type="button" [attr.aria-disabled]="!canSave()" (click)="commit()">حفظ</button>
 </div>

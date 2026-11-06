@@ -7,7 +7,7 @@ import type { Me } from '../session/session-store';
 import { toApiError } from './api-error';
 import {
   Account, AdminUser, AuditPage, Budget, BudgetGroup, BudgetItem, BudgetListItem, Category, Cycle, CycleInput, Day, Entry,
-  EntryInput, Home, ImportMode, ImportPreview, ImportRecord, Invitation, Receipt, ServiceInfo, Stats,
+  EntryInput, Home, ImportMode, ImportPreview, ImportRecord, Invitation, QuickPicks, Receipt, ServiceInfo, Stats,
 } from './models';
 
 /**
@@ -110,6 +110,8 @@ export class Api {
   suggestions(budgetId: string, categoryId: string) {
     return this.get<{ suggestions: string[] }>(`/budgets/${budgetId}/entries/suggestions`, { categoryId });
   }
+  /** The entry sheet's one-tap shortcuts and category order (R-ENT-14, R-ENT-15) */
+  quick(budgetId: string) { return this.get<QuickPicks>(`/budgets/${budgetId}/entries/quick`); }
 
   // ── SRV-006, SRV-008 ────────────────────────────────────────
   stats(accountId: string, cycle: string) { return this.get<Stats>(`/accounts/${accountId}/stats`, { cycle }); }

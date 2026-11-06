@@ -34,6 +34,7 @@ import com.abdullah.msal2.expenses.EntryDtos.DayResponse;
 import com.abdullah.msal2.expenses.EntryDtos.DaysResponse;
 import com.abdullah.msal2.expenses.EntryDtos.EntryResponse;
 import com.abdullah.msal2.expenses.EntryDtos.HomeResponse;
+import com.abdullah.msal2.expenses.EntryDtos.QuickResponse;
 import com.abdullah.msal2.expenses.EntryDtos.Selected;
 import com.abdullah.msal2.expenses.EntryDtos.UpdateEntryRequest;
 import com.abdullah.msal2.system.audit.AuditAction;
@@ -46,7 +47,7 @@ import com.abdullah.msal2.system.web.Inputs;
 import com.abdullah.msal2.system.web.Patch;
 
 /**
- * SRV-001: expenses and extra income (R-ENT-01 to R-ENT-12), and the home screen
+ * SRV-001: expenses and extra income (R-ENT-01 to R-ENT-15), and the home screen
  * (R-CYC-04 to R-CYC-06).
  */
 @Service
@@ -150,6 +151,18 @@ public class EntryService {
 				.map(Entry::toData).toList();
 		return NameSuggestions.suggest(history, categoryId, NameSuggestions.DEFAULT_LIMIT,
 				categories.starterSuggestions(category));
+	}
+
+	/** The entry sheet's shortcuts and category order (R-ENT-14, R-ENT-15). */
+	@Transactional(readOnly = true)
+	public QuickResponse quick(UUID userId, UUID budgetId, LocalDate today) {
+		budgets.owned(userId, budgetId);
+		List<EntryData> recent = entries.findByBudgetIdAndDeletedAtIsNullAndEntryDateBetween(budgetId,
+				today.minusDays(QuickPicks.DAYS - 1L), today).stream().map(Entry::toData).toList();
+		List<QuickPicks.CategoryRef> refs = categories.inBudget(budgetId).stream()
+				.map(c -> new QuickPicks.CategoryRef(c.getId(), c.isHidden(), c.getSortOrder())).toList();
+		QuickPicks.Result picks = QuickPicks.of(recent, refs, today);
+		return new QuickResponse(picks.shortcuts(), picks.categoryOrder());
 	}
 
 	// ── Changing ────────────────────────────────────────────────
