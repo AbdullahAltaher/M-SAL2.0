@@ -443,3 +443,35 @@ app-entry-sheet .es-key{min-height:46px}
 /* "+ يضيف إلى X" above the + button */
 .fab-hint{position:fixed;z-index:31;left:50%;transform:translateX(-50%);bottom:calc(98px + env(safe-area-inset-bottom));padding:5px 12px;border-radius:999px;background:var(--x-inc);color:#06301E;font:600 12px var(--ar);white-space:nowrap;box-shadow:0 8px 18px -8px rgba(0,0,0,.5);pointer-events:none;animation:hintIn .3s var(--ease-out)}
 @keyframes hintIn{from{opacity:0;transform:translate(-50%,6px)}}
+/* ---- the photo behind a big card (D-15, D-16) ---- */
+.hero-acts{display:inline-flex;align-items:center;gap:6px;flex:none}
+.hp-body{position:relative}
+.hero-photo{position:relative;overflow:hidden;text-shadow:0 1px 10px rgba(0,0,0,.35)}
+.g-hero.hero-photo::before,.g-hero.hero-photo::after{display:none}
+.g-hero > .hp-img,.g-hero > .hp-shade,.hero-photo > .hp-img,.hero-photo > .hp-shade{position:absolute;inset:0}
+.hero-photo .hp-img{width:100%;height:100%;object-fit:cover}
+/* (a) darkened all over */
+.ph-dim .hp-shade{background:linear-gradient(180deg,rgba(5,10,25,.25),rgba(5,10,25,.62))}
+/* (b) clear photo, the numbers on a frosted panel at the bottom; the card grows a little */
+.ph-glass .hp-shade{display:none}
+.g-hero.ph-glass{padding-top:96px}
+.ph-glass .hp-body{padding:12px 14px 14px;margin:0 -8px -8px;border-radius:20px;background:rgba(10,18,40,.42);border:1px solid rgba(255,255,255,.18);-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%)}
+/* (c) tinted with the app's blue */
+.ph-tint .hp-img{filter:grayscale(.35)}
+.ph-tint .hp-shade{background:linear-gradient(145deg,rgba(47,107,224,.72),rgba(29,71,168,.78))}
+/* the tools menu follows ⋯ down when the card grew */
+.b-top:has(.ph-glass) .b-tools-menu{top:154px}
+/* the sheet: three small cards to choose from */
+.cp-styles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 0 16px}
+.cp-opt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:0;background:none;border:none;color:var(--x-text);font:500 13px var(--ar);cursor:pointer}
+.cp-mini{display:block;width:100%;height:104px;border-radius:16px;border:2px solid transparent;padding:10px}
+.cp-opt[aria-checked="true"] .cp-mini{border-color:var(--x-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--x-accent) 35%,transparent)}
+.cp-mini .hp-body{display:flex;flex-direction:column;gap:5px}
+.cp-mini.ph-glass{padding-top:52px}
+.cp-mini.ph-glass .hp-body{margin:0 -4px -4px;padding:7px;border-radius:10px}
+.cp-l1,.cp-l2{display:block;height:6px;border-radius:3px;background:rgba(255,255,255,.9)}
+.cp-l1{width:45%}
+.cp-l2{width:75%;height:10px}
+.cp-pick{position:relative;width:100%;overflow:hidden;cursor:pointer}
+.cp-pick input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.cp-remove{width:100%;margin-top:10px;color:var(--x-exp)}

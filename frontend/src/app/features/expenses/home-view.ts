@@ -3,12 +3,15 @@ import { RouterLink } from '@angular/router';
 
 import { Api } from '../../core/api/api';
 import { CycleSummary, Day } from '../../core/api/models';
+import { CardPhoto, CardPhotos, accountPhotoKey } from '../../core/photos/card-photos';
 import { shortArabicDate, weekdayDate } from '../../core/util/dates';
 import { AED, formatMoney } from '../../core/util/money';
 import { Icon } from '../../shared/components/icon';
+import { CardPhotoSheet } from '../../shared/components/card-photo-sheet';
 import { CountTo } from '../../shared/components/count-to';
 import { MoneyView } from '../../shared/components/money';
 import { Collapse } from '../../shared/directives/collapse';
+import { Sheets } from '../../shared/sheet/sheets';
 import { DayStrip } from './day-strip';
 import { EntryRow } from './entry-row';
 import { EntrySheets } from './entry-sheets';
@@ -32,6 +35,8 @@ export class HomeView {
   protected readonly sheets = inject(EntrySheets);
   private readonly api = inject(Api);
   protected readonly unit = AED;
+  private readonly photos = inject(CardPhotos);
+  private readonly sheetHost = inject(Sheets);
 
   protected readonly home = this.store.home;
   protected readonly summary = computed(() => this.home()?.selected.summary ?? null);
@@ -73,6 +78,21 @@ export class HomeView {
       if (!want || !accountId || !key || key === 'none') return;
       void this.api.entries(accountId, key).then((r) => this.dayList.set(r.days)).catch(() => this.dayList.set([]));
     });
+  }
+
+  /** This account's photo behind the card, kept on this device (D-15, D-26) */
+  protected readonly photo = computed(() => {
+    const id = this.home()?.account.id;
+    return id ? this.photos.get(accountPhotoKey(id)) : null;
+  });
+
+  protected photoClass(p: CardPhoto | null): string {
+    return p ? 'g-hero hero-photo ph-' + p.style : 'g-hero';
+  }
+
+  protected openPhoto(): void {
+    const id = this.home()?.account.id;
+    if (id) void this.sheetHost.open(CardPhotoSheet, 'صورة البطاقة', { photoKey: accountPhotoKey(id) });
   }
 
   protected toggleDays(): void {

@@ -2,7 +2,9 @@ import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, injec
 
 import { ApiError } from '../../core/api/api-error';
 import { BudgetsStore } from '../../core/data/budgets-store';
+import { CardPhoto, CardPhotos, budgetPhotoKey } from '../../core/photos/card-photos';
 import { parseLedgerAmount, toLatinDigits } from '../../core/util/amounts';
+import { CardPhotoSheet } from '../../shared/components/card-photo-sheet';
 import { Icon } from '../../shared/components/icon';
 import { Collapse } from '../../shared/directives/collapse';
 import { Dialogs } from '../../shared/sheet/dialogs';
@@ -44,6 +46,12 @@ export class BudgetPage {
   protected readonly focused = signal<string | null>(null);
   protected readonly toolsOpen = signal(false);
   private readonly folded = signal<ReadonlySet<string>>(readFolded());
+  private readonly photos = inject(CardPhotos);
+  /** This person's photo behind the card, kept on this device (D-15, D-26) */
+  protected readonly photo = computed(() => {
+    const id = this.ledger.state()?.id;
+    return id ? this.photos.get(budgetPhotoKey(id)) : null;
+  });
 
   /** "صُرف X من Y بنود" and the bar under it: the items marked as paid */
   protected readonly progress = computed(() => {
@@ -93,6 +101,15 @@ export class BudgetPage {
   /** The fields inside the card are as wide as their text, so they read as text, not boxes. */
   protected fieldWidth(text: string, min: number): number {
     return Math.max(min, [...text].length + 1);
+  }
+
+  protected photoClass(p: CardPhoto | null): string {
+    return p ? 'g-hero b-hero hero-photo ph-' + p.style : 'g-hero b-hero';
+  }
+
+  protected openPhoto(): void {
+    const id = this.ledger.state()?.id;
+    if (id) void this.sheets.open(CardPhotoSheet, 'صورة البطاقة', { photoKey: budgetPhotoKey(id) });
   }
 
   protected isOpen(groupId: string): boolean {

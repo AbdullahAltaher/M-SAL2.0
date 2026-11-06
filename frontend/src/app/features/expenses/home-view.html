@@ -1,34 +1,43 @@
 @if (home(); as h) {
-  <section class="g-hero" [attr.aria-label]="'الحساب ' + h.account.name" (touchstart)="touchStart($event)" (touchend)="touchEnd($event)">
-    <div class="g-hero-top">
-      <span class="g-hero-acct" dir="auto">{{ h.account.name }}</span>
-      <button class="g-circ on-hero" type="button" aria-label="تعديل الحسابات" (click)="sheets.accounts()"><app-icon name="edit" [size]="20" /></button>
-    </div>
-    @if (summary(); as s) {
-      <div class="g-hero-label" dir="rtl">المتبقي</div>
-      <div class="g-hero-big" [class.over]="s.over"><bdi class="n" dir="ltr"><app-count [value]="+s.remaining" /></bdi><span class="u" dir="rtl">{{ unit }}</span></div>
-      <div class="g-hero-range">
-        <span class="rng"><span dir="rtl">{{ range()?.start }}</span><span class="sep" aria-hidden="true">←</span><span dir="rtl">{{ range()?.end }}</span></span>
-      </div>
-      <div class="g-bar" [class.over]="s.over" role="progressbar" aria-label="نسبة المصروف من المتاح" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="pct(s.progress)">
-        <i [style.width.%]="pct(s.progress)"></i>
-      </div>
-      <div class="g-hero-foot">
-        <span class="grp"><span dir="rtl">صرفت</span><app-money [value]="s.spent" /></span>
-        <span class="grp"><span dir="rtl">من</span><app-money [value]="s.budget" />@if (+s.extra > 0) {<span class="x" dir="rtl">مع الدخل الإضافي</span>}</span>
-      </div>
-      @if (s.over) {
-        <span class="g-over-tag" dir="rtl">تجاوزت المتاح</span>
-      }
-    } @else if (noCycle()) {
-      <div class="g-hero-label" dir="rtl">بدون دورة</div>
-      <div class="g-hero-big"><bdi class="n" dir="ltr">{{ fmt(h.selected.noCycleTotal) }}</bdi><span class="u" dir="rtl">{{ unit }}</span></div>
-      <p class="g-hero-note" dir="rtl">هذه المصاريف مؤرخة قبل أول دورة. أضف دورة سابقة لتُحتسب ضمنها.</p>
-      <button class="g-btn" type="button" (click)="addEarlierCycle()">إضافة دورة سابقة</button>
-    } @else {
-      <div class="g-hero-label" dir="rtl">ابدأ دورتك الأولى</div>
-      <p class="g-hero-note" dir="rtl">الدورة تمتد من تاريخ الراتب حتى الراتب التالي، وليس من أول الشهر. يمكنك إضافة المصاريف قبل ذلك بزر +.</p>
+  <section class="g-hero" [class]="photoClass(photo())" [attr.aria-label]="'الحساب ' + h.account.name" (touchstart)="touchStart($event)" (touchend)="touchEnd($event)">
+    @if (photo(); as p) {
+      <img class="hp-img" [src]="p.url" alt="">
+      <span class="hp-shade"></span>
     }
+    <div class="hp-body">
+      <div class="g-hero-top">
+        <span class="g-hero-acct" dir="auto">{{ h.account.name }}</span>
+        <span class="hero-acts">
+          <button class="g-circ on-hero" type="button" aria-label="صورة البطاقة" (click)="openPhoto()"><app-icon name="photo" [size]="20" /></button>
+          <button class="g-circ on-hero" type="button" aria-label="تعديل الحسابات" (click)="sheets.accounts()"><app-icon name="edit" [size]="20" /></button>
+        </span>
+      </div>
+      @if (summary(); as s) {
+        <div class="g-hero-label" dir="rtl">المتبقي</div>
+        <div class="g-hero-big" [class.over]="s.over"><bdi class="n" dir="ltr"><app-count [value]="+s.remaining" /></bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+        <div class="g-hero-range">
+          <span class="rng"><span dir="rtl">{{ range()?.start }}</span><span class="sep" aria-hidden="true">←</span><span dir="rtl">{{ range()?.end }}</span></span>
+        </div>
+        <div class="g-bar" [class.over]="s.over" role="progressbar" aria-label="نسبة المصروف من المتاح" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="pct(s.progress)">
+          <i [style.width.%]="pct(s.progress)"></i>
+        </div>
+        <div class="g-hero-foot">
+          <span class="grp"><span dir="rtl">صرفت</span><app-money [value]="s.spent" /></span>
+          <span class="grp"><span dir="rtl">من</span><app-money [value]="s.budget" />@if (+s.extra > 0) {<span class="x" dir="rtl">مع الدخل الإضافي</span>}</span>
+        </div>
+        @if (s.over) {
+          <span class="g-over-tag" dir="rtl">تجاوزت المتاح</span>
+        }
+      } @else if (noCycle()) {
+        <div class="g-hero-label" dir="rtl">بدون دورة</div>
+        <div class="g-hero-big"><bdi class="n" dir="ltr">{{ fmt(h.selected.noCycleTotal) }}</bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+        <p class="g-hero-note" dir="rtl">هذه المصاريف مؤرخة قبل أول دورة. أضف دورة سابقة لتُحتسب ضمنها.</p>
+        <button class="g-btn" type="button" (click)="addEarlierCycle()">إضافة دورة سابقة</button>
+      } @else {
+        <div class="g-hero-label" dir="rtl">ابدأ دورتك الأولى</div>
+        <p class="g-hero-note" dir="rtl">الدورة تمتد من تاريخ الراتب حتى الراتب التالي، وليس من أول الشهر. يمكنك إضافة المصاريف قبل ذلك بزر +.</p>
+      }
+    </div>
   </section>
 
   <div class="g-acctrow">

@@ -1,42 +1,53 @@
 @if (ledger.state(); as s) {
   <!-- The remaining card (DESIGN.md D-05, D-14): the month, the tools, the remaining, the salary -->
   <div class="b-top">
-    <section class="g-hero b-hero" id="salaryPanel">
-      <div class="g-hero-top">
-        <label class="b-month">
-          <input id="monthLabel" dir="rtl" aria-label="اسم الشهر" placeholder="اسم الشهر" [value]="s.monthLabel" #ml
-                 [style.width.ch]="fieldWidth(s.monthLabel, 8)"
-                 (input)="ledger.editBudget('monthLabel', ml.value)" (blur)="ledger.editBudget('monthLabel', ml.value, true)">
-          <app-icon name="edit" [size]="15" />
-        </label>
-        <button class="g-circ on-hero b-tools" type="button" aria-label="أدوات الميزانية" aria-haspopup="menu"
-                [attr.aria-expanded]="toolsOpen()" (click)="toolsOpen.set(!toolsOpen())">
-          <app-icon name="more" [size]="22" [sw]="3" />
-        </button>
-      </div>
-
-      <div class="g-hero-label" dir="rtl">المتبقي</div>
-      @if (ledger.totals(); as t) {
-        <div class="g-hero-big" id="finalBalance" [class.over]="t.final < 0">
-          <span>@if (t.finalApprox) {<span class="approx">~</span>}{{ value(t.final) }}</span>
-        </div>
+    <section class="g-hero b-hero" id="salaryPanel" [class]="photoClass(photo())">
+      @if (photo(); as p) {
+        <img class="hp-img" [src]="p.url" alt="">
+        <span class="hp-shade"></span>
       }
+      <div class="hp-body">
+        <div class="g-hero-top">
+          <label class="b-month">
+            <input id="monthLabel" dir="rtl" aria-label="اسم الشهر" placeholder="اسم الشهر" [value]="s.monthLabel" #ml
+                   [style.width.ch]="fieldWidth(s.monthLabel, 8)"
+                   (input)="ledger.editBudget('monthLabel', ml.value)" (blur)="ledger.editBudget('monthLabel', ml.value, true)">
+            <app-icon name="edit" [size]="15" />
+          </label>
+          <span class="hero-acts">
+            <button class="g-circ on-hero" type="button" aria-label="صورة البطاقة" (click)="openPhoto()">
+              <app-icon name="photo" [size]="20" />
+            </button>
+            <button class="g-circ on-hero b-tools" type="button" aria-label="أدوات الميزانية" aria-haspopup="menu"
+                    [attr.aria-expanded]="toolsOpen()" (click)="toolsOpen.set(!toolsOpen())">
+              <app-icon name="more" [size]="22" [sw]="3" />
+            </button>
+          </span>
+        </div>
 
-      <div class="b-hero-row">
-        <label class="b-salary">
-          <input class="b-salary-label" id="salaryLabel" dir="rtl" aria-label="مسمى الراتب" placeholder="الراتب"
-                 [value]="s.salaryLabel" #sl [style.width.ch]="fieldWidth(s.salaryLabel, 4)"
-                 (input)="ledger.editBudget('salaryLabel', sl.value)" (blur)="ledger.editBudget('salaryLabel', sl.value, true)">
-          <input class="b-salary-amount" id="salaryAmount" dir="ltr" inputmode="decimal" aria-label="مبلغ الراتب" placeholder="0"
-                 [value]="shown('salary', s.salaryRaw)" #sa [style.width.ch]="fieldWidth(shown('salary', s.salaryRaw), 3)"
-                 (focus)="focusAmount('salary', s.salaryRaw, sa)" (input)="ledger.editSalary(typed(sa))" (blur)="blurAmount('salary', sa)">
-        </label>
-        @if (progress().total) {
-          <span class="b-done" dir="rtl">صُرف <bdi dir="ltr">{{ progress().done }}</bdi> من <bdi dir="ltr">{{ progress().total }}</bdi> بنود</span>
+        <div class="g-hero-label" dir="rtl">المتبقي</div>
+        @if (ledger.totals(); as t) {
+          <div class="g-hero-big" id="finalBalance" [class.over]="t.final < 0">
+            <span>@if (t.finalApprox) {<span class="approx">~</span>}{{ value(t.final) }}</span>
+          </div>
         }
-      </div>
-      <div class="g-bar" role="progressbar" aria-label="البنود المصروفة" aria-valuemin="0" [attr.aria-valuemax]="progress().total" [attr.aria-valuenow]="progress().done">
-        <i [style.width.%]="progress().total ? (progress().done / progress().total) * 100 : 0"></i>
+
+        <div class="b-hero-row">
+          <label class="b-salary">
+            <input class="b-salary-label" id="salaryLabel" dir="rtl" aria-label="مسمى الراتب" placeholder="الراتب"
+                   [value]="s.salaryLabel" #sl [style.width.ch]="fieldWidth(s.salaryLabel, 4)"
+                   (input)="ledger.editBudget('salaryLabel', sl.value)" (blur)="ledger.editBudget('salaryLabel', sl.value, true)">
+            <input class="b-salary-amount" id="salaryAmount" dir="ltr" inputmode="decimal" aria-label="مبلغ الراتب" placeholder="0"
+                   [value]="shown('salary', s.salaryRaw)" #sa [style.width.ch]="fieldWidth(shown('salary', s.salaryRaw), 3)"
+                   (focus)="focusAmount('salary', s.salaryRaw, sa)" (input)="ledger.editSalary(typed(sa))" (blur)="blurAmount('salary', sa)">
+          </label>
+          @if (progress().total) {
+            <span class="b-done" dir="rtl">صُرف <bdi dir="ltr">{{ progress().done }}</bdi> من <bdi dir="ltr">{{ progress().total }}</bdi> بنود</span>
+          }
+        </div>
+        <div class="g-bar" role="progressbar" aria-label="البنود المصروفة" aria-valuemin="0" [attr.aria-valuemax]="progress().total" [attr.aria-valuenow]="progress().done">
+          <i [style.width.%]="progress().total ? (progress().done / progress().total) * 100 : 0"></i>
+        </div>
       </div>
     </section>
     <!-- outside the card, which clips its content -->
