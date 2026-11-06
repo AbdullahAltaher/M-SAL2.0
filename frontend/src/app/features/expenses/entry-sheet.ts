@@ -11,6 +11,7 @@ import { Icon } from '../../shared/components/icon';
 import { Collapse } from '../../shared/directives/collapse';
 import { Sheets } from '../../shared/sheet/sheets';
 import { Toasts } from '../../shared/toast/toast';
+import { flyCoin } from './coin-flight';
 import { ExpensesStore } from './expenses-store';
 
 /**
@@ -189,6 +190,11 @@ export class EntrySheet implements OnInit {
         : await this.api.createEntry(this.store.budgetId() ?? '', body);
       this.store.jumpTo(saved);
       this.sheets.close(saved);
+      if (!editing) {
+        this.store.markFresh(saved.id);
+        // a coin from + to the account card, then its numbers count down (DESIGN.md D-10, D-24)
+        if (saved.type === 'EXPENSE') flyCoin(document.querySelector('.xbar .fab'), document.querySelector('app-home-view .g-hero'));
+      }
       const accName = this.store.accounts().find((a) => a.id === saved.accountId)?.name;
       const label = editing ? 'حُفظ التعديل: ' : this.type() === 'INCOME' ? 'أُضيف دخل: ' : 'أُضيف: ';
       this.toasts.show(label, { money: saved.amount, suffix: this.multi() && accName ? ' · ' + accName : undefined });

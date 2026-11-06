@@ -91,6 +91,16 @@ export class ExpensesStore {
     this.changed.update((n) => n + 1);
   }
 
+  /** The entry just added, whose row slides in at the top of the list (DESIGN.md D-10) */
+  readonly fresh = signal<string | null>(null);
+  private freshTimer: ReturnType<typeof setTimeout> | null = null;
+
+  markFresh(entryId: string): void {
+    this.fresh.set(entryId);
+    if (this.freshTimer) clearTimeout(this.freshTimer);
+    this.freshTimer = setTimeout(() => this.fresh.set(null), 1500);
+  }
+
   refresh(): void {
     this.changed.update((n) => n + 1);
   }

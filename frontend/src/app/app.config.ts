@@ -14,7 +14,7 @@ export const appConfig: ApplicationConfig = {
     // Read the saved session, and a sign-in link's tokens in the address (#access_token=...),
     // before the router starts: its first redirect would otherwise remove them from the URL
     provideAppInitializer(() => inject(SupabaseAuth).whenReady()),
-    provideRouter(routes, withComponentInputBinding(), withViewTransitions({ onViewTransitionCreated: pageMotion })),
+    provideRouter(routes, withComponentInputBinding(), withViewTransitions({ skipInitialTransition: true, onViewTransitionCreated: pageMotion })),
     provideHttpClient(withInterceptors([apiInterceptor])),
     // Angular's worker plus the icon badge (public/msal-sw.js). Its scope is /M-SAL2.0/ where
     // the app is served, never the root, so M-SAL is untouched (CLAUDE.md rule 15)

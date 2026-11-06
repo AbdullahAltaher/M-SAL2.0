@@ -15,6 +15,9 @@
         <span class="nm" dir="auto">{{ budgets.current()?.name }}</span>
         <app-icon name="chevD" [size]="18" [sw]="2.2" />
       </button>
+      @if (expenses()) {
+        <app-cycle-switch />
+      }
       @if (!expenses() && !admin()) {
         <span class="saved" id="savedDot" dir="rtl" role="status" [class.on]="savedOn()" [class.bad]="ledger.failed()">
           <app-icon [name]="ledger.failed() ? 'alert' : 'cloudOk'" [size]="16" />

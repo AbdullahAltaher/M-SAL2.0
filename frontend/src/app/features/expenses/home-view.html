@@ -6,12 +6,16 @@
     </div>
     @if (summary(); as s) {
       <div class="g-hero-label" dir="rtl">المتبقي</div>
-      <div class="g-hero-big" [class.over]="s.over"><bdi class="n" dir="ltr">{{ fmt(s.remaining) }}</bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+      <div class="g-hero-big" [class.over]="s.over"><bdi class="n" dir="ltr"><app-count [value]="+s.remaining" /></bdi><span class="u" dir="rtl">{{ unit }}</span></div>
       <div class="g-hero-range">
         <span class="rng"><span dir="rtl">{{ range()?.start }}</span><span class="sep" aria-hidden="true">←</span><span dir="rtl">{{ range()?.end }}</span></span>
       </div>
       <div class="g-bar" [class.over]="s.over" role="progressbar" aria-label="نسبة المصروف من المتاح" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="pct(s.progress)">
         <i [style.width.%]="pct(s.progress)"></i>
+      </div>
+      <div class="g-hero-foot">
+        <span class="grp"><span dir="rtl">صرفت</span><app-money [value]="s.spent" /></span>
+        <span class="grp"><span dir="rtl">من</span><app-money [value]="s.budget" />@if (+s.extra > 0) {<span class="x" dir="rtl">مع الدخل الإضافي</span>}</span>
       </div>
       @if (s.over) {
         <span class="g-over-tag" dir="rtl">تجاوزت المتاح</span>
@@ -65,7 +69,7 @@
                 <span class="g-card-title" dir="rtl">{{ d.over ? 'تجاوزت اليوم' : 'تقدر تصرف اليوم' }}</span>
                 <span class="g-pill"><span dir="rtl">باقي</span><bdi dir="ltr">{{ s.daysLeft }}</bdi><span dir="rtl">يوم</span></span>
               </div>
-              <div class="g-big" [class.over]="d.over"><bdi class="n" dir="ltr">{{ fmt(d.value) }}</bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+              <div class="g-big" [class.over]="d.over"><bdi class="n" dir="ltr"><app-count [value]="+(d.value ?? 0)" /></bdi><span class="u" dir="rtl">{{ unit }}</span></div>
               <div class="g-bar" [class.over]="d.over" role="progressbar" aria-label="المصروف اليوم من ميزانية اليوم" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="pct(d.frac)">
                 <i [style.width.%]="pct(d.frac)"></i>
               </div>
@@ -81,28 +85,17 @@
         }
       }
     }
-    <div class="g-pair">
-      <section class="g-card g-mini spent"><div class="lb" dir="rtl">المصروف</div><app-money [value]="s.spent" /></section>
-      <section class="g-card g-mini">
-        <div class="lb" dir="rtl">المخصَّص</div><app-money [value]="s.allowance" />
-        @if (+s.extra > 0) {
-          <div class="sub"><span dir="rtl">+ دخل إضافي </span><app-money [value]="s.extra" /></div>
-        }
-      </section>
-    </div>
   }
 
-  <button class="g-btn primary" type="button" (click)="sheets.newCycle()">وصل الراتب</button>
-
-  <section class="g-card g-tight">
-    <div class="g-card-head">
-      <span class="g-card-title" dir="rtl">آخر المصاريف</span>
+  <section class="x-day" aria-label="آخر المصاريف">
+    <div class="x-dayhead">
+      <h2 class="x-dayname" dir="rtl">آخر المصاريف</h2>
       @if (h.recent.length) {
         <a class="g-link" routerLink="/expenses/entries">عرض الكل</a>
       }
     </div>
     @if (h.recent.length) {
-      <ul class="g-rows">
+      <ul class="x-rows">
         @for (e of h.recent; track e.id) {
           <li app-entry-row [entry]="e" [showDate]="true" [today]="h.today"></li>
         }
@@ -111,4 +104,6 @@
       <p class="g-none" dir="rtl">لا توجد مصاريف في هذه الدورة بعد. اضغط + لإضافة مصروف.</p>
     }
   </section>
+
+  <button class="g-btn g-salary" type="button" (click)="sheets.newCycle()">وصل الراتب</button>
 }

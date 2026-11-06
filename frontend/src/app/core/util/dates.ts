@@ -64,3 +64,8 @@ export function dayLabel(date: string, today: string): string {
   if (date === addDays(today, 1)) return 'غدًا';
   return fullArabicDate(date);
 }
+
+/** "الخميس 6 نوفمبر", without the year (the day headings, DESIGN.md D-21). */
+export function weekdayDate(date: string): string {
+  return AR_WEEKDAYS[weekdayIndex(date)] + ' ' + shortArabicDate(date);
+}

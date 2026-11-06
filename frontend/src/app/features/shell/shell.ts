@@ -15,6 +15,7 @@ import { Dialogs } from '../../shared/sheet/dialogs';
 import { SheetHost } from '../../shared/sheet/sheet-host';
 import { ToastHost, Toasts } from '../../shared/toast/toast';
 import { LedgerStore } from '../budget/ledger-store';
+import { CycleSwitch } from '../expenses/cycle-switch';
 import { LockScreen } from '../lock/lock-screen';
 import { ImportExport } from '../settings/import-export';
 import { LastTab } from './last-tab';
@@ -23,12 +24,12 @@ import { LastTab } from './last-tab';
 /**
  * The signed-in frame: the glass background, the shared header, the sheet host, the toast host
  * and the keyboard proxy. The header (DESIGN.md D-08, D-14) shows only the person's name, which
- * opens the people menu, the saved mark in the budget, and the section switch (D-03), whose pill
- * slides while the page slides with it (D-32, app.config.ts).
+ * opens the people menu, the saved mark in the budget or the cycle in Expenses (D-18), and the
+ * section switch (D-03), whose pill slides while the page slides with it (D-32, app.config.ts).
  */
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, SheetHost, ToastHost, LockScreen, Icon, FloatingWallet],
+  imports: [RouterOutlet, SheetHost, ToastHost, LockScreen, Icon, FloatingWallet, CycleSwitch],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shell.html',
   host: { '(document:pointerdown)': 'outside($event)' },

@@ -2,57 +2,58 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 
 import { Api } from '../../core/api/api';
 import { ApiError } from '../../core/api/api-error';
-import { Day, Entry } from '../../core/api/models';
-import { dayLabel } from '../../core/util/dates';
+import { Day } from '../../core/api/models';
+import { dayLabel, weekdayDate } from '../../core/util/dates';
 import { Icon } from '../../shared/components/icon';
 import { MoneyView } from '../../shared/components/money';
+import { Collapse } from '../../shared/directives/collapse';
 import { Toasts } from '../../shared/toast/toast';
 import { EntryRow } from './entry-row';
 import { ExpensesStore } from './expenses-store';
 
 /**
- * S-21: all entries of the cycle by day, with search, one-tap category chips and "repeat last"
- * (M-SAL's renderEntriesView, R-ENT-08, R-ENT-10, R-ENT-11). Search runs on the server.
+ * S-21: all entries of the cycle by day, with search and the category chips behind a filter
+ * button (M-SAL's renderEntriesView, R-ENT-10, R-ENT-11), as clean rows (DESIGN.md D-21).
+ * "Repeat last" is gone: the one-tap shortcuts in the entry sheet replace it (D-25). Search
+ * runs on the server.
  */
 @Component({
   selector: 'app-entries-view',
-  imports: [Icon, MoneyView, EntryRow],
+  imports: [Icon, MoneyView, EntryRow, Collapse],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="g-search">
-      <span class="si" aria-hidden="true"><app-icon name="search" [size]="20" /></span>
-      <input #q class="field" type="search" dir="rtl" enterkeyhint="search" autocomplete="off" placeholder="ابحث بالاسم أو الفئة"
-             aria-label="بحث" [value]="query()" (input)="onQuery(q.value)">
-    </div>
-
-    <div class="g-chips" role="group" aria-label="تصفية بالفئة">
-      <button class="g-fchip" type="button" [attr.aria-pressed]="!cat()" (click)="cat.set('')"><span dir="rtl">الكل</span></button>
-      @for (c of chips(); track c.id) {
-        <button class="g-fchip" type="button" [attr.aria-pressed]="cat() === c.id" (click)="cat.set(cat() === c.id ? '' : c.id)">
-          <span class="e" aria-hidden="true">{{ c.emoji }}</span><span dir="rtl">{{ c.name }}</span>
-        </button>
-      }
-    </div>
-
-    @if (last(); as l) {
-      <button class="g-repeat" type="button" [attr.aria-label]="'كرر آخر مصروف بتاريخ اليوم: ' + nameOf(l)" (click)="store.duplicate(l)">
-        <app-icon name="repeat" [size]="20" />
-        <span class="lb" dir="rtl">كرر:</span>
-        <span class="nm" dir="auto">{{ nameOf(l) }}</span>
-        <span class="dash" aria-hidden="true">—</span>
-        <app-money [value]="l.amount" />
+    <div class="x-search">
+      <div class="g-search">
+        <span class="si" aria-hidden="true"><app-icon name="search" [size]="20" /></span>
+        <input #q class="field" type="search" dir="rtl" enterkeyhint="search" autocomplete="off" placeholder="ابحث بالاسم أو الفئة"
+               aria-label="بحث" [value]="query()" (input)="onQuery(q.value)">
+      </div>
+      <button class="x-filter" type="button" [class.on]="!!cat()" [attr.aria-expanded]="filterOpen()"
+              [attr.aria-label]="cat() ? 'التصفية: ' + catName() : 'تصفية بالفئة'" (click)="filterOpen.set(!filterOpen())">
+        <app-icon name="sliders" [size]="20" />
       </button>
-    }
+    </div>
+
+    <div class="g-col" [appCollapse]="filterOpen()">
+      <div class="g-chips" role="group" aria-label="تصفية بالفئة">
+        <button class="g-fchip" type="button" [attr.aria-pressed]="!cat()" (click)="cat.set('')"><span dir="rtl">الكل</span></button>
+        @for (c of chips(); track c.id) {
+          <button class="g-fchip" type="button" [attr.aria-pressed]="cat() === c.id" (click)="cat.set(cat() === c.id ? '' : c.id)">
+            <span class="e" aria-hidden="true">{{ c.emoji }}</span><span dir="rtl">{{ c.name }}</span>
+          </button>
+        }
+      </div>
+    </div>
 
     <div class="g-daystack">
       @if (days().length) {
         @for (d of days(); track d.date) {
-          <section class="g-card g-tight">
-            <div class="g-dayhead">
-              <h3 class="g-dayname" dir="rtl">{{ label(d.date) }}</h3>
+          <section class="x-day" [attr.aria-label]="label(d.date)">
+            <div class="x-dayhead">
+              <h3 class="x-dayname" dir="rtl">{{ label(d.date) }}</h3>
               <span class="g-daytot"><app-money [value]="d.spent" />@if (+d.extra > 0) {<span class="plus">+<app-money [value]="d.extra" /></span>}</span>
             </div>
-            <ul class="g-rows">
+            <ul class="x-rows">
               @for (e of d.entries; track e.id) {
                 <li app-entry-row [entry]="e" [today]="today()"></li>
               }
@@ -76,7 +77,7 @@ export class EntriesView {
   /** The cycle's days without any filter */
   protected readonly all = signal<Day[]>([]);
   private readonly filtered = signal<Day[] | null>(null);
-  protected readonly last = signal<Entry | null>(null);
+  protected readonly filterOpen = signal(false);
   protected readonly loaded = signal(false);
   protected readonly today = computed(() => this.store.home()?.today ?? '');
 
@@ -90,16 +91,15 @@ export class EntriesView {
   private timer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
-    // The whole cycle and "repeat last", again after any change
+    // The whole cycle, again after any change
     effect(() => {
       this.store.changed();
       const accountId = this.store.accountId();
       const key = this.store.selectedKey();
       if (!accountId || !key) return;
-      void Promise.all([this.api.entries(accountId, key), this.api.lastExpense(accountId)])
-        .then(([list, last]) => {
+      void this.api.entries(accountId, key)
+        .then((list) => {
           this.all.set(list.days);
-          this.last.set(last);
           this.loaded.set(true);
         })
         .catch((e: ApiError) => this.toasts.show(e.message));
@@ -127,11 +127,14 @@ export class EntriesView {
     this.timer = setTimeout(() => this.debounced.set(value), 300);
   }
 
-  protected nameOf(e: Entry): string {
-    return e.name || this.store.catOf(e.categoryId).name;
+  protected catName(): string {
+    return this.store.catOf(this.cat()).name;
   }
 
+  /** "اليوم · الخميس 6 نوفمبر", "أمس · …", or "الثلاثاء 4 نوفمبر" (D-21) */
   protected label(date: string): string {
-    return dayLabel(date, this.today());
+    const near = dayLabel(date, this.today());
+    const full = weekdayDate(date);
+    return near === 'اليوم' || near === 'أمس' ? near + ' · ' + full : full;
   }
 }

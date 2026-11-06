@@ -6,18 +6,20 @@ import { CycleSummary } from '../../core/api/models';
 import { shortArabicDate } from '../../core/util/dates';
 import { AED, formatMoney } from '../../core/util/money';
 import { Icon } from '../../shared/components/icon';
+import { CountTo } from '../../shared/components/count-to';
 import { MoneyView } from '../../shared/components/money';
 import { EntryRow } from './entry-row';
 import { EntrySheets } from './entry-sheets';
 import { ExpensesStore } from './expenses-store';
 
 /**
- * S-20: the Expenses home (M-SAL's renderHome): the account card, "can spend today", the
- * spent/allowance pair, "salary arrived" and the last 5 entries (R-CYC-04 to R-CYC-06).
+ * S-20: the Expenses home (M-SAL's renderHome, R-CYC-04 to R-CYC-06), as the owner uses it
+ * (DESIGN.md D-18): the account card with what was spent of what is available, "can spend today",
+ * the last 5 entries, then "salary arrived". The two big numbers count to their new value.
  */
 @Component({
   selector: 'app-home-view',
-  imports: [Icon, MoneyView, EntryRow, RouterLink],
+  imports: [Icon, MoneyView, EntryRow, RouterLink, CountTo],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home-view.html',
 })

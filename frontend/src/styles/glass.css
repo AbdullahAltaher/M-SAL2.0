@@ -62,12 +62,9 @@ header.top .top-row{position:relative;min-height:44px}
 .g-head{display:flex;flex-direction:column;gap:2px;padding:6px 4px 0}
 .g-h1{font:700 30px/1.2 var(--ar);color:var(--x-text)}
 .g-sub{font:500 15px var(--ar);color:var(--x-muted)}
-.g-cyc{display:flex;align-items:center;gap:4px;padding:4px;border-radius:999px;background:var(--x-field);border:1px solid var(--x-line)}
 .g-circ{flex:none;position:relative;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:none;background:transparent;color:var(--x-text);cursor:pointer;transition:transform .12s cubic-bezier(.23,1,.32,1)}
 .g-circ:active:not(:disabled){transform:scale(.96)}
 .g-circ:disabled{opacity:.35;cursor:default}
-.g-cyc-l{flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:transparent;border:none;border-radius:999px;color:var(--x-text);font:600 15px var(--ar);cursor:pointer}
-.g-cyc-pos{font:500 12px var(--ar);color:var(--x-muted)}
 .rng{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
 .rng .sep{color:var(--x-warn);font-family:var(--num)}
 .g-card{position:relative;background:var(--x-card);border:1px solid var(--x-line);border-radius:26px;padding:18px;box-shadow:var(--x-hi),var(--x-shadow)}
@@ -120,34 +117,8 @@ header.top .top-row{position:relative;min-height:44px}
 .g-prompt .ic{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--x-tile);color:var(--x-accent-ink)}
 .g-prompt .tx{flex:1;min-width:0}
 .g-prompt .ch{flex:none;color:var(--x-muted)}
-.g-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.g-mini{padding:16px 16px 14px}
-.g-mini .lb{font:500 14px var(--ar);color:var(--x-muted)}
-.g-mini .money{margin-top:6px;font-size:22px;font-weight:600;color:var(--x-text)}
-.g-mini .money .u{font-size:13px}
-.g-mini .sub{margin-top:4px;font:500 12px var(--ar);color:var(--x-muted)}
-.g-mini.spent .money{color:var(--x-exp)}
-.g-mini .sub .money{margin:0;font-size:14px}
-.g-mini .sub .money .u{font-size:11px}
 /* ---- entry rows (home recents, entries view) ---- */
-.g-rows{list-style:none}
-.g-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:8px;min-height:72px;padding:4px 0;border-bottom:1px solid var(--x-line-soft)}
-.g-rows .g-row:last-child{border-bottom:none}
 .g-tile{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--x-tile);border:1px solid var(--x-line);font-size:22px;line-height:1}
-.g-rmain{min-width:0}
-.g-rname{font:600 16px/1.3 var(--ar);color:var(--x-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.g-rsub{display:flex;align-items:baseline;gap:6px;min-width:0;white-space:nowrap}
-.g-ramt{direction:ltr;unicode-bidi:isolate;display:inline-flex;align-items:baseline;gap:2px;font:600 15px var(--num);color:var(--x-exp)}
-.g-ramt.inc{color:var(--x-inc)}
-.g-ramt .money{font-weight:600}
-.g-ramt .money .u{color:inherit;opacity:.78;font-size:12px}
-.g-rcat,.g-rdate{font:400 12px var(--ar);color:var(--x-muted);overflow:hidden;text-overflow:ellipsis}
-.g-racts{display:flex;align-items:center}
-.g-ib{position:relative;width:44px;height:44px;display:grid;place-items:center;background:none;border:none;color:var(--x-muted);cursor:pointer;transition:transform .12s cubic-bezier(.23,1,.32,1)}
-.g-ib::before{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--x-field);border:1px solid var(--x-line)}
-.g-ib svg{position:relative}
-.g-ib:active{transform:scale(.96)}
-.g-ib.del{color:var(--x-exp)}
 /* old components that still show in this state pick up the glass look through the re-pointed tokens */
 .pill{min-height:44px;background:var(--x-field);border-color:var(--x-line);color:var(--x-text);border-radius:999px}
 .pill.primary{background:linear-gradient(180deg,var(--x-btn-a),var(--x-btn-b));border-color:rgba(255,255,255,.18);color:#fff}
@@ -162,8 +133,6 @@ header.top .top-row{position:relative;min-height:44px}
   .g-h1{font-size:26px}
   .g-hero-big{font-size:40px}
   .g-big{font-size:32px}
-  .g-pair{gap:10px}
-  .g-mini{padding:14px 12px 12px}
 }
 /* ---- entries view ---- */
 .g-search{position:relative}
@@ -175,17 +144,7 @@ header.top .top-row{position:relative;min-height:44px}
 .g-fchip .e{font-size:18px;line-height:1}
 .g-fchip:active{transform:scale(.96)}
 .g-fchip[aria-pressed="true"]{background:linear-gradient(180deg,var(--x-btn-a),var(--x-btn-b));border-color:rgba(255,255,255,.2);color:#fff}
-.g-repeat{display:flex;align-items:center;gap:8px;width:100%;min-width:0;min-height:50px;padding:0 16px;border-radius:999px;background:var(--x-field);border:1px dashed var(--x-accent);color:var(--x-text);font:500 15px var(--ar);cursor:pointer;transition:transform .12s cubic-bezier(.23,1,.32,1)}
-.g-repeat:active{transform:scale(.97)}
-.g-repeat svg{flex:none;color:var(--x-accent-ink)}
-.g-repeat .lb,.g-repeat .dash{flex:none;color:var(--x-muted)}
-.g-repeat .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:start}
-.g-repeat .money{flex:none;font-weight:600;color:var(--x-exp)}
-.g-repeat .money .u{color:inherit;opacity:.8}
 .g-daystack{display:flex;flex-direction:column;gap:12px}
-.g-tight{padding:12px 12px 6px}
-.g-dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:2px 4px 8px}
-.g-dayname{font:600 15px var(--ar);color:var(--x-text)}
 .g-daytot{display:inline-flex;align-items:baseline;gap:8px}
 .g-daytot .money{font-size:14px;font-weight:500;color:var(--x-muted)}
 .g-daytot .money .u{font-size:11px}
@@ -240,7 +199,6 @@ header.top .top-row{position:relative;min-height:44px}
 .toast{background:var(--x-glass-solid);color:var(--x-text);border:1px solid var(--x-line);border-radius:999px;padding:4px 8px 4px 18px;box-shadow:var(--x-hi),0 16px 36px -10px rgba(0,0,0,.55)}
 .t-act{min-width:44px;min-height:44px;color:var(--x-accent-ink)}
 .toast .money .u{color:var(--x-muted)}
-.g-tight .g-card-head{padding:2px 4px 0}
 /* ---- stats ---- */
 .g-total .g-big{margin:2px 0 6px}
 .g-donut{position:relative;width:196px;height:196px;margin:2px auto 12px}
@@ -411,3 +369,51 @@ html[data-motion="fade"]::view-transition-new(page){animation:.3s var(--ease-out
 .b-group .tline.rest{margin-top:4px;padding-top:8px;border-top:1px solid var(--x-line-soft)}
 .b-addgroup{width:100%;min-height:54px;border:1.5px dashed var(--x-line);border-radius:22px;background:none;color:var(--x-accent-ink);font:600 15px var(--ar);cursor:pointer;transition:transform .12s var(--ease-out)}
 .b-addgroup:active{transform:scale(.98)}
+/* ---- Expenses (D-18, D-21, D-25) ---- */
+/* the cycle, small, in the header beside the name */
+.cyc{display:inline-flex;align-items:center;margin-inline-start:auto;border-radius:999px;background:var(--x-field);border:1px solid var(--x-line)}
+.cyc-b{width:34px;height:36px;display:grid;place-items:center;background:none;border:none;border-radius:999px;color:var(--x-text);cursor:pointer}
+.cyc-b:disabled{opacity:.3;cursor:default}
+.cyc-b:active:not(:disabled){transform:scale(.92)}
+.cyc-l{min-height:36px;padding:0 4px;background:none;border:none;color:var(--x-text);font:600 13px var(--ar);white-space:nowrap;cursor:pointer}
+/* the account card: what was spent of what is available, under the bar */
+.g-hero-foot{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:10px;font:500 13px var(--ar);color:var(--x-on-hero-muted)}
+.g-hero-foot .grp{display:inline-flex;align-items:baseline;gap:5px;flex-wrap:wrap}
+.g-hero-foot .money{font-size:14px;font-weight:600;color:#fff}
+.g-hero-foot .money .u{color:var(--x-on-hero-muted)}
+.g-hero-foot .x{font-size:11px}
+.g-salary{width:100%}
+/* days and rows */
+.x-day{display:flex;flex-direction:column;gap:6px}
+.x-dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:4px 6px 0}
+.x-dayname{font:500 13px var(--ar);color:var(--x-muted)}
+.x-dayhead .g-link{min-height:32px}
+.x-rows{list-style:none;display:flex;flex-direction:column;gap:6px}
+.x-row{position:relative;border-radius:18px;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.x-front{position:relative;z-index:1;display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:8px 14px 8px 12px;background:var(--x-card-solid);border:1px solid var(--x-line);border-radius:18px;color:var(--x-text);text-align:start;cursor:pointer;transition:transform .32s var(--ease-ios)}
+.x-row.dragging .x-front{transition:none}
+.x-front:active{background:color-mix(in srgb,var(--x-card-solid) 92%,var(--x-text))}
+.x-tile{flex:none;width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:21px;line-height:1;background:color-mix(in srgb,var(--c,var(--x-accent)) 20%,transparent);border:1px solid color-mix(in srgb,var(--c,var(--x-accent)) 35%,transparent)}
+.x-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.x-name{font:600 16px/1.3 var(--ar);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.x-sub{font:400 12px var(--ar);color:var(--x-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.x-amt{flex:none;direction:ltr;display:inline-flex;align-items:baseline;gap:1px;font:600 16px var(--num);color:var(--x-exp)}
+.x-amt.inc{color:var(--x-inc)}
+.x-amt .money .u{color:inherit;opacity:.75;font-size:11px}
+/* what shows under a dragged row: delete on the left edge, copy on the right (right-to-left) */
+.x-act{position:absolute;inset:0;display:none;align-items:center;gap:8px;padding:0 22px;border-radius:18px;color:#fff;font:600 14px var(--ar)}
+.x-act.del{justify-content:flex-end;background:#C73A2E}
+.x-act.copy{justify-content:flex-start;background:var(--x-btn-b)}
+.x-row[data-swipe="del"] .x-act.del,.x-row[data-swipe="copy"] .x-act.copy{display:flex}
+.x-act svg,.x-act span{opacity:.55;transition:opacity .15s,transform .15s var(--ease-out)}
+.x-row.armed .x-act svg,.x-row.armed .x-act span{opacity:1;transform:scale(1.06)}
+.x-vh button{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* the entry just added slides in at the top (D-10) */
+.x-row.fresh{animation:rowIn .5s var(--ease-out)}
+@keyframes rowIn{from{opacity:0;transform:translateY(-10px) scale(.97)}}
+/* search with the filter button beside it */
+.x-search{display:flex;align-items:center;gap:8px}
+.x-search .g-search{flex:1;min-width:0}
+.x-filter{flex:none;position:relative;width:50px;height:50px;display:grid;place-items:center;border-radius:50%;background:var(--x-field);border:1px solid var(--x-line);color:var(--x-text);cursor:pointer}
+.x-filter.on{background:linear-gradient(180deg,var(--x-btn-a),var(--x-btn-b));color:#fff;border-color:rgba(255,255,255,.2)}
+.x-filter[aria-expanded="true"]:not(.on){border-color:var(--x-accent)}
