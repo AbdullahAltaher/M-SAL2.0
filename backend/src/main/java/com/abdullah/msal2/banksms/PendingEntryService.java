@@ -87,8 +87,10 @@ public class PendingEntryService {
 		Category category = categories.find(userId, request.categoryId())
 				.filter(c -> c.getBudgetId().equals(p.budgetId()))
 				.orElseThrow(() -> new ApiException(ErrorCode.SYS_E004));
+		// The day it arrived, unless the user picked another (B-21); checked as any entry date
+		String date = request.entryDate() != null ? request.entryDate() : p.entryDate().toString();
 		EntryResponse entry = entries.create(userId, p.budgetId(), new CreateEntryRequest("EXPENSE",
-				p.amount().toPlainString(), request.name(), category.getId(), p.entryDate().toString(), p.accountId()));
+				p.amount().toPlainString(), request.name(), category.getId(), date, p.accountId()));
 		if (Boolean.TRUE.equals(request.remember())) {
 			// The whole cleaned name, not its first word: "AL SARAB CAFETERIA" starts with "AL" (4.4)
 			String word = MerchantClassifier.clean(p.merchant());

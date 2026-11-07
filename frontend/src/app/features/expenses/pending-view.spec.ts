@@ -129,8 +129,27 @@ describe('PendingCard (BANK-SMS.md B-18)', () => {
     fixture.detectChanges();
     el.querySelector<HTMLButtonElement>('.pc-acts .primary')!.click();
     await settle(fixture);
-    expect(approved).toEqual([{ id: 'p1', body: { categoryId: 'c-shop', name: 'هدية', remember: true } }]);
+    expect(approved).toEqual([{ id: 'p1', body: { categoryId: 'c-shop', name: 'هدية', remember: true, entryDate: '2026-11-11' } }]);
     expect(host.done.map((d) => d.remembered)).toEqual(['c-shop']);
+  });
+
+  it('counts on another day when picked, such as yesterday after midnight (B-21)', async () => {
+    const { el, fixture } = render();
+    const chip = el.querySelector<HTMLButtonElement>('.pc-date')!;
+    expect(chip.textContent).toContain('اليوم');
+    chip.click();
+    fixture.detectChanges();
+    [...el.querySelectorAll<HTMLButtonElement>('.pc-dates .g-dchip')].find((b) => b.textContent?.includes('أمس'))!.click();
+    fixture.detectChanges();
+    expect(el.querySelector('.pc-date')?.textContent).toContain('أمس');
+    expect(el.querySelector('.pc-date')?.classList).toContain('moved');
+    const name = el.querySelector<HTMLInputElement>('.pc-name')!;
+    name.value = 'سحور';
+    name.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    el.querySelector<HTMLButtonElement>('.pc-acts .primary')!.click();
+    await settle(fixture);
+    expect(approved).toEqual([{ id: 'p1', body: { categoryId: 'c-food', name: 'سحور', remember: false, entryDate: '2026-11-10' } }]);
   });
 
   it('never offers "remember" for a merchant picked every time (B-15)', () => {

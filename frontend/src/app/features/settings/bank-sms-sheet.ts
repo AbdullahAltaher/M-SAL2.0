@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { Api } from '../../core/api/api';
@@ -23,7 +24,7 @@ import { NewSmsToken } from './new-token';
  */
 @Component({
   selector: 'app-bank-sms-sheet',
-  imports: [Icon],
+  imports: [Icon, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (settings(); as s) {
@@ -105,22 +106,13 @@ import { NewSmsToken } from './new-token';
                 <span class="bs-kw"><bdi dir="ltr">{{ k.keyword }}</bdi>
                   <button type="button" [attr.aria-label]="'حذف ' + k.keyword" (click)="removeWord(k)"><app-icon name="close" [size]="13" [sw]="2.4" /></button></span>
               }
-              <button class="bs-add" type="button" (click)="startWord(g.category.id)">+ كلمة</button>
+              @if (adding() !== g.category.id) {
+                <button class="bs-add" type="button" (click)="startWord(g.category.id)">+ كلمة</button>
+              }
             </div>
-          </div>
-        }
-        @if (adding() !== undefined && adding() !== null && !hasWords(adding()!)) {
-          <div class="bs-group">
-            <div class="bs-cat" dir="rtl"><span class="e" aria-hidden="true">{{ store.catOf(adding()).emoji }}</span>{{ store.catOf(adding()).name }}</div>
-          </div>
-        }
-        @if (adding() !== undefined) {
-          <div class="st-row bs-form">
-            <input #wordField class="st-time bs-word" type="text" dir="ltr" maxlength="40" autocapitalize="characters" autocomplete="off"
-                   [attr.aria-label]="adding() ? 'كلمة لفئة ' + store.catOf(adding()).name : 'جهة تختار فئتها كل مرة'"
-                   [placeholder]="adding() ? 'CAFE' : 'FASTBITE'" (keydown.enter)="addWord(wordField.value)">
-            <button class="bs-ok" type="button" [disabled]="busy()" (click)="addWord(wordField.value)">إضافة</button>
-            <button class="bs-x" type="button" aria-label="إلغاء" (click)="adding.set(undefined)"><app-icon name="close" [size]="16" [sw]="2.2" /></button>
+            @if (adding() === g.category.id) {
+              <ng-container [ngTemplateOutlet]="wordForm" />
+            }
           </div>
         }
         @if (others().length) {
@@ -133,6 +125,9 @@ import { NewSmsToken } from './new-token';
                 </button>
               }
             </div>
+            @if (adding() && !hasWords(adding()!)) {
+              <ng-container [ngTemplateOutlet]="wordForm" />
+            }
           </div>
         }
       </div>
@@ -146,14 +141,30 @@ import { NewSmsToken } from './new-token';
               <span class="bs-kw"><bdi dir="ltr">{{ k.keyword }}</bdi>
                 <button type="button" [attr.aria-label]="'حذف ' + k.keyword" (click)="removeWord(k)"><app-icon name="close" [size]="13" [sw]="2.4" /></button></span>
             }
-            <button class="bs-add" type="button" (click)="startWord(null)">+ جهة</button>
+            @if (adding() !== null) {
+              <button class="bs-add" type="button" (click)="startWord(null)">+ جهة</button>
+            }
           </div>
+          @if (adding() === null) {
+            <ng-container [ngTemplateOutlet]="wordForm" />
+          }
         </div>
       </div>
       <p class="st-note" dir="rtl">جهة تحتمل عدة فئات (مثل تطبيقات التوصيل) تصل بدون اقتراح، وتختار فئتها في كل طلب.</p>
     } @else if (failed()) {
       <p class="g-none" dir="rtl">{{ failed() }}</p>
     }
+
+    <!-- Adding a word, shown inside the group it belongs to -->
+    <ng-template #wordForm>
+      <div class="bs-form-in">
+        <input #wordField class="st-time bs-word" type="text" dir="ltr" maxlength="40" autocapitalize="characters" autocomplete="off"
+               [attr.aria-label]="adding() ? 'كلمة لفئة ' + store.catOf(adding()).name : 'جهة تختار فئتها كل مرة'"
+               [placeholder]="adding() ? 'CAFE' : 'FASTBITE'" (keydown.enter)="addWord(wordField.value)">
+        <button class="bs-ok" type="button" [disabled]="busy()" (click)="addWord(wordField.value)">إضافة</button>
+        <button class="bs-x" type="button" aria-label="إلغاء" (click)="adding.set(undefined)"><app-icon name="close" [size]="16" [sw]="2.2" /></button>
+      </div>
+    </ng-template>
   `,
 })
 export class BankSmsSheet {

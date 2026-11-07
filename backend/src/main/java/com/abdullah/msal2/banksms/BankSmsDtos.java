@@ -52,8 +52,12 @@ public final class BankSmsDtos {
 			boolean askEachTime, Instant receivedAt, LocalDate entryDate, String smsText) {
 	}
 
-	/** @param remember add the merchant's name as a word of this category (B-16) */
-	public record ApproveRequest(UUID categoryId, @Size(max = 200) String name, Boolean remember) {
+	/**
+	 * @param remember  add the merchant's name as a word of this category (B-16)
+	 * @param entryDate another day than the one the message arrived, such as yesterday for a payment
+	 *                  after midnight (B-21); null keeps the day it arrived
+	 */
+	public record ApproveRequest(UUID categoryId, @Size(max = 200) String name, Boolean remember, String entryDate) {
 	}
 
 	// ── Settings ────────────────────────────────────────────────

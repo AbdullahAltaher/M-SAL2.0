@@ -132,7 +132,7 @@ export class Api {
   // ── SRV-011: bank messages (BANK-SMS.md 4.5) ───────────────
   pendingEntries(budgetId: string) { return this.get<PendingEntry[]>(`/budgets/${budgetId}/pending-entries`); }
   /** Adds the entry exactly as createEntry does, and deletes the pending one with its message (B-07) */
-  approvePending(id: string, body: { categoryId: string; name: string; remember: boolean }) {
+  approvePending(id: string, body: { categoryId: string; name: string; remember: boolean; entryDate?: string }) {
     return this.post<Entry>(`/pending-entries/${id}/approve`, body);
   }
   ignorePending(id: string) { return this.delete(`/pending-entries/${id}`); }

@@ -317,6 +317,27 @@ class BankSmsApiTest extends IntegrationTest {
 	}
 
 	@Test
+	void anotherDayCanBePickedWhenApproving() throws Exception {
+		// Paid after midnight, counted on the day before (B-21)
+		TestUser user = signUp("sara");
+		String token = ready(user);
+		ingest(token, debit("7.00", "SAND KIOSK"));
+		String id = pending(user).get(0).get("id").asString();
+		String food = categoryOf(user, "cat_food");
+
+		Map<String, Object> bad = new HashMap<>(Map.of("categoryId", food, "name", "شاي", "entryDate", "2026-02-30"));
+		send(user, post("/api/v1/pending-entries/" + id + "/approve"), bad).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("SRV-001-E004"));
+		assertThat(pending(user)).hasSize(1);
+
+		Map<String, Object> body = new HashMap<>(Map.of("categoryId", food, "name", "شاي", "entryDate", "2026-11-10"));
+		JsonNode entry = json(send(user, post("/api/v1/pending-entries/" + id + "/approve"), body)
+				.andExpect(status().isCreated()));
+		assertThat(entry.get("entryDate").asString()).isEqualTo("2026-11-10");
+		assertThat(pending(user)).isEmpty();
+	}
+
+	@Test
 	void ignoringDeletesItWithoutAnEntry() throws Exception {
 		TestUser user = signUp("sara");
 		String token = ready(user);

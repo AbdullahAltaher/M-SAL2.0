@@ -495,7 +495,7 @@
 |---|---|---|
 | `POST` | `/sms/ingest` | **من الاختصار فقط**، بالرمز الشخصي بدل JWT (9.6). الجسم `{ text }`، والرد دائماً `200`: `{ status: PENDING | DUPLICATE | IGNORED, message }` |
 | `GET` | `/budgets/{budgetId}/pending-entries` | الطلبات، الأحدث أولاً: `{id, accountId, amount, merchant, categoryId, askEachTime, receivedAt, entryDate, smsText}` |
-| `POST` | `/pending-entries/{id}/approve` | `{ categoryId, name, remember }` ← `201` والمصروف (مثل `POST /entries`، مع `cycleKey`)، ويُحذف الطلب ونصه |
+| `POST` | `/pending-entries/{id}/approve` | `{ categoryId, name, remember, entryDate? }` (`entryDate` اختياري، الافتراضي يوم الوصول، B-21) ← `201` والمصروف (مثل `POST /entries`، مع `cycleKey`)، ويُحذف الطلب ونصه |
 | `DELETE` | `/pending-entries/{id}` | تجاهل (B-05) ← `204` |
 | `GET` | `/sms/settings` | `{ links: [{suffix, accountId, accountName, archived, budgetId, budgetName}], token: {hint, createdAt, lastUsedAt} | null, keywords: [{id, budgetId, keyword, categoryId}] }` |
 | `PUT` | `/sms/links/{suffix}` | ربط آخر أرقام الحساب `{ accountId }` (أو نقلها لحساب آخر) ← `204` |

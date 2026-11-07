@@ -6,7 +6,7 @@ import { ApiError } from '../../core/api/api-error';
 import { Category, Entry, PendingEntry } from '../../core/api/models';
 import { SessionStore } from '../../core/session/session-store';
 import { sliceVar } from '../../core/util/chart';
-import { dayLabel } from '../../core/util/dates';
+import { addDays, dayLabel, parseDate, weekdayDate } from '../../core/util/dates';
 import { Icon } from '../../shared/components/icon';
 import { MoneyView } from '../../shared/components/money';
 import { Toasts } from '../../shared/toast/toast';
@@ -47,7 +47,7 @@ export interface CardDone {
     </div>
 
     <div class="pc-catrow">
-      <button class="pc-chip" type="button" [class.empty]="!cat()" [attr.aria-expanded]="picking()" (click)="picking.set(!picking())">
+      <button class="pc-chip" type="button" [class.empty]="!cat()" [attr.aria-expanded]="picking()" (click)="picking.set(!picking()); dating.set(false)">
         @if (cat(); as c) {
           <span class="e" aria-hidden="true">{{ c.emoji }}</span><span dir="rtl">{{ c.name }}</span>
         } @else {
@@ -55,12 +55,28 @@ export interface CardDone {
         }
         <app-icon name="chevD" [size]="14" [sw]="2.4" />
       </button>
+      <!-- the day it counts on: the day it arrived, or another (B-21) -->
+      <button class="pc-chip pc-date" type="button" [class.moved]="date() !== entry().entryDate" [attr.aria-expanded]="dating()"
+              [attr.aria-label]="'اليوم: ' + dateLabel()" (click)="dating.set(!dating()); picking.set(false)">
+        <app-icon name="calendar" [size]="15" /><span dir="rtl">{{ dateLabel() }}</span><app-icon name="chevD" [size]="14" [sw]="2.4" />
+      </button>
       @if (entry().askEachTime && !cat()) {
         <span class="pc-hint" dir="rtl">جهة تختار فئتها كل مرة</span>
       } @else if (suggested() && cat()?.id === entry().categoryId) {
         <span class="pc-hint" dir="rtl">مقترحة</span>
       }
     </div>
+    @if (dating()) {
+      <div class="g-dchips pc-dates" role="group" aria-label="اليوم">
+        <button class="g-dchip" type="button" [attr.aria-pressed]="date() === today()" (click)="setDate(today())">اليوم</button>
+        <button class="g-dchip" type="button" [attr.aria-pressed]="date() === yesterday()" (click)="setDate(yesterday())">أمس</button>
+        <label class="g-dchip" [attr.data-on]="otherDate() ? '1' : '0'">
+          <span dir="rtl">{{ otherDate() ? shortDate(date()) : 'تاريخ آخر' }}</span>
+          <input #dateField class="g-date-in" type="date" dir="ltr" aria-label="تاريخ آخر" [value]="date()"
+                 (click)="openPicker(dateField)" (change)="setDate(dateField.value)">
+        </label>
+      </div>
+    }
     @if (picking()) {
       <div class="g-chips pc-cats" role="group" aria-label="الفئة">
         @for (c of categories(); track c.id) {
@@ -122,6 +138,15 @@ export class PendingCard {
   protected readonly name = signal('');
   protected readonly remember = signal(false);
   protected readonly picking = signal(false);
+  /** The day the entry counts on: the day it arrived, unless picked (B-21) */
+  protected readonly date = linkedSignal(() => this.entry().entryDate);
+  protected readonly dating = signal(false);
+  protected readonly yesterday = computed(() => (this.today() ? addDays(this.today(), -1) : ''));
+  protected readonly otherDate = computed(() => this.date() !== this.today() && this.date() !== this.yesterday());
+  protected readonly dateLabel = computed(() => {
+    const d = this.date();
+    return d === this.today() ? 'اليوم' : d === this.yesterday() ? 'أمس' : this.shortDate(d);
+  });
   protected readonly showText = signal(false);
   protected readonly suggestions = signal<string[]>([]);
   protected readonly busy = signal(false);
@@ -173,6 +198,25 @@ export class PendingCard {
     if (id === this.entry().categoryId) this.remember.set(false);
   }
 
+  protected setDate(d: string): void {
+    if (!parseDate(d)) return;
+    this.date.set(d);
+    this.dating.set(false);
+    this.hint.set('');
+  }
+
+  protected openPicker(input: HTMLInputElement): void {
+    try {
+      input.showPicker?.();
+    } catch {
+      // The native tap already opens it
+    }
+  }
+
+  protected shortDate(d: string): string {
+    return parseDate(d) ? weekdayDate(d) : 'تاريخ آخر';
+  }
+
   protected setName(value: string): void {
     this.name.set(value);
     this.bad.set(false);
@@ -196,7 +240,7 @@ export class PendingCard {
     this.busy.set(true);
     try {
       const remember = this.canRemember() && this.remember();
-      const entry = await this.api.approvePending(this.entry().id, { categoryId, name: this.name().trim(), remember });
+      const entry = await this.api.approvePending(this.entry().id, { categoryId, name: this.name().trim(), remember, entryDate: this.date() });
       this.leave({ id: this.entry().id, entry, remembered: remember ? categoryId : undefined, from: button });
     } catch (e) {
       this.hint.set((e as ApiError).message);
