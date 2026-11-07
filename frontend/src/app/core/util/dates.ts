@@ -69,3 +69,10 @@ export function dayLabel(date: string, today: string): string {
 export function weekdayDate(date: string): string {
   return AR_WEEKDAYS[weekdayIndex(date)] + ' ' + shortArabicDate(date);
 }
+
+/** A day heading: "اليوم · الخميس 6 نوفمبر", "أمس · …", or "الثلاثاء 4 نوفمبر" (D-21, D-39). */
+export function dayHeading(date: string, today: string): string {
+  const near = dayLabel(date, today);
+  const full = weekdayDate(date);
+  return near === 'اليوم' || near === 'أمس' ? near + ' · ' + full : full;
+}

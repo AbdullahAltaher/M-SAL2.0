@@ -1,6 +1,6 @@
 import { parseAllowance, parseEntryAmount, parseLedgerAmount, toLatinDigits } from './amounts';
 import { computeTotals } from './budget-totals';
-import { dayLabel, fullArabicDate, parseDate, shortArabicDate, weekdayIndex } from './dates';
+import { dayHeading, dayLabel, fullArabicDate, parseDate, shortArabicDate, weekdayIndex } from './dates';
 import { formatMoney, moneyText } from './money';
 
 /** Ported from M-SAL's test/expenses.test.js, with the examples in BUSINESS_RULES.md. */
@@ -103,6 +103,12 @@ describe('R-GEN-06: dates', () => {
     expect(dayLabel('2026-10-03', '2026-10-02')).toBe('غدًا');
     expect(dayLabel('2026-09-28', '2026-10-02')).toBe('الاثنين 28 سبتمبر 2026');
     expect(fullArabicDate('2026-10-02')).toBe('الجمعة 2 أكتوبر 2026');
+  });
+
+  it('day headings: today and yesterday keep the weekday and date, other days without the year (D-21)', () => {
+    expect(dayHeading('2026-11-06', '2026-11-06')).toBe('اليوم · الجمعة 6 نوفمبر');
+    expect(dayHeading('2026-11-05', '2026-11-06')).toBe('أمس · الخميس 5 نوفمبر');
+    expect(dayHeading('2026-11-03', '2026-11-06')).toBe('الثلاثاء 3 نوفمبر');
   });
 
   it('finds yesterday across month and year ends', () => {

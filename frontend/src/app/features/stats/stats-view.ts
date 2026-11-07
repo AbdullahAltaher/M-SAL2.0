@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 
 import { Api } from '../../core/api/api';
 import { ApiError } from '../../core/api/api-error';
-import { Stats } from '../../core/api/models';
+import { Day, Stats } from '../../core/api/models';
 import { chartNum, chartX, smoothPath, sliceVar } from '../../core/util/chart';
-import { parseDate } from '../../core/util/dates';
+import { dayHeading, parseDate } from '../../core/util/dates';
 import { AED, formatMoney } from '../../core/util/money';
 import { Icon } from '../../shared/components/icon';
 import { MoneyView } from '../../shared/components/money';
@@ -14,6 +14,17 @@ import { ExpensesStore } from '../expenses/expenses-store';
 
 const R = 42;
 const CIRC = 2 * Math.PI * R;
+
+/**
+ * D-39: one category's days for "usage by category": expenses only (income and days without an
+ * expense dropped), newest day first.
+ */
+export function categoryDays(days: Day[]): Day[] {
+  return days
+    .map((d) => ({ ...d, entries: d.entries.filter((e) => e.type === 'EXPENSE') }))
+    .filter((d) => d.entries.length > 0)
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
 
 /**
  * S-22: statistics of the selected cycle (M-SAL's renderStatsView, R-STA-01 to R-STA-06).
@@ -90,6 +101,12 @@ export class StatsView {
 
   protected readonly sliceVar = sliceVar;
 
+  /** D-39: the category opened in "usage by category" (one at a time), and the days loaded per category */
+  protected readonly openCat = signal<string | null>(null);
+  protected readonly catDays = signal<Record<string, Day[]>>({});
+  /** The account and cycle the loaded days belong to */
+  private scope = '';
+
   constructor() {
     effect(() => {
       this.store.changed();
@@ -97,7 +114,45 @@ export class StatsView {
       const key = this.store.selectedKey();
       if (!accountId || !key) return;
       void this.api.stats(accountId, key).then((s) => this.stats.set(s)).catch((e: ApiError) => this.toasts.show(e.message));
+      // Another account or cycle closes the open category; a change in the same one reloads it
+      const scope = accountId + '|' + key;
+      if (scope !== this.scope) {
+        this.scope = scope;
+        this.openCat.set(null);
+        this.catDays.set({});
+        return;
+      }
+      // Keep the open list on screen until its new days arrive
+      const open = untracked(() => this.openCat());
+      const kept = open ? untracked(() => this.catDays()[open]) : undefined;
+      this.catDays.set(open && kept ? { [open]: kept } : {});
+      if (open) this.loadCategory(open);
     });
+  }
+
+  protected toggle(categoryId: string): void {
+    if (this.openCat() === categoryId) {
+      this.openCat.set(null);
+      return;
+    }
+    this.openCat.set(categoryId);
+    if (!this.catDays()[categoryId]) this.loadCategory(categoryId);
+  }
+
+  private loadCategory(categoryId: string): void {
+    const accountId = this.store.accountId();
+    const key = this.store.selectedKey();
+    if (!accountId || !key) return;
+    const scope = this.scope;
+    void this.api.entries(accountId, key, undefined, categoryId)
+      .then((list) => {
+        if (scope === this.scope) this.catDays.update((m) => ({ ...m, [categoryId]: categoryDays(list.days) }));
+      })
+      .catch((e: ApiError) => this.toasts.show(e.message));
+  }
+
+  protected label(date: string): string {
+    return dayHeading(date, this.today());
   }
 
   protected fmt(v: string | number): string {

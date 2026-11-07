@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { Api } from '../../core/api/api';
 import { ApiError } from '../../core/api/api-error';
 import { Day } from '../../core/api/models';
-import { dayLabel, weekdayDate } from '../../core/util/dates';
+import { dayHeading } from '../../core/util/dates';
 import { Icon } from '../../shared/components/icon';
 import { MoneyView } from '../../shared/components/money';
 import { Collapse } from '../../shared/directives/collapse';
@@ -133,8 +133,6 @@ export class EntriesView {
 
   /** "اليوم · الخميس 6 نوفمبر", "أمس · …", or "الثلاثاء 4 نوفمبر" (D-21) */
   protected label(date: string): string {
-    const near = dayLabel(date, this.today());
-    const full = weekdayDate(date);
-    return near === 'اليوم' || near === 'أمس' ? near + ' · ' + full : full;
+    return dayHeading(date, this.today());
   }
 }

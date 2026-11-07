@@ -109,14 +109,34 @@
       <ul class="g-use">
         @for (c of s.categories; track c.categoryId; let i = $index) {
           <li>
-            <div class="top">
-              <span class="g-tile sm" aria-hidden="true">{{ store.catOf(c.categoryId).emoji }}</span>
-              <span class="nm" dir="auto">{{ store.catOf(c.categoryId).name }}</span>
-              <app-money [value]="c.total" />
-            </div>
-            <div class="g-bar" role="progressbar" [attr.aria-label]="store.catOf(c.categoryId).name" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="c.pct">
-              <i [style.width.%]="c.pct < 2 ? 2 : c.pct" [style.background]="sliceVar(i)"></i>
-            </div>
+            <button class="g-use-hit" type="button" [attr.aria-expanded]="openCat() === c.categoryId"
+                    [attr.aria-label]="store.catOf(c.categoryId).name + '، مصاريف الفئة'" (click)="toggle(c.categoryId)">
+              <span class="top">
+                <span class="g-tile sm" aria-hidden="true">{{ store.catOf(c.categoryId).emoji }}</span>
+                <span class="nm" dir="auto">{{ store.catOf(c.categoryId).name }}</span>
+                <app-money [value]="c.total" />
+                <app-icon class="cv" name="chevD" [size]="16" [sw]="2.4" />
+              </span>
+              <span class="g-bar" role="progressbar" [attr.aria-label]="store.catOf(c.categoryId).name" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="c.pct">
+                <i [style.width.%]="c.pct < 2 ? 2 : c.pct" [style.background]="sliceVar(i)"></i>
+              </span>
+            </button>
+            @if (openCat() === c.categoryId) {
+              @if (catDays()[c.categoryId]; as days) {
+                <div class="g-use-days">
+                  @for (d of days; track d.date) {
+                    <section class="g-use-day" [attr.aria-label]="label(d.date)">
+                      <div class="g-use-dh"><span dir="rtl">{{ label(d.date) }}</span><app-money [value]="d.spent" /></div>
+                      <ul class="g-use-rows">
+                        @for (e of d.entries; track e.id) {
+                          <li><span class="en" dir="auto">{{ e.name }}</span><app-money [value]="e.amount" /></li>
+                        }
+                      </ul>
+                    </section>
+                  }
+                </div>
+              }
+            }
           </li>
         }
       </ul>

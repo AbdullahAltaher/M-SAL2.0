@@ -231,12 +231,31 @@ header.top .top-row{position:relative;min-height:44px}
 .g-chg .k-new .money{color:var(--x-exp)}
 .g-chg .money .u{color:inherit;opacity:.78;font-size:11px}
 .g-use{list-style:none}
-.g-use li{padding:10px 0 12px;border-bottom:1px solid var(--x-line-soft)}
-.g-use li:last-child{border-bottom:none;padding-bottom:2px}
+.g-use>li{padding:10px 0 12px;border-bottom:1px solid var(--x-line-soft)}
+.g-use>li:last-child{border-bottom:none;padding-bottom:2px}
 .g-use .top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .g-use .nm{flex:1;min-width:0;font:500 15px var(--ar);color:var(--x-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.g-use .money{flex:none;font-weight:600;font-size:15px;color:var(--x-text)}
-.g-use .money .u{font-size:11px}
+.g-use .top .money{flex:none;font-weight:600;font-size:15px;color:var(--x-text)}
+.g-use .top .money .u{font-size:11px}
+/* a category opens its expenses by day (D-39): shown at once, no fold over the glass (HANDOFF traps) */
+.g-use-hit{display:block;width:100%;padding:0;margin:0;background:none;border:none;color:inherit;font:inherit;text-align:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s var(--ease-out)}
+.g-use-hit:active{transform:scale(.985)}
+.g-use-hit .g-bar{display:block}
+.g-use-hit .cv{flex:none;display:grid;color:var(--x-muted)}
+.g-use-hit .cv svg{transition:transform .25s var(--ease-out)}
+.g-use-hit[aria-expanded="true"] .cv svg{transform:rotate(180deg)}
+.g-use-hit:focus-visible{outline:2px solid var(--x-accent);outline-offset:4px;border-radius:12px}
+.g-use-days{margin-top:12px;padding:4px 14px;border-radius:16px;background:var(--x-field);border:1px solid var(--x-line-soft);animation:gUseIn .22s var(--ease-out) both}
+@keyframes gUseIn{from{opacity:0}}
+.g-use-day+.g-use-day{border-top:1px solid var(--x-line-soft)}
+.g-use-dh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:10px 0 4px;font:500 12px var(--ar);color:var(--x-muted)}
+.g-use-dh .money{font-size:12px;font-weight:500;color:var(--x-muted)}
+.g-use-dh .money .u{font-size:10px}
+.g-use-rows{list-style:none;padding-bottom:6px}
+.g-use-rows li{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:5px 0}
+.g-use-rows .en{flex:1;min-width:0;font:400 14px var(--ar);color:var(--x-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-use-rows .money{flex:none;font-size:14px;font-weight:500;color:var(--x-text)}
+.g-use-rows .money .u{font-size:10px}
 /* ---- add sheet: grabber, required description, save bar, keyboard ---- */
 .sheet-grab{display:grid;place-items:center;width:100%;height:32px;margin:0;background:none;opacity:1;border-radius:0;touch-action:none;cursor:grab}
 .sheet-grab::before{content:"";width:40px;height:5px;border-radius:3px;background:var(--x-muted);opacity:.55}
@@ -280,6 +299,7 @@ header.top .top-row{position:relative;min-height:44px}
   .sheet-back.on .sheet{opacity:1}
   .sheet-back::before{transition:opacity .12s linear !important}
   .g-col{transition:none !important}
+  .g-use-days{animation:none}
 }
 /* ================= small screens ================= */
 @media (max-width:359px){
