@@ -12,12 +12,15 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.abdullah.msal2.banksms.BankSmsDtos.IngestLimits;
+import com.abdullah.msal2.banksms.SmsSecurityConfig;
 import com.abdullah.msal2.system.error.ApiErrorWriter;
 import com.abdullah.msal2.system.error.ErrorCode;
 
 /**
  * Refuses API bodies over 1MB (API.md section 7) before they are read, with {@code SYS-E006}.
- * Imports may send a 5MB file (SRV-007-E003), plus room for the multipart wrapping.
+ * Imports may send a 5MB file (SRV-007-E003), plus room for the multipart wrapping. The bank
+ * shortcut sends one message: 2KB at most (BANK-SMS.md 4.3).
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
@@ -40,7 +43,13 @@ public class RequestSizeFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 		String uri = request.getRequestURI();
 		long length = request.getContentLengthLong();
-		if (uri.startsWith("/api/v1/imports")) {
+		if (uri.equals(SmsSecurityConfig.INGEST_URL)) {
+			if (length > IngestLimits.MAX_BODY) {
+				errors.write(response, ErrorCode.SYS_E006);
+				return;
+			}
+		}
+		else if (uri.startsWith("/api/v1/imports")) {
 			if (length > MAX_IMPORT_BYTES + MULTIPART_ROOM) {
 				errors.write(response, ErrorCode.SRV_007_E003);
 				return;

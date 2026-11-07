@@ -12,6 +12,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/install/install-page').then((m) => m.InstallPage),
   },
   {
+    // How to set up the iPhone shortcut (BANK-SMS.md B-19): a page of its own, drawn like the install page
+    path: 'bank-sms/setup',
+    canActivate: [serviceGuard('SRV-011')],
+    loadComponent: () => import('./features/settings/shortcut-setup').then((m) => m.ShortcutSetup),
+  },
+  {
     path: 'login',
     canActivate: [installGuard, guestGuard],
     loadComponent: () => import('./features/auth/login-page').then((m) => m.LoginPage),
@@ -46,6 +52,12 @@ export const routes: Routes = [
             path: 'stats',
             canActivate: [serviceGuard('SRV-006')],
             loadComponent: () => import('./features/stats/stats-view').then((m) => m.StatsView),
+          },
+          {
+            // Bank messages waiting for review (BANK-SMS.md B-18)
+            path: 'pending',
+            canActivate: [serviceGuard('SRV-011')],
+            loadComponent: () => import('./features/expenses/pending-view').then((m) => m.PendingView),
           },
         ],
       },

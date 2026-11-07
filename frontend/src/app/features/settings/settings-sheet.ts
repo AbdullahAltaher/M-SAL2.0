@@ -18,6 +18,7 @@ import { Sheets } from '../../shared/sheet/sheets';
 import { Toasts } from '../../shared/toast/toast';
 import { CardPhotoSheet } from '../../shared/components/card-photo-sheet';
 import { Icon } from '../../shared/components/icon';
+import { IfService } from '../../core/permissions/if-service';
 import { ExpensesStore } from '../expenses/expenses-store';
 import { ImportExport } from './import-export';
 
@@ -30,7 +31,7 @@ import { ImportExport } from './import-export';
  */
 @Component({
   selector: 'app-settings-sheet',
-  imports: [Icon],
+  imports: [Icon, IfService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (me(); as m) {
@@ -83,6 +84,17 @@ import { ImportExport } from './import-export';
         @if (lockAvailable()) {القفل يُطلب عند فتح التطبيق وبعد 5 دقائق في الخلفية، ولا يغني عن تسجيل الدخول. }
         والتذكير «سجّلت مصاريف اليوم؟» يصل فقط إذا لم تسجّل أي مصروف ذلك اليوم.
       </p>
+
+      <ng-container *appIfService="'SRV-011'">
+        <h3 class="st-sec" dir="rtl">رسائل البنك</h3>
+        <div class="st-grp">
+          <button class="st-row" type="button" (click)="bankSms()">
+            <span class="st-ic" style="--c:#2BB673"><app-icon name="message" [size]="16" /></span>
+            <span class="st-l">رسائل البنك</span><span class="st-v" dir="rtl">الحساب، والرمز، والكلمات</span><app-icon name="chevL" [size]="16" />
+          </button>
+        </div>
+        <p class="st-note" dir="rtl">اختصار في الآيفون يرسل رسائل البنك، فتصير طلبات تراجعها قبل أن تُضاف.</p>
+      </ng-container>
 
       <h3 class="st-sec" dir="rtl">البيانات</h3>
       <div class="st-grp">
@@ -245,6 +257,12 @@ export class SettingsSheet {
     if (!id) return;
     const photoKey = card === 'budget' ? budgetPhotoKey(id) : accountPhotoKey(id);
     void this.sheets.open(CardPhotoSheet, 'صورة البطاقة', { photoKey });
+  }
+
+  /** BANK-SMS.md B-19 */
+  protected async bankSms(): Promise<void> {
+    const { BankSmsSheet } = await import('./bank-sms-sheet');
+    await this.sheets.open(BankSmsSheet, 'رسائل البنك');
   }
 
   protected installHelp(): void {

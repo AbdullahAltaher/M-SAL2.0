@@ -15,6 +15,7 @@ import { DayStrip } from './day-strip';
 import { EntryRow } from './entry-row';
 import { EntrySheets } from './entry-sheets';
 import { ExpensesStore } from './expenses-store';
+import { pendingLabel } from './pending-label';
 
 /**
  * S-20: the Expenses home (M-SAL's renderHome, R-CYC-04 to R-CYC-06), as the owner uses it
@@ -105,6 +106,11 @@ export class HomeView {
 
   private sx: number | null = null;
   private sy = 0;
+
+  /** "طلب واحد بانتظار المراجعة", "طلبان…", "3 طلبات…", "11 طلبًا…" */
+  protected pendingText(n: number): string {
+    return pendingLabel(n) + ' بانتظار المراجعة';
+  }
 
   protected fmt(v: string | number | null | undefined): string {
     return formatMoney(v);

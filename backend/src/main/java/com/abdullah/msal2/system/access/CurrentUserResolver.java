@@ -1,5 +1,7 @@
 package com.abdullah.msal2.system.access;
 
+import java.util.UUID;
+
 import org.springframework.security.oauth2.jwt.Jwt;
 
 /**
@@ -9,4 +11,10 @@ import org.springframework.security.oauth2.jwt.Jwt;
 public interface CurrentUserResolver {
 
 	CurrentUser resolve(Jwt jwt);
+
+	/**
+	 * An existing user by id, for requests signed in another way than a JWT (the bank shortcut's
+	 * token, BANK-SMS.md 4.3). Never creates one: an unknown id is {@code SYS-E001}.
+	 */
+	CurrentUser resolve(UUID userId);
 }

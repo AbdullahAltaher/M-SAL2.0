@@ -78,6 +78,12 @@ public class UserProvisioningService implements CurrentUserResolver {
 		}
 	}
 
+	@Override
+	public CurrentUser resolve(UUID userId) {
+		return users.findById(userId).map(UserProvisioningService::toCurrentUser)
+				.orElseThrow(() -> new ApiException(ErrorCode.SYS_E001));
+	}
+
 	private AppUser provision(UUID id, String rawEmail) {
 		if (rawEmail == null || rawEmail.isBlank()) {
 			throw new ApiException(ErrorCode.SRV_000_E001);

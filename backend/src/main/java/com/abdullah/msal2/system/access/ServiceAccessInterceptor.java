@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import com.abdullah.msal2.banksms.SmsSecurityConfig.SmsTokenAuthentication;
 import com.abdullah.msal2.system.RequestContext;
 import com.abdullah.msal2.system.ServiceCode;
 import com.abdullah.msal2.system.access.PermissionRepository.ServiceAccess;
@@ -23,7 +24,8 @@ import com.abdullah.msal2.system.error.ErrorCode;
 /**
  * The permission check on every API request, in the order of API.md section 1:
  * <ol>
- * <li>the JWT is valid (already checked by Spring Security, {@code SYS-E001});</li>
+ * <li>the JWT is valid (already checked by Spring Security, {@code SYS-E001}), or for the bank
+ * shortcut, its personal token ({@code SmsSecurityConfig});</li>
  * <li>the user exists or may be created ({@code SRV-000-E001}), and is not disabled ({@code SYS-E009});</li>
  * <li>the controller's service is enabled ({@code SYS-E003});</li>
  * <li>{@code GET} needs read, every other method needs write ({@code SYS-E002});</li>
@@ -61,9 +63,7 @@ public class ServiceAccessInterceptor implements HandlerInterceptor {
 		String code = serviceCode.value();
 		MDC.put(RequestContext.SERVICE, code);
 
-		Jwt jwt = currentJwt();
-		MDC.put(RequestContext.USER, jwt.getSubject());
-		CurrentUser user = users.resolve(jwt);
+		CurrentUser user = currentUser();
 		if (user.disabled()) {
 			throw new ApiException(ErrorCode.SYS_E009);
 		}
@@ -85,10 +85,19 @@ public class ServiceAccessInterceptor implements HandlerInterceptor {
 		return true;
 	}
 
-	private static Jwt currentJwt() {
+	/**
+	 * The user of a verified JWT, or of the bank shortcut's token (BANK-SMS.md 4.3), whose chain
+	 * signs in with the user's id. The user goes into the log context (MDC) either way.
+	 */
+	private CurrentUser currentUser() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
-			return jwt;
+			MDC.put(RequestContext.USER, jwt.getSubject());
+			return users.resolve(jwt);
+		}
+		if (auth instanceof SmsTokenAuthentication sms) {
+			MDC.put(RequestContext.USER, sms.getPrincipal().toString());
+			return users.resolve(sms.getPrincipal());
 		}
 		throw new ApiException(ErrorCode.SYS_E001);
 	}

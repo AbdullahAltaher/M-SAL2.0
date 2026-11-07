@@ -7,7 +7,8 @@ import type { Me } from '../session/session-store';
 import { toApiError } from './api-error';
 import {
   Account, AdminUser, AuditPage, Budget, BudgetGroup, BudgetItem, BudgetListItem, Category, Cycle, CycleInput, Day, Entry,
-  EntryInput, Home, ImportMode, ImportPreview, ImportRecord, Invitation, QuickPicks, Receipt, ServiceInfo, Stats,
+  EntryInput, Home, ImportMode, ImportPreview, ImportRecord, Invitation, MerchantKeyword, PendingEntry, QuickPicks, Receipt,
+  ServiceInfo, SmsSettings, Stats,
 } from './models';
 
 /**
@@ -127,6 +128,24 @@ export class Api {
   previewImport(file: File) { return this.post<ImportPreview>('/imports/preview', form(file)); }
   importFile(file: File, mode: ImportMode) { return this.post<ImportRecord>(`/imports?mode=${mode}`, form(file)); }
   imports() { return this.get<ImportRecord[]>('/imports'); }
+
+  // ── SRV-011: bank messages (BANK-SMS.md 4.5) ───────────────
+  pendingEntries(budgetId: string) { return this.get<PendingEntry[]>(`/budgets/${budgetId}/pending-entries`); }
+  /** Adds the entry exactly as createEntry does, and deletes the pending one with its message (B-07) */
+  approvePending(id: string, body: { categoryId: string; name: string; remember: boolean }) {
+    return this.post<Entry>(`/pending-entries/${id}/approve`, body);
+  }
+  ignorePending(id: string) { return this.delete(`/pending-entries/${id}`); }
+  smsSettings() { return this.get<SmsSettings>('/sms/settings'); }
+  linkSms(suffix: string, accountId: string) { return this.put<void>(`/sms/links/${encodeURIComponent(suffix)}`, { accountId }); }
+  unlinkSms(suffix: string) { return this.delete(`/sms/links/${encodeURIComponent(suffix)}`); }
+  /** The token is returned this once only (B-19) */
+  newSmsToken() { return this.post<{ token: string; hint: string; createdAt: string }>('/sms/token'); }
+  revokeSmsToken() { return this.delete('/sms/token'); }
+  addKeyword(budgetId: string, keyword: string, categoryId: string | null) {
+    return this.post<MerchantKeyword>(`/budgets/${budgetId}/merchant-keywords`, { keyword, categoryId });
+  }
+  deleteKeyword(id: string) { return this.delete(`/merchant-keywords/${id}`); }
 
   // ── SRV-009 ─────────────────────────────────────────────────
   adminUsers() { return this.get<AdminUser[]>('/admin/users'); }

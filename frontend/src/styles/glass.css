@@ -539,3 +539,70 @@ app-day-strip{display:block;animation:stripIn .28s var(--ease-out)}
 .xbar-space{height:56px}
 /* English descriptions sit on the right like Arabic ones, so the list reads in one line */
 .x-name,.x-sub,.es-name{text-align:right}
+/* ---- bank messages (BANK-SMS.md): the bar above the account card, the review cards, the settings ---- */
+/* the bar (B-04): shown at once, never unfolded (the iPhone backdrop-filter trap), only fades in */
+.g-pending{display:flex;align-items:center;gap:12px;min-height:58px;margin-bottom:12px;padding:8px 14px 8px 10px;border-radius:20px;background:var(--x-card);border:1px solid color-mix(in srgb,var(--x-accent) 45%,var(--x-line));box-shadow:var(--x-hi),0 10px 24px -16px rgba(40,100,230,.7);color:var(--x-text);text-decoration:none;animation:fadeIn .35s var(--ease-out);transition:transform .12s var(--ease-out)}
+.g-pending:active{transform:scale(.98)}
+.g-pending .pd-ic{position:relative;flex:none;width:40px;height:40px;border-radius:13px;display:grid;place-items:center;color:#fff;background:linear-gradient(180deg,var(--x-btn-a),var(--x-btn-b));box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+.g-pending .pd-n{position:absolute;top:-3px;inset-inline-end:-3px;width:12px;height:12px;border-radius:50%;background:var(--x-exp);box-shadow:0 0 0 2.5px var(--x-card-solid)}
+.g-pending .pd-tx{flex:1;min-width:0;font:600 15.5px var(--ar)}
+.g-pending .pd-go{flex:none;display:inline-flex;align-items:center;gap:2px;color:var(--x-accent-ink);font:600 14px var(--ar)}
+/* the review cards (B-18, "الشكل أ") */
+.pc-intro{margin:2px 6px 12px;color:var(--x-muted);font:400 14px/1.6 var(--ar)}
+.pc-list{display:flex;flex-direction:column;gap:12px}
+.pc{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:24px;background:var(--x-card);border:1px solid var(--x-line);box-shadow:var(--x-hi),var(--x-shadow);transition:opacity .25s var(--ease-out),transform .25s var(--ease-out)}
+.pc.leaving{opacity:0;transform:translateX(24px) scale(.97);pointer-events:none}
+.pc-head{display:flex;align-items:center;gap:12px}
+.pc-tile{width:46px;height:46px;font-size:22px}
+.pc-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.pc-merchant{font:600 15.5px/1.3 var(--num);letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.pc-when{font:400 12.5px var(--ar);color:var(--x-muted)}
+.pc-amt{flex:none;direction:ltr;display:inline-flex;align-items:baseline;font:700 21px var(--num);color:var(--x-exp)}
+.pc-amt .money .u{color:inherit;opacity:.75;font-size:12px;margin-inline-start:3px}
+.pc-catrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pc-chip{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px 0 14px;border-radius:999px;background:var(--x-field);border:1px solid var(--x-line);color:var(--x-text);font:600 14px var(--ar);cursor:pointer;transition:transform .12s var(--ease-out)}
+.pc-chip:active{transform:scale(.96)}
+.pc-chip .e{font-size:17px;line-height:1}
+.pc-chip svg{color:var(--x-muted)}
+.pc-chip.empty{border-style:dashed;border-color:var(--x-accent);color:var(--x-accent-ink)}
+.pc-chip.empty svg{color:inherit}
+.pc-chip[aria-expanded="true"] app-icon:last-child svg{transform:rotate(180deg)}
+.pc-hint{color:var(--x-muted);font:400 12.5px var(--ar)}
+.pc-cats{animation:stripIn .25s var(--ease-out)}
+.pc-remember{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 12px;border-radius:16px;background:var(--x-tile)}
+.pc-rl{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;font:600 14px var(--ar)}
+.pc-rl small{font:400 12px var(--ar);color:var(--x-muted)}
+.pc .pc-name{width:100%;height:50px;min-height:50px;font-size:16px}
+.pc-name.bad{border-color:var(--x-exp)}
+.pc-sugg .g-fchip{min-height:38px;font-size:13.5px}
+.pc-smstog{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 4px;background:none;border:none;color:var(--x-accent-ink);font:600 13.5px var(--ar);cursor:pointer}
+.pc-smstog[aria-expanded="true"] app-icon:last-child svg{transform:rotate(180deg)}
+.pc-sms{margin:-4px 0 0;padding:10px 12px;border-radius:14px;background:var(--x-field);border:1px solid var(--x-line-soft);color:var(--x-text);font:400 13px/1.55 var(--num);white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;animation:fadeIn .25s var(--ease-out)}
+.pc-err{margin:-4px 4px 0;color:var(--x-exp);font:500 13px var(--ar)}
+.pc-acts{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.pc-acts .g-btn{width:100%;min-height:48px}
+.pc-empty{display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:24px}
+/* the settings (B-19) */
+.bs-suffix{font:600 15px var(--num)}
+.bs-x{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;border:none;background:var(--x-field);color:var(--x-muted);cursor:pointer}
+.bs-ok{flex:none;min-height:34px;padding:0 14px;border-radius:999px;border:none;background:linear-gradient(180deg,var(--x-btn-a),var(--x-btn-b));color:#fff;font:600 13.5px var(--ar);cursor:pointer}
+.bs-ok:disabled{opacity:.5}
+.st-row.bs-form{gap:8px}
+.st-row.bs-form .bs-digits{width:76px;max-width:none;text-align:center;letter-spacing:1px}
+.st-row.bs-form .bs-acct{flex:1;min-width:0;max-width:none}
+.st-row.bs-form .bs-word{flex:1;min-width:0;max-width:none;text-transform:uppercase}
+.bs-token{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px;border-bottom:1px solid var(--x-line-soft);background:color-mix(in srgb,var(--x-inc) 10%,transparent)}
+.bs-token code{flex:1;min-width:0;overflow-wrap:anywhere;font:600 13px/1.5 var(--num);color:var(--x-text);text-align:left}
+.bs-token p{flex-basis:100%;margin:0;color:var(--x-warn);font:500 12.5px var(--ar)}
+.bs-words{padding:4px 0}
+.bs-group{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-bottom:1px solid var(--x-line-soft)}
+.bs-group:last-child{border-bottom:none}
+.bs-cat{display:flex;align-items:center;gap:6px;font:600 14px var(--ar);color:var(--x-text)}
+.bs-cat .e{font-size:17px;line-height:1}
+.bs-cat.muted{color:var(--x-muted);font-weight:500;font-size:13px}
+.bs-chips{display:flex;flex-wrap:wrap;gap:6px}
+.bs-kw{display:inline-flex;align-items:center;gap:2px;min-height:32px;padding:0 4px 0 10px;border-radius:999px;background:var(--x-field);border:1px solid var(--x-line);font:600 12.5px var(--num);color:var(--x-text)}
+.bs-kw button{width:24px;height:24px;display:grid;place-items:center;border:none;border-radius:50%;background:none;color:var(--x-muted);cursor:pointer}
+.bs-add{min-height:32px;padding:0 12px;border-radius:999px;border:1px dashed var(--x-accent);background:none;color:var(--x-accent-ink);font:600 12.5px var(--ar);cursor:pointer}
+.bs-others .g-fchip{min-height:36px;font-size:13px}
+@media (prefers-reduced-motion:reduce){.g-pending,.pc-cats,.pc-sms{animation:none}.pc{transition:none}}

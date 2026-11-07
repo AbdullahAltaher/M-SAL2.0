@@ -21,7 +21,7 @@ class MigrationTest extends IntegrationTest {
 				// version is null on Flyway's own "create schema" row
 				"select version from msal.flyway_schema_history where success and version is not null order by installed_rank",
 				String.class))
-				.containsExactly("1", "2", "3", "4", "5", "6", "7", "8");
+				.containsExactly("1", "2", "3", "4", "5", "6", "7", "8", "9");
 	}
 
 	@Test
@@ -36,7 +36,7 @@ class MigrationTest extends IntegrationTest {
 
 	@Test
 	void referenceDataIsSeeded() {
-		assertThat(jdbc.queryForObject("select count(*) from msal.services", Integer.class)).isEqualTo(10);
+		assertThat(jdbc.queryForObject("select count(*) from msal.services", Integer.class)).isEqualTo(11);
 		assertThat(jdbc.queryForList("select code from msal.roles order by code", String.class))
 				.containsExactly("ADMIN", "USER");
 		assertThat(jdbc.queryForObject("select count(*) from msal.category_templates", Integer.class)).isEqualTo(20);

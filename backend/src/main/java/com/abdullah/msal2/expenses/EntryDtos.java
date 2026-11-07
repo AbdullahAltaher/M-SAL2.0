@@ -63,9 +63,14 @@ public final class EntryDtos {
 	public record Selected(String key, CycleRef cycle, CycleSummary summary, BigDecimal noCycleTotal) {
 	}
 
-	/** Everything the home screen needs in one call (R-CYC-04 to R-CYC-06). */
+	/**
+	 * Everything the home screen needs in one call (R-CYC-04 to R-CYC-06).
+	 *
+	 * @param pendingCount the budget's bank messages waiting for review, for the bar above the
+	 *                     account card (BANK-SMS.md B-04); they are not entries (B-06)
+	 */
 	public record HomeResponse(LocalDate today, AccountRef account, List<AccountRef> activeAccounts,
-			List<String> cycleKeys, Selected selected, List<EntryResponse> recent) {
+			List<String> cycleKeys, Selected selected, List<EntryResponse> recent, int pendingCount) {
 	}
 
 	public record DayResponse(LocalDate date, BigDecimal spent, BigDecimal extra, List<EntryResponse> entries) {

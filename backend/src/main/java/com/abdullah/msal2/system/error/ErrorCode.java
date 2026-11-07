@@ -61,7 +61,12 @@ public enum ErrorCode {
 	SRV_009_E001("SRV-009-E001", HttpStatus.CONFLICT, "هذا البريد مستخدم بالفعل."),
 	SRV_009_E002("SRV-009-E002", HttpStatus.CONFLICT, "توجد دعوة معلّقة لهذا البريد."),
 	SRV_009_E003("SRV-009-E003", HttpStatus.CONFLICT, "لا يمكنك إيقاف حسابك أو إزالة صلاحية المدير عن نفسك."),
-	SRV_009_E004("SRV-009-E004", HttpStatus.BAD_GATEWAY, "تعذّر إنشاء المستخدم في نظام الدخول.");
+	SRV_009_E004("SRV-009-E004", HttpStatus.BAD_GATEWAY, "تعذّر إنشاء المستخدم في نظام الدخول."),
+
+	SRV_011_E001("SRV-011-E001", HttpStatus.BAD_REQUEST, "اكتب آخر أرقام الحساب كما في رسالة البنك (من 3 إلى 6 أرقام)."),
+	SRV_011_E002("SRV-011-E002", HttpStatus.BAD_REQUEST, "اكتب كلمة."),
+	SRV_011_E003("SRV-011-E003", HttpStatus.BAD_REQUEST, "الكلمة طويلة (الحد 40 حرفًا)."),
+	SRV_011_E004("SRV-011-E004", HttpStatus.BAD_REQUEST, "اختر فئة قبل الاعتماد.");
 
 	private static final Map<String, ErrorCode> BY_CODE = Arrays.stream(values())
 			.collect(Collectors.toUnmodifiableMap(ErrorCode::code, Function.identity()));

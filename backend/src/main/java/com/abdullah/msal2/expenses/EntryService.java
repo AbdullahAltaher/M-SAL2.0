@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abdullah.msal2.accounts.Account;
 import com.abdullah.msal2.accounts.AccountRepository;
+import com.abdullah.msal2.banksms.PendingEntries;
 import com.abdullah.msal2.budget.Budget;
 import com.abdullah.msal2.budget.BudgetService;
 import com.abdullah.msal2.categories.Category;
@@ -63,11 +64,12 @@ public class EntryService {
 	private final BudgetService budgets;
 	private final CategoryService categories;
 	private final AuditService audit;
+	private final PendingEntries pending;
 	private final Clock clock;
 
 	public EntryService(EntryRepository entries, LedgerService ledgers, AccountRepository accounts,
 			SalaryCycleRepository cycles, BudgetService budgets, CategoryService categories, AuditService audit,
-			Clock clock) {
+			PendingEntries pending, Clock clock) {
 		this.entries = entries;
 		this.ledgers = ledgers;
 		this.accounts = accounts;
@@ -75,6 +77,7 @@ public class EntryService {
 		this.budgets = budgets;
 		this.categories = categories;
 		this.audit = audit;
+		this.pending = pending;
 		this.clock = clock;
 	}
 
@@ -102,7 +105,8 @@ public class EntryService {
 		List<AccountRef> active = accounts.findByBudgetIdOrderBySortOrderAscCreatedAtAsc(ledger.account().getBudgetId())
 				.stream().filter(a -> !a.isArchived()).map(a -> new AccountRef(a.getId(), a.getName())).toList();
 		return new HomeResponse(today, new AccountRef(accountId, ledger.account().getName()), active,
-				CycleKey.all(ledger.cycles(), ledger.entries()), selection, recent);
+				CycleKey.all(ledger.cycles(), ledger.entries()), selection, recent,
+				pending.count(ledger.account().getBudgetId()));
 	}
 
 	/** The entries of a cycle grouped by day, filtered by text and category (R-ENT-10, R-ENT-11). */

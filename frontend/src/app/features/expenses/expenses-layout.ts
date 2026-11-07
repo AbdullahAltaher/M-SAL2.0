@@ -10,7 +10,7 @@ import { Toasts } from '../../shared/toast/toast';
 import { EntrySheets } from './entry-sheets';
 import { ExpensesStore } from './expenses-store';
 
-const TITLES: Record<string, string> = { entries: 'المصاريف', stats: 'الإحصاءات' };
+const TITLES: Record<string, string> = { entries: 'المصاريف', stats: 'الإحصاءات', pending: 'بانتظار المراجعة' };
 
 /**
  * The Expenses section (M-SAL's renderExp): the selected screen and the floating bottom bar
@@ -89,6 +89,6 @@ export class ExpensesLayout {
   }
 
   private viewOf(url: string): string {
-    return url.includes('/entries') ? 'entries' : url.includes('/stats') ? 'stats' : 'home';
+    return url.includes('/entries') ? 'entries' : url.includes('/stats') ? 'stats' : url.includes('/pending') ? 'pending' : 'home';
   }
 }

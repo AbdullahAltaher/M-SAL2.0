@@ -1,7 +1,7 @@
 # قاعدة بيانات M-SAL2.0
 
 > نتيجة جلسة التخطيط 2 (2026-10-31). مبنية على [BUSINESS_RULES.md](BUSINESS_RULES.md).
-> ملفات SQL هنا نُسخت كما هي في مرحلة التنفيذ 1 إلى `backend/src/main/resources/db/migration/` (V1–V6)، وهناك المرجع الآن. **لا تُعدَّل بعد تطبيقها** (القاعدة 3): أي تغيير يكون بملف جديد بالرقم التالي. **`V7__add_invitation_auth_user.sql`** أُضيف في المرحلة 3 (عمود `invitations.auth_user_id`)، فصار ملف الإشعارات `V8`.
+> ملفات SQL هنا نُسخت كما هي في مرحلة التنفيذ 1 إلى `backend/src/main/resources/db/migration/` (V1–V6)، وهناك المرجع الآن (ومعها `V7` إلى `V9` التي أُضيفت أثناء التنفيذ). **لا تُعدَّل بعد تطبيقها** (القاعدة 3): أي تغيير يكون بملف جديد بالرقم التالي. **`V7__add_invitation_auth_user.sql`** أُضيف في المرحلة 3 (عمود `invitations.auth_user_id`)، فصار ملف الإشعارات `V8`.
 
 ## المحتويات
 
@@ -286,6 +286,17 @@ PK مركّب: `(user_id, role_code)`.
 | `entry_date` | `date` | مطلوب | التاريخ |
 | `deleted_at` | `timestamptz` | | حذف مؤقت |
 
+### 3.4 رسائل البنك (SRV-011، `V9`، المرحلة 11)
+
+كلها في `msal` وعليها RLS، وفي كل جدول `user_id`. التصميم في [BANK-SMS.md](BANK-SMS.md).
+
+| الجدول | ما فيه | الحذف |
+|---|---|---|
+| `sms_account_links` | آخر أرقام الحساب في رسالة البنك (`suffix`، من 3 إلى 6 أرقام) ← `account_id`. `unique (user_id, suffix)` | فعلي. يُحذف مع الحساب (`on delete cascade`) |
+| `sms_tokens` | `token_hash` (SHA-256، `unique`)، و`hint` (آخر 4 أحرف)، و`last_used_at`، و`revoked_at`. **رمز واحد فعّال** لكل مستخدم (`unique index … where revoked_at is null`). الرمز نفسه لا يُخزَّن | الإلغاء بـ `revoked_at` |
+| `merchant_keywords` | `keyword` (منظّفة: أحرف كبيرة، و40 حرفاً كحد) و`category_id` (`null` = اختر كل مرة). `unique (budget_id, keyword)` | فعلي. تُحذف مع فئتها (الاستبدال في الاستيراد يحذف الفئات) |
+| `pending_entries` | `amount numeric(12,2)`، و`merchant`، و`suggested_category_id`، و`received_at`، و`entry_date` (بتوقيت المستخدم)، و`sms_text`، و`sms_hash`. `unique (user_id, sms_hash)` | فعلي عند الاعتماد أو التجاهل، و`audit_log.before_data` **بدون `sms_text`** (B-07) |
+
 ---
 
 ## 4. ما تضمنه قاعدة البيانات وما يضمنه السيرفر
@@ -409,6 +420,7 @@ spring:
 | `V6__create_imports.sql` | ملفات الاستيراد |
 | `V7__add_invitation_auth_user.sql` | عمود `auth_user_id` في `invitations`: مستخدم Supabase الذي أُنشئ مع الدعوة، حتى يُحذف عند إلغاء دعوة لم تُستخدم (`API.md` 2.3). **أُضيف في مرحلة التنفيذ 3** |
 | `V8__create_push_subscriptions.sql` | اشتراكات الإشعارات ووقت التذكير اليومي. **أُضيف في مرحلة التنفيذ 7** مع عمود `last_reminder_on` (أُضيف في جلسة التخطيط 4، انظر [SCREENS.md](SCREENS.md) القسم 7) |
+| `V9__create_bank_sms.sql` | رسائل البنك (SRV-011): `sms_account_links`، و`sms_tokens`، و`merchant_keywords`، و`pending_entries`. **أُضيف في مرحلة التنفيذ 11**، والتفاصيل في القسم 3.4 و[BANK-SMS.md](BANK-SMS.md) القسم 4.2. المرجع هو الملف نفسه في `db/migration/` |
 
 ### V1__create_system.sql
 ```sql

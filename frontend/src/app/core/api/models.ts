@@ -156,6 +156,8 @@ export interface Home {
     noCycleTotal: Money | null;
   };
   recent: Entry[];
+  /** Bank messages of this budget waiting for review (BANK-SMS.md B-04) */
+  pendingCount: number;
 }
 
 /** R-ENT-14, R-ENT-15 */
@@ -280,4 +282,45 @@ export interface ImportRecord {
   counts: ImportCounts;
   warnings: ImportWarning[];
   createdAt: string;
+}
+
+// ── SRV-011: bank messages (BANK-SMS.md) ──────────────────────
+
+/** A debit read from a bank message, waiting for review (B-18). Not an entry (B-06). */
+export interface PendingEntry {
+  id: string;
+  accountId: string;
+  amount: Money;
+  merchant: string;
+  /** The suggested category, or null when the user picks one */
+  categoryId: string | null;
+  /** A merchant whose category is picked every time (B-15) */
+  askEachTime: boolean;
+  receivedAt: string;
+  entryDate: string;
+  /** The bank's message exactly as it came (B-03) */
+  smsText: string;
+}
+
+export interface SmsLink {
+  suffix: string;
+  accountId: string;
+  accountName: string;
+  archived: boolean;
+  budgetId: string;
+  budgetName: string;
+}
+
+export interface MerchantKeyword {
+  id: string;
+  budgetId: string;
+  keyword: string;
+  /** null: the category is picked every time (B-15) */
+  categoryId: string | null;
+}
+
+export interface SmsSettings {
+  links: SmsLink[];
+  token: { hint: string; createdAt: string; lastUsedAt: string | null } | null;
+  keywords: MerchantKeyword[];
 }

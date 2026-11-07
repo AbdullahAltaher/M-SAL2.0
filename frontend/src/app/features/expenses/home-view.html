@@ -1,4 +1,12 @@
 @if (home(); as h) {
+  <!-- Bank messages waiting for review (BANK-SMS.md B-04), above the account card -->
+  @if (h.pendingCount > 0) {
+    <a class="g-pending" routerLink="/expenses/pending" [attr.aria-label]="pendingText(h.pendingCount) + '، افتح المراجعة'">
+      <span class="pd-ic" aria-hidden="true"><app-icon name="message" [size]="20" /><b class="pd-n"></b></span>
+      <span class="pd-tx" dir="rtl">{{ pendingText(h.pendingCount) }}</span>
+      <span class="pd-go" dir="rtl">راجع<app-icon name="chevL" [size]="16" [sw]="2.2" /></span>
+    </a>
+  }
   <section class="g-hero" [class]="photoClass(photo())" [attr.aria-label]="'الحساب ' + h.account.name" (touchstart)="touchStart($event)" (touchend)="touchEnd($event)">
     @if (photo(); as p) {
       <img class="hp-img" [src]="p.url" alt="">
