@@ -59,7 +59,11 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "assets": [
+                { "glob": "**/*", "input": "public" },
+                { "glob": "**/*", "input": "dev", "output": "dev" }
+              ]
             }
           },
           "defaultConfiguration": "production"

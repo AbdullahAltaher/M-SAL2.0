@@ -348,3 +348,16 @@
   1. **شريط الأيام ظهر خلف بطاقة "تقدر تصرف اليوم"** (ويصح فقط بعد الخروج من التطبيق والرجوع). السبب على الأرجح: الآيفون لم يُعِد رسم البطاقة الزجاجية (`backdrop-filter`) في مكانها الجديد بعد أن كبر الشريط فوقها بحركة الطي (`Collapse`). **الحل:** الشريط يظهر بـ `@if` مباشرة مع حركة انزلاق قصيرة له وحده، وبلا طي. **لم يُجرَّب على الآيفون بعد.**
   2. **"وصل الراتب" تحت الشريط السفلي:** `.xbar-space` (56px) في آخر `expenses-layout`، فيبقى آخر عنصر فوق الشريط وزر +.
   3. **الوصف الإنجليزي كان على اليسار:** `.x-name` و`.x-sub` وخانة الوصف `text-align: right` دائماً.
+
+## 8. المرحلة 11: رسائل البنك (2026-11-07 و08)
+
+- **النشر:** `8c9340f` (المرحلة كاملة)، ثم `e03eb2e` (B-21 وحقل الكلمة). CI وPages نجحا، و`V9` طُبّق على Supabase عند تشغيل Render.
+- **السيرفر:** `V9` (SRV-011 وصلاحية USER، و`sms_account_links`، و`sms_tokens`، و`merchant_keywords`، و`pending_entries`، وRLS). وحدة `banksms`: `AdibSmsParser` و`MerchantClassifier` (منطق صافٍ)، و`CategorySuggester`، و`SmsIngestService`، و`PendingEntryService` (الاعتماد يستدعي `EntryService.create`)، و`SmsSettingsService`، ومستودعات JDBC (`SmsTokens`، و`SmsLinks`، و`MerchantKeywords`، و`PendingEntries`)، و`BankSmsController`. `pendingCount` في `home`.
+- **الأمان:** `SmsSecurityConfig` سلسلة `@Order(1)` على `/api/v1/sms/ingest`: فلتر يمسح أي مصادقة، ويحسب SHA-256 للرمز، ويضع `SmsTokenAuthentication`. `ServiceAccessInterceptor` يقبلها (`CurrentUserResolver.resolve(UUID)`). `RequestSizeFilter`: 2KB لهذا المسار.
+- **الواجهة:** الشريط في `home-view.html`، و`pending-view.ts` (`PendingCard` و`PendingView`، و`linkedSignal` للفئة واليوم)، و`settings/bank-sms-sheet.ts`، و`settings/shortcut-setup.ts` (`/bank-sms/setup`)، و`settings/new-token.ts` (الرمز في الذاكرة فقط). الأنماط في آخر `glass.css` (`.g-pending`، و`.pc-*`، و`.bs-*`).
+- **الاختبارات:** `AdibSmsParserTest`، و`MerchantClassifierTest`، و`BankSmsApiTest` (22، منها العزل)، و`FakeSms` لرسائل وهمية؛ و`pending-view.spec.ts` في Angular. المجموع 232 للسيرفر و82 للواجهة.
+- **التجربة:** curl على السيرفر المحلي (9 حالات: PENDING، وDUPLICATE، وIGNORED، و401، و2KB، وبدون CORS)، والذاكرة 309MB من 512MB.
+- **على الآيفون (2026-11-08):** المالك عدّل الأتمتة (Get Contents of URL، ثم Get Dictionary Value `message`، ثم Show Notification) ووصله "طلب جديد: 1.00 د.إ · اختر الفئة" من عملية حقيقية. **فخ واجهه:** بعد ✓ في محرر الإجراءات يجب الضغط على **Done** في شاشة الأتمتة، و**X** يضيّع التعديل ("No actions"). والفئة لم تُقترح لأنه لم تكن هناك كلمات بعد (تُضاف من الإعدادات).
+- **ملاحظتان من المالك وصُلّحتا (`e03eb2e`):** حقل "+ كلمة" كان يظهر أسفل القائمة (صار داخل الفئة)، وطلب تغيير يوم الطلب لعملية بعد منتصف الليل (B-21: شريحة اليوم بجانب الفئة، و`entryDate` في `approve`).
+- **سكربت البيانات الوهمية** صار ملفاً: `frontend/dev/mock-api.js` (يُخدم في `ng serve` فقط عبر `angular.json`، وليس في البناء).
+
