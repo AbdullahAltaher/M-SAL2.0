@@ -12,7 +12,7 @@ Angular (PWA) · Spring Boot (Java 21) · Supabase Postgres + Auth · Flyway · 
 
 ## Status
 
-Phases 0 to 5 complete: the backend API and all screens. Next: phase 6, import and export.
+Phases 0 to 11 complete and in production (the latest is bank SMS ingestion). Next: phase 12, inviting family and friends.
 
 ## Run locally
 
