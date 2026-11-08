@@ -203,7 +203,7 @@ header.top .top-row{position:relative;min-height:44px}
 .g-legend li:last-child{border-bottom:none}
 .g-legend .dot{flex:none;width:12px;height:12px;border-radius:50%}
 .g-legend .nm{flex:1;min-width:0;font:500 15px var(--ar);color:var(--x-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.g-legend .pc{flex:none;font:600 15px var(--num);color:var(--x-muted);font-variant-numeric:tabular-nums}
+.g-legend .g-pct{flex:none;font:600 15px var(--num);color:var(--x-muted);font-variant-numeric:tabular-nums}
 .g-chart{display:block;width:100%;height:auto}
 .g-trk{fill:var(--x-track)}
 .g-barfill{fill:url(#gGradBar)}
