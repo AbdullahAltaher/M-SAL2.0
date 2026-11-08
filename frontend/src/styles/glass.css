@@ -456,7 +456,7 @@ app-entry-sheet .g-savebar{background:var(--x-glass-solid);border-top:1px solid 
 app-entry-sheet .x-amtrow{padding:10px 20px}
 app-entry-sheet .es-key{min-height:46px}
 /* ---- the days strip (R-ENT-16, D-19, D-23) ---- */
-.day-tog{display:inline-flex;align-items:center;gap:3px;padding:2px 4px;margin:-2px 0;background:none;border:none;border-bottom:1.5px dashed color-mix(in srgb,var(--x-accent-ink) 60%,transparent);color:var(--x-accent-ink);font:inherit;cursor:pointer}
+.day-tog{display:inline-flex;align-items:center;gap:3px;padding:2px 4px;margin:-2px 0;background:none;border:none;color:var(--x-accent-ink);font:inherit;cursor:pointer}
 .day-tog svg{transition:transform .25s var(--ease-out)}
 .day-tog[aria-expanded="true"] svg{transform:rotate(180deg)}
 .ds{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
