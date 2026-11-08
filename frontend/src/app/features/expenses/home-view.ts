@@ -15,6 +15,7 @@ import { DayStrip } from './day-strip';
 import { EntryRow } from './entry-row';
 import { EntrySheets } from './entry-sheets';
 import { ExpensesStore } from './expenses-store';
+import { PaceRings, daysLeftLabel, pace, salarySoon } from './pace-rings';
 import { pendingLabel } from './pending-label';
 
 /**
@@ -26,7 +27,7 @@ import { pendingLabel } from './pending-label';
  */
 @Component({
   selector: 'app-home-view',
-  imports: [Icon, MoneyView, EntryRow, RouterLink, CountTo, DayStrip],
+  imports: [Icon, MoneyView, EntryRow, RouterLink, CountTo, DayStrip, PaceRings],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home-view.html',
 })
@@ -156,6 +157,12 @@ export class HomeView {
     const spentToday = Number(s.spentToday);
     const over = Number(s.canSpendToday) < 0;
     const frac = over ? 1 : dayBudget > 0 ? spentToday / dayBudget : spentToday > 0 ? 1 : 0;
-    return { kind: 'open' as const, over, frac, dayBudget, value: over ? s.overToday : s.canSpendToday };
+    // Days to the salary and time against money (D-40)
+    const daysLeft = s.daysLeft ?? 1;
+    const left = daysLeftLabel(daysLeft, this.home()?.selected.cycle?.expectedNextSalaryDate ?? null, this.home()?.today ?? '');
+    return {
+      kind: 'open' as const, over, frac, dayBudget, value: over ? s.overToday : s.canSpendToday,
+      left, soon: salarySoon(daysLeft), pace: pace(s),
+    };
   }
 }

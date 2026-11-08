@@ -110,6 +110,18 @@ header.top .top-row{position:relative;min-height:44px}
 .g-big{direction:ltr;unicode-bidi:isolate;display:flex;align-items:baseline;gap:6px;font:600 36px/1.2 var(--num);font-variant-numeric:tabular-nums;font-feature-settings:"tnum";color:var(--x-text);margin:0 0 10px}
 .g-big .u{font:500 16px var(--ar);color:var(--x-muted)}
 .g-big.over{color:var(--x-exp)}
+/* time against money (D-40): the number and its key, the two rings beside them */
+.g-pace{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.g-pace-main{min-width:0}
+.g-pace .g-big{margin-bottom:4px}
+.g-pace-key{font:500 13px/1.75 var(--ar);color:var(--x-muted)}
+.g-pace-key b{font-weight:600;color:var(--x-text);margin-inline-start:4px}
+.g-pace-key .k{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:6px;background:var(--x-accent);vertical-align:1px}
+.g-pace-key .k.money{background:var(--x-inc)}
+.g-pace-key .k.money.fast{background:var(--x-warn)}
+.g-pace-say{margin-top:12px;padding-top:10px;border-top:1px solid var(--x-line);font:600 14px var(--ar);color:var(--x-inc)}
+.g-pace-say.fast{color:var(--x-warn)}
+.g-pill.soon{color:var(--x-warn);border-color:color-mix(in srgb,var(--x-warn) 55%,transparent);background:color-mix(in srgb,var(--x-warn) 14%,transparent)}
 .g-line{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:10px;font:500 14px var(--ar);color:var(--x-muted)}
 .g-line .grp{display:inline-flex;align-items:baseline;gap:6px}
 .g-line .money{font-size:15px;color:var(--x-text);font-weight:600}

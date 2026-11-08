@@ -113,9 +113,23 @@
                   <span class="g-card-title" dir="rtl">{{ d.over ? 'تجاوزت' : 'تقدر تصرف' }}
                     <button class="day-tog" type="button" [attr.aria-expanded]="daysOpen()" aria-label="اليوم، أيام الدورة" (click)="toggleDays()">اليوم<app-icon name="chevD" [size]="14" [sw]="2.4" /></button>
                   </span>
-                  <span class="g-pill"><span dir="rtl">باقي</span><bdi dir="ltr">{{ s.daysLeft }}</bdi><span dir="rtl">يوم</span></span>
+                  <span class="g-pill" [class.soon]="d.soon" dir="rtl">{{ d.left }}</span>
                 </div>
-                <div class="g-big" [class.over]="d.over"><bdi class="n" dir="ltr"><app-count [value]="+(d.value ?? 0)" /></bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+                @if (d.pace; as p) {
+                  <!-- Time against money (D-40): the days gone and the money spent of the cycle -->
+                  <div class="g-pace">
+                    <div class="g-pace-main">
+                      <div class="g-big" [class.over]="d.over"><bdi class="n" dir="ltr"><app-count [value]="+(d.value ?? 0)" /></bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+                      <div class="g-pace-key" dir="rtl">
+                        <div><i class="k time"></i>مضى من الدورة <b class="num">{{ p.time }}%</b></div>
+                        <div><i class="k money" [class.fast]="p.fast"></i>صُرف من الفلوس <b class="num">{{ p.money }}%</b></div>
+                      </div>
+                    </div>
+                    <app-pace-rings [time]="p.time" [money]="p.money" [fast]="p.fast" />
+                  </div>
+                } @else {
+                  <div class="g-big" [class.over]="d.over"><bdi class="n" dir="ltr"><app-count [value]="+(d.value ?? 0)" /></bdi><span class="u" dir="rtl">{{ unit }}</span></div>
+                }
                 <div class="g-bar" [class.over]="d.over" role="progressbar" aria-label="المصروف اليوم من ميزانية اليوم" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="pct(d.frac)">
                   <i [style.width.%]="pct(d.frac)"></i>
                 </div>
@@ -124,7 +138,10 @@
                   <span class="grp"><span dir="rtl">من</span><app-money [value]="d.dayBudget" /></span>
                 </div>
                 @if (d.over && s.tomorrow !== null) {
-                  <div class="g-line"><span dir="rtl">بكرة تقدر تصرف</span><app-money [value]="s.tomorrow" /></div>
+                  <div class="g-line"><span dir="rtl">باجر تقدر تصرف</span><app-money [value]="s.tomorrow" /></div>
+                }
+                @if (d.pace; as p) {
+                  <div class="g-pace-say" [class.fast]="p.fast" dir="rtl">{{ p.fast ? 'صرفك أسرع من الوقت، خفّف شوي' : 'ماشي على الخطة' }}</div>
                 }
               </section>
             }
