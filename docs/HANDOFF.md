@@ -60,6 +60,7 @@
 - **الدخول الحقيقي محلياً:** المالك بإيميله، أو `node scripts/dev-sign-in-link.mjs` **يشغّله المالك بنفسه**.
 - **رسائل البنك بـ curl محلياً:** مستخدم وهمي في قاعدة Docker مع `sms_tokens.token_hash` = SHA-256 لرمز تولّده بـ Node (لا تطبعه)، ثم `POST http://localhost:8080/api/v1/sms/ingest`، ثم احذفه (`audit_log` ← `sms_tokens` ← `budgets` ← `user_roles` ← `app_users`).
 - **بعد push:** `gh run list --limit 4` ثم `gh run watch <id>` (فلتر `--commit` بالـ SHA القصير لا يعمل).
+- **Render MCP (للقراءة):** الخدمة `srv-dbj78fe7bikc73ek7mh0`، ومساحة العمل `tea-d84no0rtqb8s73fgvsu0` (مرّرها `workspaceId`). `list_deploys` (هل النسخة live)، و`list_logs` (Flyway والأخطاء)، و`get_metrics` (الذاكرة). **السيرفر ينشر فقط إذا تغيّر `backend/**` أو `render.yaml`**، فتعديلات الواجهة وحدها لا تنشره. أي تغيير في الإعدادات يحتاج موافقة المالك.
 
 ## 6. فخاخ
 
@@ -68,6 +69,7 @@
 - **أسماء كلاسات عامة** (`sheet`، و`row`، و`panel`، و`field`) مستخدمة في `ledger.css` و`glass.css`: استخدم بادئة (`pc-`، و`bs-`...). و`.g-hero` فيها `overflow:hidden`. **قبل أي كلاس جديد في `glass.css`:** `grep -rn '\.NAME\b\|"NAME"' frontend/src` (كلاس `.pc` لبطاقة رسائل البنك كسر نسب الإحصاءات، والحل كان `g-pct`).
 - **أيقونة داخل `app-icon`** (`display: contents`): للتدوير استهدف `app-icon:last-child svg`، وليس `svg:last-child` (يطابق كل الأيقونات).
 - **Spring:** `@Transactional` من service أخرى ثم التقاط الاستثناء يجعلها rollback-only (لذلك `CategoryService.find` يرجع `Optional`).
+- **السحب الجانبي:** `header.top` يمتد بهامش سالب = حشوة `.wrap` (12px في `glass.css`)؛ أي فرق يجعل الصفحة تتحرك جانبياً في الآيفون. للفحص: عنصر داخل `.wrap` يتجاوز `clientWidth` بمقاس 320 و375.
 - **Guards:** `inject()` لا يعمل بعد `await`.
 - **قوالب Angular:** `in` كلمة محجوزة، فلا تسمِّ خاصية `in` وتستخدمها في القالب (خطأ `NG5002`).
 - **CSP في `index.html`:** أي عنوان خارجي جديد يُضاف لها.
@@ -86,4 +88,4 @@
 - **مفاتيح VAPID** لا تُنشأ مرة ثانية (تلغي اشتراك كل الأجهزة). `VAPID_SUBJECT` = عنوان التطبيق.
 - **إذا تغيّرت كلمة مرور Google أو أُلغي App Password:** تتوقف رموز الدخول. الحل: App Password جديد في `.env`، ثم `scripts/apply-auth-email.mjs`.
 - **رمز الاختصار** (رسائل البنك) عند المالك فقط، وفي القاعدة بصمته SHA-256. إذا ضاع: "إنشاء رمز جديد" وتحديث الاختصار.
-- **ذاكرة Render:** حوالي 290 إلى 355MB من 512MB (محلياً 309MB بعد المرحلة 11). عند 450MB تُضبط Java قبل أي تغيير للاستضافة (القاعدة 13).
+- **ذاكرة Render:** حوالي 320 إلى 365MB من 512MB (2026-11-14 بعد `V10`) (محلياً 309MB بعد المرحلة 11). عند 450MB تُضبط Java قبل أي تغيير للاستضافة (القاعدة 13).

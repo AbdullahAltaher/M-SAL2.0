@@ -45,6 +45,8 @@ header.top .top-row{position:relative;min-height:44px}
 .tabs[data-at="expenses"] .tab-pill{transform:translateX(-100%)}
 .tabs[data-at="none"] .tab-pill{opacity:0}
 .wrap{padding-inline:12px}
+/* the header reaches the screen's edges, not 2px past each (it made the page move sideways) */
+header.top{margin-inline:-12px}
 #viewExp{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
 /* ---- floating glass bar ---- */
 .xbar{display:flex;position:fixed;z-index:30;left:0;right:0;margin-inline:auto;width:min(calc(100% - 28px),420px);bottom:calc(14px + env(safe-area-inset-bottom));height:68px;align-items:center;justify-content:space-between;padding:0 10px;border-radius:999px;border:1px solid var(--x-line);box-shadow:var(--x-hi),0 20px 40px -12px rgba(0,0,0,.55);background:var(--x-glass-solid)}
