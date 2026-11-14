@@ -630,7 +630,8 @@ app-day-strip{display:block;animation:stripIn .28s var(--ease-out)}
 .pc-date[aria-expanded="true"] app-icon:last-child svg{transform:rotate(180deg)}
 
 /* ---- thanks after adding, and the salary card (D-42) ---- */
-.gr-float{position:fixed;inset:0;z-index:65;display:grid;place-items:center;padding:0 28px;pointer-events:none}
+/* the screen behind is dimmed and blurred, so the eye goes to the card; the toast ("تراجع", z 70) stays above it */
+.gr-float{position:fixed;inset:0;z-index:65;display:grid;place-items:center;padding:0 28px;background:var(--x-scrim);-webkit-backdrop-filter:blur(12px) saturate(120%);backdrop-filter:blur(12px) saturate(120%);animation:fadeIn .3s both}
 .gr-card{pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:2px;width:min(100%,360px);padding:20px 18px 16px;text-align:center;background:var(--x-glass-solid);border:1px solid var(--x-line);border-radius:26px;color:var(--x-text);box-shadow:var(--x-hi),0 24px 50px -16px rgba(0,0,0,.6);cursor:pointer;animation:grIn .35s var(--ease-out) both}
 .gr-kind{display:inline-flex;align-items:center;gap:6px;font:500 12.5px var(--ar);color:var(--x-muted)}
 .gr-star{color:var(--x-warn);font-size:14px}

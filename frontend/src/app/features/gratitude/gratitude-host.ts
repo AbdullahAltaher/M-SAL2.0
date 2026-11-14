@@ -5,8 +5,9 @@ import { MoneyView } from '../../shared/components/money';
 import { Gratitude } from './gratitude';
 
 /**
- * The cards of D-42: after adding, in the middle of the screen (a tap closes it, it goes by
- * itself after a few seconds); for a new cycle, a full card closed by "الحمد لله".
+ * The cards of D-42: after adding, in the middle of a blurred screen (a tap anywhere closes it,
+ * it goes by itself after a few seconds; "تراجع" stays sharp above it); for a new cycle, a full
+ * card closed by "الحمد لله".
  */
 @Component({
   selector: 'app-gratitude-host',
@@ -16,7 +17,7 @@ import { Gratitude } from './gratitude';
     @if (g.card(); as c) {
       @for (k of [c.key]; track k) {
         @if (c.kind === 'added') {
-          <div class="gr-float">
+          <div class="gr-float" (click)="g.close()">
             <button class="gr-card" type="button" aria-live="polite" aria-label="إغلاق" (click)="g.close()">
               <span class="gr-kind" dir="rtl"><span class="gr-star" aria-hidden="true">✦</span>{{ c.text.type }}</span>
               <span class="gr-text" [class.verse]="c.text.type === 'آية'" dir="rtl">{{ c.text.type === 'آية' ? '﴿' + c.text.text + '﴾' : c.text.text }}</span>
