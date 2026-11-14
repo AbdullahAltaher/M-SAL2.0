@@ -99,7 +99,7 @@ class MeApiTest extends IntegrationTest {
 
 	@Test
 	void invitedEmailBecomesUserAndInvitationIsAccepted() throws Exception {
-		insertInvitation("friend@test.local", "USER", Instant.now().plus(14, ChronoUnit.DAYS));
+		insertInvitation("friend@test.local", "USER", NOW.plus(14, ChronoUnit.DAYS));
 		mvc.perform(get("/api/v1/me").with(signedIn(UUID.randomUUID(), "Friend@Test.local")))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.roles.length()").value(1))
@@ -111,7 +111,7 @@ class MeApiTest extends IntegrationTest {
 
 	@Test
 	void expiredInvitationIsRefused() throws Exception {
-		insertInvitation("late@test.local", "USER", Instant.now().minus(1, ChronoUnit.DAYS));
+		insertInvitation("late@test.local", "USER", NOW.minus(1, ChronoUnit.DAYS));
 		mvc.perform(get("/api/v1/me").with(signedIn(UUID.randomUUID(), "late@test.local")))
 				.andExpect(status().isForbidden())
 				.andExpect(jsonPath("$.code").value("SRV-000-E001"));

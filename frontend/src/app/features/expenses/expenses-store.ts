@@ -3,6 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Api } from '../../core/api/api';
 import { Account, Category, Entry, Home } from '../../core/api/models';
 import { BudgetsStore } from '../../core/data/budgets-store';
+import { showBadge } from '../../core/pwa/app-badge';
 import { Toasts } from '../../shared/toast/toast';
 
 /** What a missing category shows as (R-CAT). */
@@ -62,7 +63,10 @@ export class ExpensesStore {
   async loadHome(): Promise<void> {
     const accountId = this.accountId();
     if (!accountId) return;
-    this.home.set(await this.api.home(accountId, this.cycleKey()));
+    const home = await this.api.home(accountId, this.cycleKey());
+    this.home.set(home);
+    // The messages waiting for review stay on the app icon until reviewed (B-22)
+    showBadge(home.pendingTotal ?? 0);
   }
 
   catOf(id: string | null | undefined): Pick<Category, 'name' | 'emoji'> {

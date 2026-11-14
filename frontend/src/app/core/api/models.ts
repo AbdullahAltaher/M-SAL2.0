@@ -158,6 +158,8 @@ export interface Home {
   recent: Entry[];
   /** Bank messages of this budget waiting for review (BANK-SMS.md B-04) */
   pendingCount: number;
+  /** The user's messages waiting for review in all budgets: the number on the app icon (B-22) */
+  pendingTotal: number;
 }
 
 /** R-ENT-14, R-ENT-15 */

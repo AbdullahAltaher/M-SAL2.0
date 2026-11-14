@@ -122,7 +122,7 @@ class PushApiTest extends IntegrationTest {
 
 		remindAt(sara, "11:15"); // 45 minutes ago: still sent
 		assertThat(reminder.run()).isEqualTo(1);
-		verify(webPush).send(eq(APPLE), eq(KEY), eq(AUTH), eq(DailyReminder.PAYLOAD));
+		verify(webPush).send(eq(APPLE), eq(KEY), eq(AUTH), eq(DailyReminder.payload(0)));
 		assertThat(reminder.run()).isZero(); // once a day
 		assertThat(jdbc.queryForObject("select last_reminder_on::text from msal.app_users where id = ?", String.class,
 				sara.id())).isEqualTo("2026-11-11");
@@ -190,5 +190,11 @@ class PushApiTest extends IntegrationTest {
 		when(webPush.publicKey()).thenReturn(KEY);
 		TestUser sara = signUp("sara");
 		call(sara, get("/api/v1/me")).andExpect(jsonPath("$.pushPublicKey").value(KEY));
+	}
+
+	@Test
+	void theReminderShowsOneOrTheMessagesWaitingForReview() {
+		assertThat(DailyReminder.payload(0)).contains("\"badge\":1,");
+		assertThat(DailyReminder.payload(3)).contains("\"badge\":3,");
 	}
 }

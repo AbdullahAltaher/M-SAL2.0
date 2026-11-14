@@ -71,7 +71,7 @@ const routes = [
   ['GET', /\/accounts$/, () => [{ id: A, name: 'مصاريفي', isArchived: false, sortOrder: 0, version: 0 }]],
   ['GET', /\/categories$/, () => categories],
   ['GET', /\/home$/, () => ({ today: TODAY, account: { id: A, name: 'مصاريفي' }, activeAccounts: [{ id: A, name: 'مصاريفي' }], cycleKeys: ['cy1'],
-    selected: { key: 'cy1', cycle, summary, noCycleTotal: null }, recent: mock.entries.slice(0, 5), pendingCount: mock.pending.length })],
+    selected: { key: 'cy1', cycle, summary, noCycleTotal: null }, recent: mock.entries.slice(0, 5), pendingCount: mock.pending.length, pendingTotal: mock.pending.length })],
   ['GET', /\/entries\/quick$/, () => ({ shortcuts: [], categoryOrder: ['c-food', 'c-coffee', 'c-groc'] })],
   ['GET', /\/entries\/suggestions$/, (url) => ({ suggestions: url.includes('c-food') ? ['غداء', 'عشاء', 'ريوق'] : url.includes('c-coffee') ? ['قهوة'] : [] })],
   ['GET', /\/entries\/deleted$/, () => []],

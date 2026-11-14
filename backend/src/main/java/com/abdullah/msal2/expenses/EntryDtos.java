@@ -68,9 +68,12 @@ public final class EntryDtos {
 	 *
 	 * @param pendingCount the budget's bank messages waiting for review, for the bar above the
 	 *                     account card (BANK-SMS.md B-04); they are not entries (B-06)
+	 * @param pendingTotal the user's messages waiting for review in all budgets, the number on the
+	 *                     app icon (B-22)
 	 */
 	public record HomeResponse(LocalDate today, AccountRef account, List<AccountRef> activeAccounts,
-			List<String> cycleKeys, Selected selected, List<EntryResponse> recent, int pendingCount) {
+			List<String> cycleKeys, Selected selected, List<EntryResponse> recent, int pendingCount,
+			int pendingTotal) {
 	}
 
 	public record DayResponse(LocalDate date, BigDecimal spent, BigDecimal extra, List<EntryResponse> entries) {

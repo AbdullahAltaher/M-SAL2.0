@@ -2,6 +2,12 @@ package com.abdullah.msal2.banksms;
 
 import static com.abdullah.msal2.banksms.FakeSms.debit;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
@@ -19,10 +25,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.abdullah.msal2.IntegrationTest;
+import com.abdullah.msal2.push.WebPush;
 
 import tools.jackson.databind.JsonNode;
 
@@ -125,6 +133,60 @@ class BankSmsApiTest extends IntegrationTest {
 		assertThat(cafe.get("smsText").asString()).isEqualTo(debit("12.00", "BLUE FALCON CAFE"));
 		assertThat(furniture.get("amount").asString()).isEqualTo("1250.00");
 		assertThat(absent(furniture.path("categoryId"))).isTrue();
+	}
+
+	@Test
+	void aNewPendingEntryPutsTheCountOnTheAppIcon() throws Exception {
+		String apple = "https://web.push.apple.com/QGx8device";
+		String key = "BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM";
+		String auth = "tBHItJI5svbpez7KI4CCXg";
+		when(webPush.enabled()).thenReturn(true);
+		when(webPush.send(anyString(), anyString(), anyString(), anyString())).thenReturn(WebPush.Outcome.SENT);
+		TestUser user = signUp("sara");
+		String token = ready(user);
+		send(user, post("/api/v1/me/push-subscriptions"),
+				Map.of("endpoint", apple, "keys", Map.of("p256dh", key, "auth", auth)))
+				.andExpect(status().isNoContent());
+
+		ingest(token, debit("12.00", "BLUE FALCON CAFE")).andExpect(jsonPath("$.status").value("PENDING"));
+		ingest(token, debit("7.50", "SAND KIOSK")).andExpect(jsonPath("$.status").value("PENDING"));
+		// not new: no notification (B-22)
+		ingest(token, debit("7.50", "SAND KIOSK")).andExpect(jsonPath("$.status").value("DUPLICATE"));
+		ingest(token, FakeSms.deposit("500.00")).andExpect(jsonPath("$.status").value("IGNORED"));
+
+		ArgumentCaptor<String> payloads = ArgumentCaptor.forClass(String.class);
+		verify(webPush, times(2)).send(eq(apple), eq(key), eq(auth), payloads.capture());
+		JsonNode first = jsonMapper.readTree(payloads.getAllValues().get(0)).get("notification");
+		JsonNode second = jsonMapper.readTree(payloads.getAllValues().get(1)).get("notification");
+		assertThat(first.get("body").asString()).isEqualTo("طلب جديد: 12.00 د.إ · اختر الفئة");
+		assertThat(first.get("tag").asString()).isEqualTo("bank-sms");
+		assertThat(first.get("data").get("badge").asInt()).isEqualTo(1);
+		assertThat(first.get("data").get("onActionClick").get("default").get("url").asString())
+				.isEqualTo("expenses/pending");
+		assertThat(second.get("data").get("badge").asInt()).isEqualTo(2);
+	}
+
+	@Test
+	void aFailedNotificationDoesNotChangeTheShortcutsAnswer() throws Exception {
+		when(webPush.enabled()).thenReturn(true);
+		when(webPush.send(anyString(), anyString(), anyString(), anyString())).thenThrow(new IllegalStateException());
+		TestUser user = signUp("sara");
+		String token = ready(user);
+		send(user, post("/api/v1/me/push-subscriptions"), Map.of("endpoint", "https://web.push.apple.com/QGx8device",
+				"keys", Map.of("p256dh", "BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM",
+						"auth", "tBHItJI5svbpez7KI4CCXg")))
+				.andExpect(status().isNoContent());
+
+		ingest(token, debit("12.00", "BLUE FALCON CAFE")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("PENDING"));
+		assertThat(pending(user)).hasSize(1);
+	}
+
+	@Test
+	void withoutPushNothingIsSent() throws Exception {
+		TestUser user = signUp("sara");
+		ingest(ready(user), debit("12.00", "BLUE FALCON CAFE")).andExpect(jsonPath("$.status").value("PENDING"));
+		verify(webPush, never()).send(anyString(), anyString(), anyString(), anyString());
 	}
 
 	@Test
@@ -271,6 +333,7 @@ class BankSmsApiTest extends IntegrationTest {
 		// Waiting for review, it is not an entry: home and the statistics do not change (B-06)
 		JsonNode homeWaiting = getJson(user, home);
 		assertThat(homeWaiting.get("pendingCount").asInt()).isEqualTo(1);
+		assertThat(homeWaiting.get("pendingTotal").asInt()).isEqualTo(1);
 		assertThat(homeWaiting.get("selected")).isEqualTo(homeBefore.get("selected"));
 		assertThat(homeWaiting.get("recent")).isEqualTo(homeBefore.get("recent"));
 		assertThat(getJson(user, stats)).isEqualTo(statsBefore);
@@ -288,6 +351,7 @@ class BankSmsApiTest extends IntegrationTest {
 
 		JsonNode homeAfter = getJson(user, home);
 		assertThat(homeAfter.get("pendingCount").asInt()).isZero();
+		assertThat(homeAfter.get("pendingTotal").asInt()).isZero();
 		assertThat(homeAfter.get("selected").get("summary").get("spent").asString()).isEqualTo("12.00");
 		assertThat(homeAfter.get("recent").get(0).get("id").asString()).isEqualTo(entry.get("id").asString());
 

@@ -106,7 +106,7 @@ public class EntryService {
 				.stream().filter(a -> !a.isArchived()).map(a -> new AccountRef(a.getId(), a.getName())).toList();
 		return new HomeResponse(today, new AccountRef(accountId, ledger.account().getName()), active,
 				CycleKey.all(ledger.cycles(), ledger.entries()), selection, recent,
-				pending.count(ledger.account().getBudgetId()));
+				pending.count(ledger.account().getBudgetId()), pending.countOfUser(userId));
 	}
 
 	/** The entries of a cycle grouped by day, filtered by text and category (R-ENT-10, R-ENT-11). */

@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 
 import { ApiError } from '../../core/api/api-error';
 import { BudgetsStore } from '../../core/data/budgets-store';
+import { AppStatus } from '../../core/pwa/app-status';
 import { weekdayDate } from '../../core/util/dates';
 import { Icon } from '../../shared/components/icon';
 import { Toasts } from '../../shared/toast/toast';
@@ -60,6 +61,7 @@ export class ExpensesLayout {
   private readonly budgets = inject(BudgetsStore);
   private readonly toasts = inject(Toasts);
   private readonly router = inject(Router);
+  private readonly status = inject(AppStatus);
 
   protected readonly view = signal(this.viewOf(this.router.url));
   protected readonly title = computed(() => TITLES[this.view()] ?? '');
@@ -80,6 +82,10 @@ export class ExpensesLayout {
     effect(() => {
       this.budgets.currentId();
       void this.store.ensureLoaded().then(() => this.store.refresh()).catch((e: ApiError) => this.toasts.show(e.message));
+    });
+    // Back on screen: fresh figures, and the messages that came meanwhile (B-22)
+    effect(() => {
+      if (this.status.back()) untracked(() => this.store.refresh());
     });
     effect(() => {
       this.store.changed();

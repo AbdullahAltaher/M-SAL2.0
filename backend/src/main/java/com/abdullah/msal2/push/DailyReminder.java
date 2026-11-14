@@ -7,14 +7,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.abdullah.msal2.push.PushSubscriptions.Subscription;
-import com.abdullah.msal2.push.WebPush.Outcome;
+import com.abdullah.msal2.banksms.PendingEntries;
 
 /**
  * The daily reminder "سجّلت مصاريف اليوم؟" (SCREENS.md section 7): each minute, users whose
@@ -25,13 +22,14 @@ import com.abdullah.msal2.push.WebPush.Outcome;
 @Component
 public class DailyReminder {
 
-	private static final Logger log = LoggerFactory.getLogger(DailyReminder.class);
-
-	/** Angular's service worker shows it, and opening it goes to Expenses (ngsw's onActionClick). */
+	/**
+	 * Angular's service worker shows it, and opening it goes to Expenses (ngsw's onActionClick).
+	 * The number on the icon is 1, or the messages waiting for review if more (B-22).
+	 */
 	static final String PAYLOAD = """
 			{"notification":{"title":"ميزانية","body":"سجّلت مصاريف اليوم؟","icon":"icons/icon-192.png",\
 			"lang":"ar","dir":"rtl","tag":"daily-reminder",\
-			"data":{"badge":1,"onActionClick":{"default":{"operation":"navigateLastFocusedOrOpen","url":"expenses"}}}}}""";
+			"data":{"badge":%d,"onActionClick":{"default":{"operation":"navigateLastFocusedOrOpen","url":"expenses"}}}}}""";
 
 	/**
 	 * Claims the users due now: sets {@code last_reminder_on} to their "today", so the reminder
@@ -63,15 +61,19 @@ public class DailyReminder {
 	}
 
 	private final JdbcTemplate jdbc;
-	private final PushSubscriptions subscriptions;
-	private final WebPush push;
+	private final UserPush push;
+	private final PendingEntries pending;
 	private final Clock clock;
 
-	public DailyReminder(JdbcTemplate jdbc, PushSubscriptions subscriptions, WebPush push, Clock clock) {
+	public DailyReminder(JdbcTemplate jdbc, UserPush push, PendingEntries pending, Clock clock) {
 		this.jdbc = jdbc;
-		this.subscriptions = subscriptions;
 		this.push = push;
+		this.pending = pending;
 		this.clock = clock;
+	}
+
+	static String payload(int badge) {
+		return PAYLOAD.formatted(Math.max(1, badge));
 	}
 
 	@Scheduled(cron = "${msal.push.reminder-cron:0 * * * * *}")
@@ -92,18 +94,7 @@ public class DailyReminder {
 					jdbc.queryForObject(HAS_EXPENSE_TODAY, Boolean.class, d.userId(), Date.valueOf(d.today())))) {
 				continue;
 			}
-			boolean sent = false;
-			for (Subscription s : subscriptions.of(d.userId())) {
-				Outcome outcome = push.send(s.endpoint(), s.p256dh(), s.auth(), PAYLOAD);
-				switch (outcome) {
-				case SENT -> {
-					subscriptions.used(s.id());
-					sent = true;
-				}
-				case GONE -> subscriptions.gone(s.id());
-				case FAILED -> log.warn("Daily reminder not delivered to one device of user {}", d.userId());
-				}
-			}
+			boolean sent = push.send(d.userId(), payload(pending.countOfUser(d.userId())), "Daily reminder");
 			if (sent) {
 				notified++;
 			}

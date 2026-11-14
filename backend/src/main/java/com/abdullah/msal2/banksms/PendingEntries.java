@@ -87,6 +87,18 @@ public class PendingEntries {
 		return n == null ? 0 : n;
 	}
 
+	/**
+	 * All of the user's messages waiting for review, in every budget still there: the number on
+	 * the app icon (B-22).
+	 */
+	public int countOfUser(UUID userId) {
+		Integer n = jdbc.queryForObject("""
+				select count(*) from msal.pending_entries p join msal.budgets b on b.id = p.budget_id
+				where p.user_id = ? and b.deleted_at is null
+				""", Integer.class, userId);
+		return n == null ? 0 : n;
+	}
+
 	public void delete(UUID id) {
 		jdbc.update("delete from msal.pending_entries where id = ?", id);
 	}

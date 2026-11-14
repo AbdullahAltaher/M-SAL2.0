@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.abdullah.msal2.banksms.BankSmsDtos.ApproveRequest;
 import com.abdullah.msal2.banksms.BankSmsDtos.IngestRequest;
 import com.abdullah.msal2.banksms.BankSmsDtos.IngestResponse;
+import com.abdullah.msal2.banksms.BankSmsDtos.IngestStatus;
 import com.abdullah.msal2.banksms.BankSmsDtos.KeywordRequest;
 import com.abdullah.msal2.banksms.BankSmsDtos.KeywordResponse;
 import com.abdullah.msal2.banksms.BankSmsDtos.LinkRequest;
@@ -41,11 +42,14 @@ public class BankSmsController {
 	private final SmsIngestService ingest;
 	private final PendingEntryService pending;
 	private final SmsSettingsService settings;
+	private final PendingPush notify;
 
-	public BankSmsController(SmsIngestService ingest, PendingEntryService pending, SmsSettingsService settings) {
+	public BankSmsController(SmsIngestService ingest, PendingEntryService pending, SmsSettingsService settings,
+			PendingPush notify) {
 		this.ingest = ingest;
 		this.pending = pending;
 		this.settings = settings;
+		this.notify = notify;
 	}
 
 	// ── The shortcut ────────────────────────────────────────────
@@ -53,7 +57,12 @@ public class BankSmsController {
 	@PostMapping(SmsSecurityConfig.INGEST_PATH)
 	@StrictRateLimit
 	public IngestResponse ingest(CurrentUser user, @Valid @RequestBody IngestRequest request) {
-		return ingest.ingest(user, request.text());
+		IngestResponse response = ingest.ingest(user, request.text());
+		// After the entry is saved: the number on the app icon (B-22)
+		if (response.status() == IngestStatus.PENDING) {
+			notify.newPending(user.id(), response.message());
+		}
+		return response;
 	}
 
 	// ── Review ──────────────────────────────────────────────────
