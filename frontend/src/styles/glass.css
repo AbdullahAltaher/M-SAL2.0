@@ -626,3 +626,26 @@ app-day-strip{display:block;animation:stripIn .28s var(--ease-out)}
 .pc-date.moved{border-color:var(--x-warn);color:var(--x-warn)}
 .pc-dates{margin:-2px 0 0;animation:stripIn .25s var(--ease-out)}
 .pc-date[aria-expanded="true"] app-icon:last-child svg{transform:rotate(180deg)}
+
+/* ---- thanks after adding, and the salary card (D-42) ---- */
+.gr-float{position:fixed;inset:0;z-index:65;display:grid;place-items:center;padding:0 28px;pointer-events:none}
+.gr-card{pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:2px;width:min(100%,360px);padding:20px 18px 16px;text-align:center;background:var(--x-glass-solid);border:1px solid var(--x-line);border-radius:26px;color:var(--x-text);box-shadow:var(--x-hi),0 24px 50px -16px rgba(0,0,0,.6);cursor:pointer;animation:grIn .35s var(--ease-out) both}
+.gr-kind{display:inline-flex;align-items:center;gap:6px;font:500 12.5px var(--ar);color:var(--x-muted)}
+.gr-star{color:var(--x-warn);font-size:14px}
+.gr-text{display:block;margin:6px 0 4px;font:500 18px/1.8 var(--ar);color:var(--x-text)}
+.gr-text.verse{font:400 21px/1.9 'Amiri',serif}
+.gr-src{display:block;font:500 12px var(--ar);color:var(--x-muted)}
+.gr-added{display:flex;justify-content:center;align-items:baseline;gap:6px;width:100%;margin-top:12px;padding-top:10px;border-top:1px solid var(--x-line);font:500 13px var(--ar);color:var(--x-muted)}
+.gr-added .money{color:var(--x-text)}
+.gr-back{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;justify-content:center;padding:0 12px calc(12px + env(safe-area-inset-bottom));background:rgba(4,10,24,.55);animation:fadeIn .25s both}
+.gr-sheet{width:min(100%,420px);max-height:calc(100dvh - 40px);overflow-y:auto;padding:24px 18px 16px;text-align:center;background:var(--x-glass-solid);border:1px solid var(--x-line);border-radius:30px;color:var(--x-text);box-shadow:var(--x-hi),0 -10px 40px -10px rgba(0,0,0,.5);animation:grUp .45s var(--ease-out) both}
+.gr-wallet{width:60px;height:60px;margin:0 auto;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,var(--x-hero-a),var(--x-hero-b))}
+.gr-title{margin:12px 0 0;font:600 16px var(--ar);color:var(--x-muted)}
+.gr-amount{margin:2px 0 14px;font:600 30px var(--num)}
+.gr-amount .money{font-size:30px}
+.gr-sub{margin:4px 0 14px;font:500 15px var(--ar);color:var(--x-text)}
+.gr-frame{padding:12px;border:1px solid var(--x-line);border-radius:20px}
+.gr-dua{margin:14px 0 2px;font:500 15px/1.8 var(--ar);color:var(--x-text)}
+.gr-thanks{width:100%;margin-top:16px}
+@keyframes grIn{from{opacity:0;transform:scale(.92) translateY(8px)}}
+@keyframes grUp{from{transform:translateY(40px);opacity:0}}

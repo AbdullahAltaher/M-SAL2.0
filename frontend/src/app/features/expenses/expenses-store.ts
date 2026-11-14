@@ -5,6 +5,7 @@ import { Account, Category, Entry, Home } from '../../core/api/models';
 import { BudgetsStore } from '../../core/data/budgets-store';
 import { showBadge } from '../../core/pwa/app-badge';
 import { Toasts } from '../../shared/toast/toast';
+import { Gratitude } from '../gratitude/gratitude';
 
 /** What a missing category shows as (R-CAT). */
 export const OTHER: Pick<Category, 'name' | 'emoji'> = { name: 'أخرى', emoji: '📦' };
@@ -19,6 +20,7 @@ export class ExpensesStore {
   private readonly api = inject(Api);
   private readonly budgets = inject(BudgetsStore);
   private readonly toasts = inject(Toasts);
+  private readonly gratitude = inject(Gratitude);
 
   readonly budgetId = computed(() => this.budgets.currentId());
   readonly accounts = signal<Account[]>([]);
@@ -135,6 +137,7 @@ export class ExpensesStore {
   async duplicate(entry: Entry): Promise<void> {
     const copy = await this.api.duplicateEntry(entry.id);
     this.jumpTo(copy);
+    this.gratitude.added(copy.type === 'INCOME' ? 'أُضيف دخل' : 'أُضيف', copy.amount, 250);
     this.toasts.show('نُسخ بتاريخ اليوم: ', {
       money: copy.amount,
       action: { label: 'تراجع', run: () => void this.api.purgeEntry(copy.id).then(() => this.refresh()) },

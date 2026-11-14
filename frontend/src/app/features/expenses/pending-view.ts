@@ -10,6 +10,7 @@ import { addDays, dayLabel, parseDate, weekdayDate } from '../../core/util/dates
 import { Icon } from '../../shared/components/icon';
 import { MoneyView } from '../../shared/components/money';
 import { Toasts } from '../../shared/toast/toast';
+import { Gratitude } from '../gratitude/gratitude';
 import { flyCoin } from './coin-flight';
 import { ExpensesStore } from './expenses-store';
 import { cleanMerchant } from './pending-label';
@@ -315,6 +316,9 @@ export class PendingView {
   private readonly toasts = inject(Toasts);
   private readonly router = inject(Router);
   private readonly session = inject(SessionStore);
+  private readonly gratitude = inject(Gratitude);
+  /** Approved on this visit: the thanks card comes once, after the last request (D-42) */
+  private approved: Entry[] = [];
 
   protected readonly list = signal<PendingEntry[] | null>(null);
   protected readonly failed = signal('');
@@ -370,6 +374,12 @@ export class PendingView {
     } else {
       this.store.refresh();
       this.toasts.show('تم التجاهل');
+    }
+    if (entry) this.approved.push(entry);
+    if (!rest.length && this.approved.length) {
+      const one = this.approved.length === 1 ? this.approved[0] : null;
+      this.gratitude.added(one ? 'أُضيف' : 'انتهت المراجعة', one?.amount ?? null);
+      this.approved = [];
     }
     if (!rest.length) setTimeout(() => void this.router.navigateByUrl('/expenses/home'), entry ? 900 : 300);
   }

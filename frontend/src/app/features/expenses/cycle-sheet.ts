@@ -8,6 +8,7 @@ import { parseDate, shortArabicDate } from '../../core/util/dates';
 import { Dialogs } from '../../shared/sheet/dialogs';
 import { Sheets } from '../../shared/sheet/sheets';
 import { Toasts } from '../../shared/toast/toast';
+import { Gratitude } from '../gratitude/gratitude';
 import { ExpensesStore } from './expenses-store';
 
 /**
@@ -55,6 +56,7 @@ export class CycleSheet implements OnInit {
   private readonly sheets = inject(Sheets);
   private readonly dialogs = inject(Dialogs);
   private readonly toasts = inject(Toasts);
+  private readonly gratitude = inject(Gratitude);
 
   readonly cycle = input<Cycle | null>(null);
   readonly date = input('');
@@ -110,6 +112,8 @@ export class CycleSheet implements OnInit {
       this.store.setCycle(saved.id);
       this.sheets.close(saved);
       this.toasts.show(editing ? 'حُفظت الدورة' : 'بدأت دورة جديدة من ' + shortArabicDate(start, true));
+      // The salary card, once, for a new current cycle; not for an earlier one added before others (D-42)
+      if (!editing && saved.isOpen) this.gratitude.salary(Number(saved.allowance) > 0 ? saved.allowance : null);
     } catch (e) {
       this.error.set((e as ApiError).message);
     }

@@ -11,6 +11,7 @@ import { Icon } from '../../shared/components/icon';
 import { Collapse } from '../../shared/directives/collapse';
 import { Sheets } from '../../shared/sheet/sheets';
 import { Toasts } from '../../shared/toast/toast';
+import { Gratitude } from '../gratitude/gratitude';
 import { flyCoin } from './coin-flight';
 import { ExpensesStore } from './expenses-store';
 
@@ -32,6 +33,7 @@ export class EntrySheet implements OnInit {
   private readonly store = inject(ExpensesStore);
   private readonly sheets = inject(Sheets);
   private readonly toasts = inject(Toasts);
+  private readonly gratitude = inject(Gratitude);
 
   readonly editing = input<Entry | null>(null);
   readonly presetType = input<EntryType>('EXPENSE');
@@ -249,6 +251,8 @@ export class EntrySheet implements OnInit {
       this.store.markFresh(saved.id);
       // a coin from + to the account card, then its numbers count down (DESIGN.md D-10, D-24)
       if (saved.type === 'EXPENSE') flyCoin(document.querySelector('.xbar .fab'), document.querySelector('app-home-view .g-hero'));
+      // Thanks after every entry added, once the coin has landed (D-42)
+      this.gratitude.added(saved.type === 'INCOME' ? 'أُضيف دخل' : 'أُضيف', saved.amount, saved.type === 'EXPENSE' ? undefined : 250);
     }
     const accName = this.store.accounts().find((a) => a.id === saved.accountId)?.name;
     const label = editing ? 'حُفظ التعديل: ' : saved.type === 'INCOME' ? 'أُضيف دخل: ' : 'أُضيف: ';

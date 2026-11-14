@@ -16,6 +16,7 @@ import { SheetHost } from '../../shared/sheet/sheet-host';
 import { ToastHost, Toasts } from '../../shared/toast/toast';
 import { LedgerStore } from '../budget/ledger-store';
 import { CycleSwitch } from '../expenses/cycle-switch';
+import { GratitudeHost } from '../gratitude/gratitude-host';
 import { LockScreen } from '../lock/lock-screen';
 import { ImportExport } from '../settings/import-export';
 import { LastTab } from './last-tab';
@@ -29,7 +30,7 @@ import { LastTab } from './last-tab';
  */
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, SheetHost, ToastHost, LockScreen, Icon, FloatingWallet, CycleSwitch],
+  imports: [RouterOutlet, SheetHost, ToastHost, LockScreen, Icon, FloatingWallet, CycleSwitch, GratitudeHost],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shell.html',
   host: { '(document:pointerdown)': 'outside($event)' },
