@@ -9,7 +9,8 @@ import java.util.UUID;
 /**
  * {@code GET /me} (API.md SRV-000). {@code services} holds only enabled services the user may use.
  * {@code dailyReminderTime} is "HH:mm:ss" or null (off); {@code pushPublicKey} is the server's VAPID
- * key for subscribing, or null when this server sends no notifications.
+ * key for subscribing, or null when this server sends no notifications. {@code bankSmsPush}: a new
+ * bank message waiting for review notifies the devices, with the count on the app icon (B-22).
  */
 public record MeResponse(
 		UUID id,
@@ -22,6 +23,7 @@ public record MeResponse(
 		UUID lastBudgetId,
 		ExportReminder exportReminder,
 		LocalTime dailyReminderTime,
+		boolean bankSmsPush,
 		String pushPublicKey,
 		int version) {
 

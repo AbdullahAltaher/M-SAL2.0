@@ -8,6 +8,7 @@ import { ImportRecord } from '../../core/api/models';
 import { SupabaseAuth } from '../../core/auth/supabase-auth';
 import { AppLock } from '../../core/pwa/app-lock';
 import { DailyReminder } from '../../core/pwa/daily-reminder';
+import { DevicePush } from '../../core/pwa/device-push';
 import { canLock } from '../../core/pwa/device';
 import { SessionStore } from '../../core/session/session-store';
 import { BudgetsStore } from '../../core/data/budgets-store';
@@ -61,15 +62,33 @@ import { ImportExport } from './import-export';
       </div>
       <p class="st-note" dir="rtl">«تلقائي» يتبع إعداد الجهاز (فاتح أو داكن).</p>
 
-      <h3 class="st-sec" dir="rtl">الأمان والتذكير</h3>
-      <div class="st-grp">
-        @if (lockAvailable()) {
+      @if (lockAvailable()) {
+        <h3 class="st-sec" dir="rtl">الأمان</h3>
+        <div class="st-grp">
           <div class="st-row">
             <span class="st-ic" style="--c:#17A673"><app-icon name="faceId" [size]="16" /></span>
             <span class="st-l">قفل Face ID</span>
             <button class="st-switch" type="button" role="switch" [attr.aria-checked]="lock.enabled()" aria-label="قفل Face ID" (click)="toggleLock()"></button>
           </div>
-        }
+        </div>
+        <p class="st-note" dir="rtl">القفل يُطلب عند فتح التطبيق وبعد 5 دقائق في الخلفية، ولا يغني عن تسجيل الدخول.</p>
+      }
+
+      <!-- D-41: this device, then what the notifications are for -->
+      <h3 class="st-sec" dir="rtl">الإشعارات</h3>
+      <div class="st-grp">
+        <div class="st-row">
+          <span class="st-ic" style="--c:#4D8DF0"><app-icon name="phone" [size]="16" /></span>
+          <span class="st-l">الإشعارات على هذا الجهاز</span>
+          <button class="st-switch" type="button" role="switch" [attr.aria-checked]="device.on()" aria-label="الإشعارات على هذا الجهاز"
+                  (click)="device.on() ? deviceOff() : deviceOn()"></button>
+        </div>
+        <div class="st-row" *appIfService="'SRV-011'">
+          <span class="st-ic" style="--c:#2BB673"><app-icon name="message" [size]="16" /></span>
+          <span class="st-l">طلبات البنك على الأيقونة</span>
+          <button class="st-switch" type="button" role="switch" [attr.aria-checked]="!!me()?.bankSmsPush" aria-label="طلبات البنك على الأيقونة"
+                  (click)="setBankPush(!me()?.bankSmsPush)"></button>
+        </div>
         <div class="st-row">
           <span class="st-ic" style="--c:#D85A30"><app-icon name="bell" [size]="16" /></span>
           <span class="st-l">التذكير اليومي</span>
@@ -81,8 +100,8 @@ import { ImportExport } from './import-export';
         </div>
       </div>
       <p class="st-note" dir="rtl">
-        @if (lockAvailable()) {القفل يُطلب عند فتح التطبيق وبعد 5 دقائق في الخلفية، ولا يغني عن تسجيل الدخول. }
-        والتذكير «سجّلت مصاريف اليوم؟» يصل فقط إذا لم تسجّل أي مصروف ذلك اليوم.
+        تصل لهذا الجهاز فقط إذا كان مفعّلاً. والتذكير «سجّلت مصاريف اليوم؟» يصل فقط إذا لم تسجّل أي مصروف ذلك اليوم.
+        لإظهار الرقم بدون تنبيه: إعدادات الآيفون ← الإشعارات ← التطبيق، أطفئ التنبيهات والأصوات وأبقِ الشارات.
       </p>
 
       <ng-container *appIfService="'SRV-011'">
@@ -172,6 +191,7 @@ export class SettingsSheet {
   protected readonly io = inject(ImportExport);
   protected readonly lock = inject(AppLock);
   protected readonly reminder = inject(DailyReminder);
+  protected readonly device = inject(DevicePush);
   protected readonly theme = inject(Theme);
   protected readonly themes: { mode: ThemeMode; label: string }[] = [
     { mode: 'auto', label: 'تلقائي' }, { mode: 'light', label: 'فاتح' }, { mode: 'dark', label: 'داكن' },
@@ -214,6 +234,47 @@ export class SettingsSheet {
       this.toasts.show('فُعّل قفل Face ID');
     } catch {
       this.toasts.show('لم يُفعَّل القفل.');
+    }
+  }
+
+  /** The browser asks for notifications here, inside the tap (D-41). */
+  protected async deviceOn(): Promise<void> {
+    const why = this.device.unavailable();
+    if (why) {
+      this.toasts.show(why);
+      return;
+    }
+    try {
+      await this.device.enable();
+      this.toasts.show('فُعّلت الإشعارات على هذا الجهاز');
+    } catch {
+      this.toasts.show('لم تُفعَّل الإشعارات.');
+    }
+  }
+
+  protected async deviceOff(): Promise<void> {
+    await this.device.disable();
+    this.toasts.show('أُوقفت الإشعارات على هذا الجهاز');
+  }
+
+  /** The number on the icon for the bank messages (B-22); turning it on also turns on this device. */
+  protected async setBankPush(on: boolean): Promise<void> {
+    const me = this.me();
+    if (!me) return;
+    try {
+      if (on && !this.device.on()) {
+        const why = this.device.unavailable();
+        if (why) {
+          this.toasts.show(why);
+          return;
+        }
+        await this.device.enable();
+      }
+      this.session.update(await this.api.patchMe({ bankSmsPush: on, version: me.version }));
+      this.toasts.show(on ? 'فُعّل رقم الطلبات على الأيقونة' : 'أُوقف رقم الطلبات على الأيقونة');
+    } catch (e) {
+      const error = e as Partial<ApiError>;
+      this.toasts.show(error?.code && error.message ? error.message : 'لم يُحفظ.');
     }
   }
 

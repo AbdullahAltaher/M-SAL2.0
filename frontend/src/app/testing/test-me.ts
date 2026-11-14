@@ -4,7 +4,7 @@ import { Me } from '../core/session/session-store';
 export function testMe(services: string[]): Me {
   return {
     id: 'u1', email: 'sara@test.local', displayName: null, timeZone: 'Asia/Dubai', today: '2026-11-11',
-    roles: ['USER'], lastBudgetId: 'b2', exportReminder: { due: false, days: 0, never: true }, dailyReminderTime: null, pushPublicKey: null, version: 1,
+    roles: ['USER'], lastBudgetId: 'b2', exportReminder: { due: false, days: 0, never: true }, dailyReminderTime: null, bankSmsPush: true, pushPublicKey: null, version: 1,
     services: Object.fromEntries(services.map((s) => [s, { read: true, write: true }])),
   };
 }

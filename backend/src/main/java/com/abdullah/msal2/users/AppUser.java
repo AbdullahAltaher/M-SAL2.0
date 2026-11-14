@@ -55,6 +55,10 @@ public class AppUser extends VersionedEntity {
 	@Column(name = "daily_reminder_time")
 	private LocalTime dailyReminderTime;
 
+	/** A new bank message waiting for review notifies the user's devices (V10, B-22) */
+	@Column(name = "bank_sms_push", nullable = false)
+	private boolean bankSmsPush = true;
+
 	/** The user's "today" when the reminder was last decided (push/DailyReminder) */
 	@Column(name = "last_reminder_on")
 	private LocalDate lastReminderOn;
@@ -127,6 +131,14 @@ public class AppUser extends VersionedEntity {
 			this.lastReminderOn = null;
 		}
 		this.dailyReminderTime = dailyReminderTime;
+	}
+
+	public boolean isBankSmsPush() {
+		return bankSmsPush;
+	}
+
+	public void setBankSmsPush(boolean bankSmsPush) {
+		this.bankSmsPush = bankSmsPush;
 	}
 
 	public Set<String> getRoles() {

@@ -53,7 +53,7 @@ const me = {
   id: 'u1', email: 'sara@example.test', displayName: 'سارة', timeZone: 'Asia/Dubai', today: TODAY, roles: ['USER', 'ADMIN'],
   services: Object.fromEntries(['000', '001', '002', '003', '004', '005', '006', '007', '008', '009', '011']
     .map((n) => ['SRV-' + n, { read: true, write: true }])),
-  lastBudgetId: B, exportReminder: { due: false, days: 1, never: false }, dailyReminderTime: null, pushPublicKey: null, version: 1,
+  lastBudgetId: B, exportReminder: { due: false, days: 1, never: false }, dailyReminderTime: null, bankSmsPush: true, pushPublicKey: null, version: 1,
 };
 const days = () => [...new Set(mock.entries.map((e) => e.entryDate))].sort().reverse().map((date) => {
   const list = mock.entries.filter((e) => e.entryDate === date);

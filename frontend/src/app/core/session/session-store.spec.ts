@@ -17,6 +17,7 @@ const me: Me = {
   lastBudgetId: 'b1',
   exportReminder: { due: false, days: 0, never: true },
   dailyReminderTime: null,
+  bankSmsPush: true,
   pushPublicKey: null,
   version: 1,
 };

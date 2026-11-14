@@ -124,7 +124,7 @@ describe('DailyReminder', () => {
   });
 
   it('needs the installed app when the browser has no worker', async () => {
-    expect((await signedIn('BKey')).unavailable()).toBe('التذكير يعمل في التطبيق المثبّت على الشاشة الرئيسية.');
+    expect((await signedIn('BKey')).unavailable()).toBe('الإشعارات تعمل في التطبيق المثبّت على الشاشة الرئيسية.');
   });
 
   it('shows the saved time without seconds', async () => {

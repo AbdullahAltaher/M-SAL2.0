@@ -45,7 +45,7 @@ export class Api {
   }
 
   // ── SRV-000 ─────────────────────────────────────────────────
-  patchMe(body: { displayName?: string; timeZone?: string; lastBudgetId?: string; dailyReminderTime?: string | null; version: number }) {
+  patchMe(body: { displayName?: string; timeZone?: string; lastBudgetId?: string; dailyReminderTime?: string | null; bankSmsPush?: boolean; version: number }) {
     return this.patch<Me>('/me', body);
   }
 

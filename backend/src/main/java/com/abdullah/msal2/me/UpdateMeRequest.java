@@ -8,7 +8,8 @@ import jakarta.validation.constraints.Size;
 
 /**
  * {@code PATCH /me}. A missing field stays unchanged; an empty {@code displayName} clears it,
- * and {@code dailyReminderTime: null} turns the daily reminder off.
+ * {@code dailyReminderTime: null} turns the daily reminder off, and {@code bankSmsPush} turns the
+ * bank messages' notifications on or off (B-22).
  *
  * @param version the version the client has (optimistic locking, API.md section 1)
  */
@@ -17,5 +18,6 @@ public record UpdateMeRequest(
 		String timeZone,
 		UUID lastBudgetId,
 		LocalTime dailyReminderTime,
+		Boolean bankSmsPush,
 		@NotNull Integer version) {
 }

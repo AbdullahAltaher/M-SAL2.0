@@ -18,10 +18,10 @@
 - **المراحل 0 إلى 11 مكتملة ومنشورة.** آخرها رسائل البنك ([BANK-SMS.md](BANK-SMS.md))، و**جرّبها المالك على الآيفون بعملية حقيقية ونجحت** (2026-11-08). بعدها B-21 (تغيير يوم الطلب) وحقل الكلمة داخل الفئة (`e03eb2e`)، وإصلاح نسب "حسب الفئة" في الإحصاءات (`4e639cd`، تعارض كلاس `.pc`). ثم **D-40 "الوقت ضد الفلوس"** (حلقتان في "تقدر تصرف"، و"الراتب باجر"، `b645469`)، وحذف الخط المنقّط تحت "اليوم" (`.day-tog`، D-23): جُرّب في المتصفح المدمج بمقاس الآيفون، فاتح وداكن، **ولم يُجرَّب على الآيفون ولم يُرفع بعد**.
 - **التقرير الأكاديمي** (`docs/report/`، إنجليزي وعربي، `.md` و`.docx` و`.pdf`) مكتوب حتى المرحلة 11. **خاص بالمالك: محلي فقط (`.gitignore`)، لا يُرفع.** لا يُقرأ في العمل العادي. التحويل لـ Word: `node docs/report/tools/to-docx.mjs jobs`، ثم `preview_start` باسم `report-tools` (يرسم المخططات والمعادلات، انتظر `DONE`)، ثم `node docs/report/tools/to-docx.mjs` و`to-pdf.mjs` (PDF عبر Edge headless). المعاينة: `preview.html?f=...docx` و`pdfview.html?f=...pdf&from=1&n=4` على المنفذ 4310. لا نص عربي داخل معادلة `$$` (MathJax يقطّع الحروف): رموز لاتينية ثم شرحها بالعربي.
 - **بيد المالك الآن:** إضافة كلمات التصنيف من الإعدادات ← رسائل البنك (`CHARITY`، و`CAFE`...). بدون كلمات كل الطلبات "اختر الفئة".
-- **B-22 الرقم على الأيقونة** (2026-11-14): كل طلب جديد يرسل Web Push باسم التطبيق وفيه عدد الطلبات (`PendingPush`)، والتطبيق يعيد الرقم = `pendingTotal`. **بيد المالك:** يطفئ التنبيهات ويبقي الشارات في إعدادات الآيفون، ويقرر حذف Show Notification من الاختصار (B-08). **لم يُجرَّب على الآيفون بعد.** وقلنا له يطفئ **Notify When Run** لإخفاء "Running your automation".
+- **B-22 الرقم على الأيقونة** (2026-11-14): كل طلب جديد يرسل Web Push باسم التطبيق وفيه عدد الطلبات (`PendingPush`)، والتطبيق يعيد الرقم = `pendingTotal`. **بيد المالك:** يطفئ التنبيهات ويبقي الشارات في إعدادات الآيفون، ويقرر حذف Show Notification من الاختصار (B-08). **يعمل على الآيفون (2026-11-14).** بعده **D-41 قسم "الإشعارات"** في الإعدادات (مفتاح الجهاز `DevicePush`، و`bankSmsPush` في `V10`، والتذكير لم يعد يلغي تسجيل الجهاز): جُرّب في المتصفح، **ولم يُجرَّب على الآيفون**. وقلنا له يطفئ **Notify When Run** لإخفاء "Running your automation".
 - **التالي: المرحلة 12 (دعوة الأهل والأصدقاء).** قرار معلّق: (1) **زر "مشاركة الدعوة"** في S-30 (`navigator.share` ونسخ) برسالة جاهزة: الرابط، والتثبيت، و"ادخل بإيميلك واكتب الرمز" **(الاقتراح، بدون أسرار جديدة)**، أو (2) إيميل دعوة عبر `POST /auth/v1/invite` بقالب عربي (يحتاج توكن Supabase). الآن الدعوة تُنشئ مستخدم Supabase بدون إيميل (`SupabaseAuthAdmin.createUser`). بعد القرار: شخص واحد أولاً. **وقرار ثانٍ معلّق: رابط أقصر قبل دعوة الأهل** (`github.io/M-SAL2.0` "شكله سيء"): `m-sal.app` (حوالي 14–20$ بالسنة، يشتريه المالك، ويبقى على GitHub Pages بنطاق خاص) أو `m-sal.pages.dev` (مجاني، نقل الواجهة لـ Cloudflare Pages). الاثنان بدَوا متاحين (2026-11-08)، و`msal.pages.dev` محجوز. أي تغيير: إعادة التثبيت والدخول والصور، وتحديث CORS وSupabase Site URL، ولـ `og:image` لمعاينة واتساب.
 - **لم يُجرَّب على الآيفون:** صورة البطاقة من الألبوم، وشاشة القفل مع Face ID، ومصاريف الفئة في الإحصاءات (D-39)، وصفحة المراجعة بالكامل (الاعتماد وB-21).
-- **اقتراحات لاحقة (غير ضرورية):** تنبيهات Dependabot، وRLS على `flyway_schema_history` (في `V10`)، ومسح أرقام بياناته القديمة من تاريخ git (يحتاج `push --force`: قراره).
+- **اقتراحات لاحقة (غير ضرورية):** تنبيهات Dependabot، وRLS على `flyway_schema_history` (في `V11`)، ومسح أرقام بياناته القديمة من تاريخ git (يحتاج `push --force`: قراره).
 
 ## 3. أين كل شيء
 
@@ -42,16 +42,16 @@
 - **السيرفر** `backend/src/main/java/com/abdullah/msal2/`، وحدة لكل خدمة (Controller ← Service ← Repository):
   `me` (SRV-000) · `expenses` (SRV-001، و`EntryService.home` فيها `pendingCount`) · `budget` (002) · `cycles` (003، الحسابات في `Cycles` و`CycleSummary`) · `accounts` (004) · `categories` (005) · `stats` (006) · `importer` (007) · `receipt` (008) · `users` (009) · `push` (التذكير اليومي، و`UserPush` يرسل لكل أجهزة المستخدم) · `banksms` (011، و`PendingPush` للرقم على الأيقونة).
   `system/`: `security/SecurityConfig` (JWT)، و`access/ServiceAccessInterceptor` (الصلاحية والحدود)، و`error/ErrorCode` (كل الأكواد)، و`audit/AuditService`، و`time/Today` (اليوم بتوقيت المستخدم)، و`web/Inputs` (تحليل المبالغ والتواريخ)، و`web/RequestSizeFilter`.
-  الجداول: `src/main/resources/db/migration/V1`–`V9`. **التالي `V10`.**
+  الجداول: `src/main/resources/db/migration/V1`–`V10`. **التالي `V11`.**
 - **الاختبارات** `backend/src/test/...`: `IntegrationTest` (الأساس: Testcontainers، والساعة ثابتة 2026-11-11 08:00Z، و`signUp`، و`budgetOf`، و`accountOf`، و`categoryOf`)، و`system/IsolationTest`، و`banksms/FakeSms` (رسائل وهمية).
-- **الواجهة** `frontend/src/app/`: `app.routes.ts` · `core/api/api.ts` و`models.ts` (كل المسارات والأشكال) · `core/session/session-store.ts` · `features/expenses/` (`home-view`، و`entries-view`، و`entry-sheet` + `entry-sheets.ts` تفتح كل النوافذ، و`expenses-store.ts`، و`pending-view.ts`، و`pace-rings.ts` حلقتا D-40 ونص الأيام الباقية) · `core/pwa/app-badge.ts` (الرقم على الأيقونة، B-22) · `features/budget/` · `features/stats/` · `features/settings/` (`settings-sheet.ts`، و`bank-sms-sheet.ts`، و`shortcut-setup.ts`) · `shared/components/icon.ts` (الأيقونات) · `shared/sheet/` (النوافذ، و`Dialogs` تستبدل النافذة الحالية).
+- **الواجهة** `frontend/src/app/`: `app.routes.ts` · `core/api/api.ts` و`models.ts` (كل المسارات والأشكال) · `core/session/session-store.ts` · `features/expenses/` (`home-view`، و`entries-view`، و`entry-sheet` + `entry-sheets.ts` تفتح كل النوافذ، و`expenses-store.ts`، و`pending-view.ts`، و`pace-rings.ts` حلقتا D-40 ونص الأيام الباقية) · `core/pwa/app-badge.ts` (الرقم على الأيقونة، B-22) و`device-push.ts` (مفتاح الجهاز، D-41) · `features/budget/` · `features/stats/` · `features/settings/` (`settings-sheet.ts`، و`bank-sms-sheet.ts`، و`shortcut-setup.ts`) · `shared/components/icon.ts` (الأيقونات) · `shared/sheet/` (النوافذ، و`Dialogs` تستبدل النافذة الحالية).
   الأنماط: `styles/tokens.scss` (الألوان فاتح وداكن)، و`styles/glass.css` (كل الشكل، والأقسام الجديدة في آخره).
 
 ## 5. التشغيل والتجربة
 
 - **Git Bash:** `export PATH="$PATH:/c/Program Files/Docker/Docker/resources/bin:/c/Program Files/GitHub CLI"`، و`MSYS_NO_PATHCONV=1` قبل `docker run`. **لا Python:** استخدم Node. للمسارات مع Node استخدم `C:/Users/...` وليس `/c/Users/...`.
 - **Docker Desktop** غالباً متوقف في جلسة جديدة: `Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"` (PowerShell)، وانتظر `docker info`. الاختبارات تحتاجه. `docker compose up -d --build`: قاعدة على **5433** وسيرفر على **8080** (5432 لـ Postgres آخر، لا تلمسه).
-- **الاختبارات:** `backend/./mvnw -q -o test` (236، ~3 دقائق، شغّلها في الخلفية)، و`frontend/npx ng test --watch=false` (89)، و`npm run build` (الحزمة الأولى ~457KB، الحد 500KB). لاختبار واحد: `-Dtest='BankSmsApiTest'`.
+- **الاختبارات:** `backend/./mvnw -q -o test` (238، ~3 دقائق، شغّلها في الخلفية)، و`frontend/npx ng test --watch=false` (89)، و`npm run build` (الحزمة الأولى ~457KB، الحد 500KB). لاختبار واحد: `-Dtest='BankSmsApiTest'`.
 - **الواجهة بدون دخول (الأسرع):** `preview_start` باسم `frontend`، ثم `resize_window` بـ `mobile`، ثم افتح `/login` ونفّذ بـ javascript_exec:
   `window.__mockGo = '/expenses/home'; await import('/dev/mock-api.js?' + Date.now())`
   الملف `frontend/dev/mock-api.js`: API وجلسة وهميان (`ng serve` فقط، ليس في البناء)، وحالته في `window.__mock` (`pending`، و`settings`، و`last` = آخر جسم أُرسل). أي إعادة تحميل (تعديل ملف) تمسحه: نفّذه مرة ثانية. مسار غير موجود فيه ← 404 و`mock: unmocked` في الـ console.
@@ -77,7 +77,7 @@
 - **الساعة الثابتة في الاختبارات:** كل الطلبات بنفس `received_at`، فابحث بالجهة (`byMerchant`) لا بالترتيب. وحد `@StrictRateLimit` 10 في الدقيقة لكل مستخدم يشمل `/sms/ingest` و`/sms/token`.
 - **ملفات CRLF** (`API.md`، و`CLAUDE.md`، و`SCREENS.md`، و`DATABASE.md`، و`angular.json`): التعديل بسكربت Node يحوّل لـ LF ثم يرجع، أو بأداة Edit. `sed` و`node -e` مع `\n` لا يطابقان.
 - **السكربتات الطويلة:** لا تضعها في `node -e "..."` فيها backticks أو علامات تنصيص عربية: استخدم `node - <<'EOF'` أو ملفاً في scratchpad.
-- **قاعدة Docker المحلية فيها `V9`:** لا يُعدَّل أي migration مطبَّق؛ الجديد `V10`.
+- **قاعدة Docker المحلية فيها `V9`** (`V10` يُطبَّق مع أول تشغيل): لا يُعدَّل أي migration مطبَّق؛ الجديد `V11`، ويُضاف رقمه في `MigrationTest`.
 
 ## 7. الأسرار والتوكنات
 

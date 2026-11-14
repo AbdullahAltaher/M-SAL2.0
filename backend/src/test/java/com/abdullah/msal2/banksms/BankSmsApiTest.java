@@ -183,6 +183,34 @@ class BankSmsApiTest extends IntegrationTest {
 	}
 
 	@Test
+	void theUserCanTurnTheBankNotificationsOff() throws Exception {
+		when(webPush.enabled()).thenReturn(true);
+		when(webPush.send(anyString(), anyString(), anyString(), anyString())).thenReturn(WebPush.Outcome.SENT);
+		TestUser user = signUp("sara");
+		String token = ready(user);
+		send(user, post("/api/v1/me/push-subscriptions"), Map.of("endpoint", "https://web.push.apple.com/QGx8device",
+				"keys", Map.of("p256dh", "BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM",
+						"auth", "tBHItJI5svbpez7KI4CCXg")))
+				.andExpect(status().isNoContent());
+		// on by default (D-41)
+		JsonNode me = getJson(user, "/api/v1/me");
+		assertThat(me.get("bankSmsPush").asBoolean()).isTrue();
+
+		send(user, patch("/api/v1/me"), Map.of("bankSmsPush", false, "version", me.get("version").asInt()))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.bankSmsPush").value(false));
+		ingest(token, debit("12.00", "BLUE FALCON CAFE")).andExpect(jsonPath("$.status").value("PENDING"));
+		verify(webPush, never()).send(anyString(), anyString(), anyString(), anyString());
+
+		// a missing field stays as it is
+		send(user, patch("/api/v1/me"), Map.of("displayName", "سارة", "version", me.get("version").asInt() + 1))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.bankSmsPush").value(false));
+		send(user, patch("/api/v1/me"), Map.of("bankSmsPush", true, "version", me.get("version").asInt() + 2))
+				.andExpect(status().isOk());
+		ingest(token, debit("7.50", "SAND KIOSK")).andExpect(jsonPath("$.status").value("PENDING"));
+		verify(webPush, times(1)).send(anyString(), anyString(), anyString(), anyString());
+	}
+
+	@Test
 	void withoutPushNothingIsSent() throws Exception {
 		TestUser user = signUp("sara");
 		ingest(ready(user), debit("12.00", "BLUE FALCON CAFE")).andExpect(jsonPath("$.status").value("PENDING"));

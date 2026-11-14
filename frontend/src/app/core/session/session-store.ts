@@ -20,6 +20,8 @@ export interface Me {
   exportReminder: { due: boolean; days: number; never: boolean };
   /** "21:00:00" in the user's time zone, or null when the daily reminder is off */
   dailyReminderTime: string | null;
+  /** A new bank message waiting for review notifies the devices (B-22, D-41) */
+  bankSmsPush: boolean;
   /** The server's Web Push key, or null when it sends no notifications */
   pushPublicKey: string | null;
   version: number;

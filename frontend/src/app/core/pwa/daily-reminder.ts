@@ -1,19 +1,17 @@
 import { Injectable, computed, inject } from '@angular/core';
-import { SwPush } from '@angular/service-worker';
 
 import { Api } from '../api/api';
 import { SessionStore } from '../session/session-store';
-import { canNotify } from './device';
+import { DevicePush } from './device-push';
 
 /**
- * The daily reminder "سجّلت مصاريف اليوم؟" (SCREENS.md section 7): this device subscribes to
- * Web Push with the server's key, and the time is saved in {@code /me}. The server sends it only
- * if no expense was added that day.
+ * The daily reminder "سجّلت مصاريف اليوم؟" (SCREENS.md section 7): the time is saved in
+ * {@code /me}, and the server sends it only if no expense was added that day. Turning it on also
+ * turns on this device's notifications; turning it off leaves them (DESIGN.md D-41).
  */
 @Injectable({ providedIn: 'root' })
 export class DailyReminder {
-  /** Absent in tests and in development (no worker there) */
-  private readonly push = inject(SwPush, { optional: true });
+  private readonly device = inject(DevicePush);
   private readonly api = inject(Api);
   private readonly session = inject(SessionStore);
 
@@ -22,18 +20,12 @@ export class DailyReminder {
 
   /** Why it cannot be turned on here, or null when it can */
   unavailable(): string | null {
-    if (!this.session.user()?.pushPublicKey) return 'الإشعارات غير مفعّلة في السيرفر بعد.';
-    if (!canNotify() || !this.push?.isEnabled) return 'التذكير يعمل في التطبيق المثبّت على الشاشة الرئيسية.';
-    if (Notification.permission === 'denied') return 'الإشعارات مرفوضة لهذا التطبيق من إعدادات الجهاز.';
-    return null;
+    return this.device.unavailable();
   }
 
-  /** Asks for permission (must follow a tap), subscribes this device, then saves the time. */
+  /** Turns this device's notifications on if needed (must follow a tap), then saves the time. */
   async enable(time: string): Promise<void> {
-    const key = this.session.user()?.pushPublicKey;
-    if (!key || !this.push) throw new Error('no key');
-    const subscription = await this.push.requestSubscription({ serverPublicKey: key });
-    await this.api.subscribePush(subscription.toJSON());
+    await this.device.ensure();
     await this.saveTime(time);
   }
 
@@ -41,14 +33,9 @@ export class DailyReminder {
     await this.saveTime(time);
   }
 
-  /** Off for the account; this device also stops receiving */
+  /** Off for the account; the device keeps its notifications (the bank messages, B-22) */
   async disable(): Promise<void> {
     await this.saveTime(null);
-    const subscription = this.push?.isEnabled ? await firstSubscription(this.push) : null;
-    if (subscription) {
-      await this.api.unsubscribePush(subscription.endpoint).catch(() => undefined);
-      await subscription.unsubscribe().catch(() => false);
-    }
   }
 
   private async saveTime(time: string | null): Promise<void> {
@@ -57,13 +44,4 @@ export class DailyReminder {
     const saved = await this.api.patchMe({ dailyReminderTime: time, version: me.version });
     this.session.update(saved);
   }
-}
-
-function firstSubscription(push: SwPush): Promise<PushSubscription | null> {
-  return new Promise((resolve) => {
-    const sub = push.subscription.subscribe((s) => {
-      resolve(s);
-      queueMicrotask(() => sub.unsubscribe());
-    });
-  });
 }

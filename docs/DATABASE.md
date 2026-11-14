@@ -420,6 +420,7 @@ spring:
 | `V6__create_imports.sql` | ملفات الاستيراد |
 | `V7__add_invitation_auth_user.sql` | عمود `auth_user_id` في `invitations`: مستخدم Supabase الذي أُنشئ مع الدعوة، حتى يُحذف عند إلغاء دعوة لم تُستخدم (`API.md` 2.3). **أُضيف في مرحلة التنفيذ 3** |
 | `V8__create_push_subscriptions.sql` | اشتراكات الإشعارات ووقت التذكير اليومي. **أُضيف في مرحلة التنفيذ 7** مع عمود `last_reminder_on` (أُضيف في جلسة التخطيط 4، انظر [SCREENS.md](SCREENS.md) القسم 7) |
+| `V10__add_bank_sms_push.sql` | عمود `bank_sms_push` في `app_users` (افتراضياً `true`): إشعار الطلب الجديد بالرقم على الأيقونة (BANK-SMS.md B-22، DESIGN.md D-41). **أُضيف 2026-11-14.** |
 | `V9__create_bank_sms.sql` | رسائل البنك (SRV-011): `sms_account_links`، و`sms_tokens`، و`merchant_keywords`، و`pending_entries`. **أُضيف في مرحلة التنفيذ 11**، والتفاصيل في القسم 3.4 و[BANK-SMS.md](BANK-SMS.md) القسم 4.2. المرجع هو الملف نفسه في `db/migration/` |
 
 ### V1__create_system.sql

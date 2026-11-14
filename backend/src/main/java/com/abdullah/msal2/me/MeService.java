@@ -80,6 +80,9 @@ public class MeService {
 			LocalTime time = request.dailyReminderTime();
 			user.setDailyReminderTime(time == null ? null : time.truncatedTo(ChronoUnit.MINUTES));
 		}
+		if (request.bankSmsPush() != null) {
+			user.setBankSmsPush(request.bankSmsPush());
+		}
 
 		Map<String, Object> after = snapshot(user);
 		if (!after.equals(before)) {
@@ -103,7 +106,7 @@ public class MeService {
 				me.hasData(user.getId()));
 		return new MeResponse(user.getId(), user.getEmail(), user.getDisplayName(), user.getTimeZone(), today,
 				user.getRoles().stream().sorted().toList(), services, user.getLastBudgetId(), reminder,
-				user.getDailyReminderTime(), push.publicKey(), user.getVersion());
+				user.getDailyReminderTime(), user.isBankSmsPush(), push.publicKey(), user.getVersion());
 	}
 
 	private static Map<String, Object> snapshot(AppUser user) {
@@ -112,6 +115,7 @@ public class MeService {
 		data.put("timeZone", user.getTimeZone());
 		data.put("lastBudgetId", user.getLastBudgetId());
 		data.put("dailyReminderTime", user.getDailyReminderTime());
+		data.put("bankSmsPush", user.isBankSmsPush());
 		return data;
 	}
 }
