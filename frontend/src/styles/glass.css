@@ -120,9 +120,11 @@ header.top{margin-inline:-12px}
 .g-pace-key b{font-weight:600;color:var(--x-text);margin-inline-start:4px}
 .g-pace-key .k{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:6px;background:var(--x-accent);vertical-align:1px}
 .g-pace-key .k.money{background:var(--x-inc)}
-.g-pace-key .k.money.fast{background:var(--x-warn)}
+.g-pace-key .k.money.ahead{background:var(--x-pace-ahead)}
+.g-pace-key .k.money.fast{background:var(--x-pace-fast)}
 .g-pace-say{margin-top:12px;padding-top:10px;border-top:1px solid var(--x-line);font:600 14px var(--ar);color:var(--x-inc)}
-.g-pace-say.fast{color:var(--x-warn)}
+.g-pace-say.ahead{color:var(--x-pace-ahead)}
+.g-pace-say.fast{color:var(--x-pace-fast)}
 .g-pill.soon{color:var(--x-warn);border-color:color-mix(in srgb,var(--x-warn) 55%,transparent);background:color-mix(in srgb,var(--x-warn) 14%,transparent)}
 .g-line{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:10px;font:500 14px var(--ar);color:var(--x-muted)}
 .g-line .grp{display:inline-flex;align-items:baseline;gap:6px}

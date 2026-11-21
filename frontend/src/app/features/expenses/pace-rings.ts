@@ -2,16 +2,25 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 
 import { CycleSummary } from '../../core/api/models';
 
-/** The money ring turns amber when spending runs ahead of the days by more than this (D-40) */
-const AHEAD = 5;
+/** Up to this many points ahead of the days is "a little" (yellow); more is orange (D-40) */
+const A_LITTLE = 5;
+
+/** ok: spent no faster than the days; ahead: 1 to 5 points ahead; fast: more than 5 */
+export type PaceLevel = 'ok' | 'ahead' | 'fast';
+
+/** What the card says under the rings, by level (D-40) */
+export const PACE_SAYS: Record<PaceLevel, string> = {
+  ok: 'ماشي على الخطة',
+  ahead: 'صرفك أسرع بشوي',
+  fast: 'صرفك أسرع من الوقت، خفّف شوي',
+};
 
 export interface Pace {
   /** Share of the cycle's days gone, today included (0 to 100) */
   time: number;
   /** Share of the cycle's money spent (0 to 100) */
   money: number;
-  /** Spending runs ahead of the days */
-  fast: boolean;
+  level: PaceLevel;
 }
 
 /**
@@ -22,7 +31,8 @@ export function pace(s: CycleSummary): Pace | null {
   if (!s.open || !s.totalDays) return null;
   const time = Math.round(Math.min(1, s.daysElapsed / s.totalDays) * 100);
   const money = Math.round(Math.max(0, Math.min(1, s.progress)) * 100);
-  return { time, money, fast: money > time + AHEAD };
+  const ahead = money - time;
+  return { time, money, level: ahead <= 0 ? 'ok' : ahead <= A_LITTLE ? 'ahead' : 'fast' };
 }
 
 /**
@@ -60,7 +70,7 @@ const IN = 2 * Math.PI * 25;
       <circle class="arc time" cx="42" cy="42" r="36" transform="rotate(-90 42 42)"
               [style.--c]="out" [style.stroke-dasharray]="out" [style.stroke-dashoffset]="out * (1 - time() / 100)" />
       <circle class="trk" cx="42" cy="42" r="25" />
-      <circle class="arc money" [class.fast]="fast()" cx="42" cy="42" r="25" transform="rotate(-90 42 42)"
+      <circle class="arc money" [class.ahead]="level() === 'ahead'" [class.fast]="level() === 'fast'" cx="42" cy="42" r="25" transform="rotate(-90 42 42)"
               [style.--c]="inner" [style.stroke-dasharray]="inner" [style.stroke-dashoffset]="inner * (1 - money() / 100)" />
     </svg>
   `,
@@ -73,7 +83,8 @@ const IN = 2 * Math.PI * 25;
            transition: stroke-dashoffset .9s cubic-bezier(.33, 1, .68, 1), stroke .3s; }
     .time { stroke: var(--x-accent); }
     .money { stroke: var(--x-inc); animation-delay: .12s; }
-    .money.fast { stroke: var(--x-warn); }
+    .money.ahead { stroke: var(--x-pace-ahead); }
+    .money.fast { stroke: var(--x-pace-fast); }
     @keyframes ringIn { from { stroke-dashoffset: var(--c); } }
     @media (max-width: 359px) { :host { width: 64px; height: 64px; } }
   `,
@@ -81,7 +92,7 @@ const IN = 2 * Math.PI * 25;
 export class PaceRings {
   readonly time = input.required<number>();
   readonly money = input.required<number>();
-  readonly fast = input(false);
+  readonly level = input<PaceLevel>('ok');
 
   protected readonly out = OUT;
   protected readonly inner = IN;

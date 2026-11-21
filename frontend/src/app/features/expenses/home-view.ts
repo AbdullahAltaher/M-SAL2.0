@@ -15,7 +15,7 @@ import { DayStrip } from './day-strip';
 import { EntryRow } from './entry-row';
 import { EntrySheets } from './entry-sheets';
 import { ExpensesStore } from './expenses-store';
-import { PaceRings, daysLeftLabel, pace, salarySoon } from './pace-rings';
+import { PACE_SAYS, PaceRings, daysLeftLabel, pace, salarySoon } from './pace-rings';
 import { pendingLabel } from './pending-label';
 
 /**
@@ -36,6 +36,7 @@ export class HomeView {
   protected readonly sheets = inject(EntrySheets);
   private readonly api = inject(Api);
   protected readonly unit = AED;
+  protected readonly says = PACE_SAYS;
   private readonly photos = inject(CardPhotos);
   private readonly sheetHost = inject(Sheets);
 

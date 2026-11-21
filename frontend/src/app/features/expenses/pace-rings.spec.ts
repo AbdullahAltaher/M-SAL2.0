@@ -10,14 +10,17 @@ const summary = (over: Partial<CycleSummary>): CycleSummary => ({
 
 describe('Time against money (DESIGN.md D-40)', () => {
   it('compares the days gone with the money spent, in whole percents', () => {
-    expect(pace(summary({ progress: 0.36 }))).toEqual({ time: 40, money: 36, fast: false });
-    // ahead by 5 points is still on plan, more than 5 is too fast
-    expect(pace(summary({ progress: 0.45 }))!.fast).toBe(false);
-    expect(pace(summary({ progress: 0.46 }))).toEqual({ time: 40, money: 46, fast: true });
+    expect(pace(summary({ progress: 0.36 }))).toEqual({ time: 40, money: 36, level: 'ok' });
+    expect(pace(summary({ progress: 0.40 }))!.level).toBe('ok');
+    // 1 to 5 points ahead is "a little" (the owner's cards: 90 of 87, 89 of 84), more is too fast
+    expect(pace(summary({ progress: 0.41 }))!.level).toBe('ahead');
+    expect(pace(summary({ progress: 0.45 }))!.level).toBe('ahead');
+    expect(pace(summary({ progress: 0.46 }))).toEqual({ time: 40, money: 46, level: 'fast' });
+    expect(pace(summary({ daysElapsed: 26, totalDays: 30, progress: 0.90 }))!.level).toBe('ahead');
   });
 
   it('stays within 0 and 100', () => {
-    expect(pace(summary({ daysElapsed: 31, progress: 1.2 }))).toEqual({ time: 100, money: 100, fast: false });
+    expect(pace(summary({ daysElapsed: 31, progress: 1.2 }))).toEqual({ time: 100, money: 100, level: 'ok' });
   });
 
   it('is only for an open cycle with a next salary date', () => {

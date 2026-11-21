@@ -122,10 +122,10 @@
                       <div class="g-big" [class.over]="d.over"><bdi class="n" dir="ltr"><app-count [value]="+(d.value ?? 0)" /></bdi><span class="u" dir="rtl">{{ unit }}</span></div>
                       <div class="g-pace-key" dir="rtl">
                         <div><i class="k time"></i>مضى من الدورة <b class="num">{{ p.time }}%</b></div>
-                        <div><i class="k money" [class.fast]="p.fast"></i>صُرف من الفلوس <b class="num">{{ p.money }}%</b></div>
+                        <div><i class="k money" [class.ahead]="p.level === 'ahead'" [class.fast]="p.level === 'fast'"></i>صُرف من الفلوس <b class="num">{{ p.money }}%</b></div>
                       </div>
                     </div>
-                    <app-pace-rings [time]="p.time" [money]="p.money" [fast]="p.fast" />
+                    <app-pace-rings [time]="p.time" [money]="p.money" [level]="p.level" />
                   </div>
                 } @else {
                   <div class="g-big" [class.over]="d.over"><bdi class="n" dir="ltr"><app-count [value]="+(d.value ?? 0)" /></bdi><span class="u" dir="rtl">{{ unit }}</span></div>
@@ -141,7 +141,7 @@
                   <div class="g-line"><span dir="rtl">باجر تقدر تصرف</span><app-money [value]="s.tomorrow" /></div>
                 }
                 @if (d.pace; as p) {
-                  <div class="g-pace-say" [class.fast]="p.fast" dir="rtl">{{ p.fast ? 'صرفك أسرع من الوقت، خفّف شوي' : 'ماشي على الخطة' }}</div>
+                  <div class="g-pace-say" [class.ahead]="p.level === 'ahead'" [class.fast]="p.level === 'fast'" dir="rtl">{{ says[p.level] }}</div>
                 }
               </section>
             }
