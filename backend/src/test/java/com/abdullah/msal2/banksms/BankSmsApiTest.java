@@ -218,6 +218,42 @@ class BankSmsApiTest extends IntegrationTest {
 	}
 
 	@Test
+	void aPastedMessageFollowsTheSameRulesAndTheUsersWords() throws Exception {
+		when(webPush.enabled()).thenReturn(true);
+		TestUser user = signUp("sara");
+		link(user, FakeSms.SUFFIX, accountOf(user));
+		keyword(user, "supermarket", categoryOf(user, "cat_grocery")).andExpect(status().isCreated());
+		String text = debit("14.75", "FESCO SUPERMARKET LLC");
+
+		// with the app's sign-in, no shortcut token (B-23)
+		send(user, post("/api/v1/sms/paste"), Map.of("text", text)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("PENDING"))
+				.andExpect(jsonPath("$.message").value("طلب جديد: 14.75 د.إ · بقالة"));
+		JsonNode card = byMerchant(pending(user), "FESCO SUPERMARKET LLC");
+		assertThat(card.get("categoryId").asString()).isEqualTo(categoryOf(user, "cat_grocery"));
+		assertThat(card.get("entryDate").asString()).isEqualTo("2026-11-11");
+
+		send(user, post("/api/v1/sms/paste"), Map.of("text", text)).andExpect(jsonPath("$.status").value("DUPLICATE"));
+		send(user, post("/api/v1/sms/paste"), Map.of("text", FakeSms.deposit("500.00")))
+				.andExpect(jsonPath("$.status").value("IGNORED"));
+		// the user is in the app: no notification
+		verify(webPush, never()).send(anyString(), anyString(), anyString(), anyString());
+	}
+
+	@Test
+	void aPastedMessageNeedsTheUsersOwnLinkedAccountAndSignIn() throws Exception {
+		TestUser sara = signUp("sara");
+		TestUser omar = signUp("omar");
+		link(sara, FakeSms.SUFFIX, accountOf(sara));
+		send(omar, post("/api/v1/sms/paste"), Map.of("text", debit("5.00", "SAND KIOSK")))
+				.andExpect(jsonPath("$.status").value("IGNORED"));
+		assertThat(pending(sara)).isEmpty();
+		mvc.perform(post("/api/v1/sms/paste").contentType(MediaType.APPLICATION_JSON)
+				.content(jsonMapper.writeValueAsString(Map.of("text", debit("5.00", "SAND KIOSK")))))
+				.andExpect(status().isUnauthorized());
+	}
+
+	@Test
 	void theTokenIsCheckedAndUpdatesLastUsed() throws Exception {
 		TestUser user = signUp("sara");
 		String token = ready(user);

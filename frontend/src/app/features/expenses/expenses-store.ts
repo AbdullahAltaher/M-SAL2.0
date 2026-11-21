@@ -31,6 +31,8 @@ export class ExpensesStore {
   readonly home = signal<Home | null>(null);
   /** Bumped after any change, so open views reload */
   readonly changed = signal(0);
+  /** Bumped when a bank message was pasted (B-23), so the review page reloads its list */
+  readonly pasted = signal(0);
 
   readonly activeAccounts = computed(() => this.accounts().filter((a) => !a.isArchived));
   readonly account = computed(() => this.accounts().find((a) => a.id === this.accountId()) ?? null);

@@ -652,3 +652,12 @@ app-day-strip{display:block;animation:stripIn .28s var(--ease-out)}
 .gr-thanks{width:100%;margin-top:16px}
 @keyframes grIn{from{opacity:0;transform:scale(.92) translateY(8px)}}
 @keyframes grUp{from{transform:translateY(40px);opacity:0}}
+
+/* ---- a pasted bank message (BANK-SMS.md B-23) ---- */
+.es-paste{align-self:flex-start;margin:0 0 12px}
+.ps-note{margin:0 2px 12px;color:var(--x-muted);font:400 14px/1.7 var(--ar)}
+.ps-text{display:block;width:100%;min-height:130px;padding:12px 14px;border-radius:18px;background:var(--x-field);border:1px solid var(--x-line);color:var(--x-text);font:400 16px/1.6 var(--num);resize:vertical;text-align:left}
+.ps-text:focus{outline:none;border-color:var(--x-accent)}
+.ps-row{display:flex;gap:4px;justify-content:flex-start;margin-top:2px}
+.ps-go{width:100%;margin-top:14px}
+.pc-paste{min-height:32px;margin-inline-start:4px;font-size:14px}

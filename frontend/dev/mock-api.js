@@ -90,6 +90,15 @@ const routes = [
     return [e, 201];
   }],
   ['DELETE', /^\/pending-entries\/(\w+)$/, (url, data, m) => { mock.pending = mock.pending.filter((x) => x.id !== m[1]); return [undefined, 204]; }],
+  // A pasted bank message (B-23): the real server parses it and uses the user's words; here, a
+  // grocery card for any text with "a/c", else the server's "not a debit" answer
+  ['POST', /^\/sms\/paste$/, (url, data) => {
+    if (!/a\/c/i.test(data?.text ?? '')) return { status: 'IGNORED', message: 'ليست رسالة خصم' };
+    const amount = Number((/AED\s*([\d,.]+)/i.exec(data.text)?.[1] ?? '1').replace(/,/g, '')).toFixed(2);
+    mock.pending.unshift({ id: 'p' + Date.now(), accountId: A, amount, merchant: 'FESCO SUPERMARKET LLC', categoryId: 'c-groc',
+      askEachTime: false, receivedAt: new Date().toISOString(), entryDate: TODAY, smsText: data.text });
+    return { status: 'PENDING', message: 'طلب جديد: ' + amount + ' د.إ · بقالة' };
+  }],
   ['GET', /^\/sms\/settings$/, () => mock.settings],
   ['POST', /^\/sms\/token$/, () => {
     const token = 'msal_FAKEfakeFAKEfakeFAKEfakeFAKE1234';

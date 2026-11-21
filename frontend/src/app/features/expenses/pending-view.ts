@@ -12,6 +12,7 @@ import { MoneyView } from '../../shared/components/money';
 import { Toasts } from '../../shared/toast/toast';
 import { Gratitude } from '../gratitude/gratitude';
 import { flyCoin } from './coin-flight';
+import { EntrySheets } from './entry-sheets';
 import { ExpensesStore } from './expenses-store';
 import { cleanMerchant } from './pending-label';
 
@@ -293,7 +294,8 @@ export class PendingCard {
   template: `
     @if (list(); as l) {
       @if (l.length) {
-        <p class="pc-intro" dir="rtl">اعتمد العملية لتُضاف لمصاريفك، أو تجاهلها إذا ما تبي تسجّلها.</p>
+        <p class="pc-intro" dir="rtl">اعتمد العملية لتُضاف لمصاريفك، أو تجاهلها إذا ما تبي تسجّلها.
+          <button class="g-link pc-paste" type="button" (click)="sheets.pasteSms()">الصق رسالة فاتت</button></p>
         <div class="pc-list" role="list" aria-label="بانتظار المراجعة">
           @for (p of l; track p.id) {
             <app-pending-card [entry]="p" [categories]="categories()" [today]="today()" [showAccount]="multi()" (done)="onDone($event)" />
@@ -302,6 +304,7 @@ export class PendingCard {
       } @else {
         <div class="pc-empty">
           <p class="g-none" dir="rtl">لا توجد طلبات بانتظار المراجعة.</p>
+          <button class="g-link" type="button" (click)="sheets.pasteSms()">الصق رسالة فاتت</button>
           <a class="g-btn" routerLink="/expenses/home">رجوع للرئيسية</a>
         </div>
       }
@@ -311,6 +314,7 @@ export class PendingCard {
   `,
 })
 export class PendingView {
+  protected readonly sheets = inject(EntrySheets);
   private readonly api = inject(Api);
   private readonly store = inject(ExpensesStore);
   private readonly toasts = inject(Toasts);
@@ -336,6 +340,8 @@ export class PendingView {
   constructor() {
     effect(() => {
       const budgetId = this.store.budgetId();
+      // a pasted message (B-23) joins the list
+      this.store.pasted();
       if (!budgetId) return;
       void this.load(budgetId);
       void this.api.quick(budgetId).then((q) => this.order.set(q.categoryOrder), () => undefined);

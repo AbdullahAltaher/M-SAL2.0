@@ -8,6 +8,7 @@ import { Dialogs } from '../../shared/sheet/dialogs';
 import { Sheets } from '../../shared/sheet/sheets';
 import { Toasts } from '../../shared/toast/toast';
 import { ExpensesStore } from './expenses-store';
+import { readBankMessage } from './paste-sms';
 
 /**
  * Opens the Expenses sheets (SCREENS.md section 4). The sheet components are loaded on demand,
@@ -26,6 +27,13 @@ export class EntrySheets {
   async add(type: EntryType = 'EXPENSE'): Promise<void> {
     const { EntrySheet } = await import('./entry-sheet');
     await this.sheets.open(EntrySheet, type === 'INCOME' ? 'دخل جديد' : 'مصروف جديد', { presetType: type });
+  }
+
+  /** B-23: a bank message the shortcut missed. The clipboard is read in the tap, then the sheet opens. */
+  async pasteSms(): Promise<void> {
+    const text = await readBankMessage();
+    const { PasteSmsSheet } = await import('./paste-sms-sheet');
+    await this.sheets.open(PasteSmsSheet, 'الصق رسالة البنك', { text });
   }
 
   async edit(entry: Entry): Promise<void> {

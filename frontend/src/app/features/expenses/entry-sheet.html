@@ -4,6 +4,13 @@
   <button class="seg-b" type="button" [attr.aria-pressed]="type() === 'INCOME'" (click)="setType('INCOME')">دخل</button>
 </div>
 
+<!-- BANK-SMS.md B-23: a bank message the shortcut missed (no connection) -->
+@if (canPaste && !editing() && type() === 'EXPENSE') {
+  <button class="g-fchip es-paste" type="button" (click)="pasteSms()">
+    <app-icon name="message" [size]="16" /><span dir="rtl">الصق رسالة البنك</span>
+  </button>
+}
+
 @if (shortcuts().length) {
   <div class="g-sec es-quick">
     <div class="g-lab">بضغطة وحدة</div>

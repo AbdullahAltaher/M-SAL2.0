@@ -13,6 +13,7 @@ import { Sheets } from '../../shared/sheet/sheets';
 import { Toasts } from '../../shared/toast/toast';
 import { Gratitude } from '../gratitude/gratitude';
 import { flyCoin } from './coin-flight';
+import { EntrySheets } from './entry-sheets';
 import { ExpensesStore } from './expenses-store';
 
 /**
@@ -34,6 +35,9 @@ export class EntrySheet implements OnInit {
   private readonly sheets = inject(Sheets);
   private readonly toasts = inject(Toasts);
   private readonly gratitude = inject(Gratitude);
+  private readonly entrySheets = inject(EntrySheets);
+  /** "الصق رسالة البنك" for a message the shortcut missed (B-23) */
+  protected readonly canPaste = inject(SessionStore).can('SRV-011', true);
 
   readonly editing = input<Entry | null>(null);
   readonly presetType = input<EntryType>('EXPENSE');
@@ -184,6 +188,11 @@ export class EntrySheet implements OnInit {
     } finally {
       this.busy.set(false);
     }
+  }
+
+  /** In the tap: the clipboard is read, then the paste sheet takes this one's place (B-23). */
+  protected pasteSms(): void {
+    void this.entrySheets.pasteSms();
   }
 
   protected setDate(d: string): void {

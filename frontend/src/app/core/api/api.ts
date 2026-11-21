@@ -135,6 +135,8 @@ export class Api {
   approvePending(id: string, body: { categoryId: string; name: string; remember: boolean; entryDate?: string }) {
     return this.post<Entry>(`/pending-entries/${id}/approve`, body);
   }
+  /** A bank message the shortcut missed, pasted in the app (B-23): same answer as the shortcut's */
+  pasteSms(text: string) { return this.post<{ status: 'PENDING' | 'DUPLICATE' | 'IGNORED'; message: string }>('/sms/paste', { text }); }
   ignorePending(id: string) { return this.delete(`/pending-entries/${id}`); }
   smsSettings() { return this.get<SmsSettings>('/sms/settings'); }
   linkSms(suffix: string, accountId: string) { return this.put<void>(`/sms/links/${encodeURIComponent(suffix)}`, { accountId }); }

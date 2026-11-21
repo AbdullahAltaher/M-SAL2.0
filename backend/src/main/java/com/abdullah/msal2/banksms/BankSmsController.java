@@ -65,6 +65,16 @@ public class BankSmsController {
 		return response;
 	}
 
+	/**
+	 * A bank message pasted in the app, for one the shortcut missed (no connection, B-23): the
+	 * same rules as the shortcut (a debit, a linked account, not seen before, the category from
+	 * the user's words), with the app's sign-in. No notification: the user is in the app.
+	 */
+	@PostMapping("/sms/paste")
+	public IngestResponse paste(CurrentUser user, @Valid @RequestBody IngestRequest request) {
+		return ingest.ingest(user, request.text());
+	}
+
 	// ── Review ──────────────────────────────────────────────────
 
 	@GetMapping("/budgets/{budgetId}/pending-entries")
