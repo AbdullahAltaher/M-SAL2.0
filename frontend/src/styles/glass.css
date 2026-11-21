@@ -656,7 +656,10 @@ app-day-strip{display:block;animation:stripIn .28s var(--ease-out)}
 @keyframes grUp{from{transform:translateY(40px);opacity:0}}
 
 /* ---- a pasted bank message (BANK-SMS.md B-23) ---- */
-.es-paste{align-self:flex-start;margin:0 0 12px}
+.es-qhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.es-qhead .g-lab{margin-bottom:0}
+.es-qhead-alone{justify-content:flex-start}
+.es-paste{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 4px;background:none;border:none;color:var(--x-accent-ink);font:600 13px var(--ar);cursor:pointer}
 .ps-note{margin:0 2px 12px;color:var(--x-muted);font:400 14px/1.7 var(--ar)}
 .ps-text{display:block;width:100%;min-height:130px;padding:12px 14px;border-radius:18px;background:var(--x-field);border:1px solid var(--x-line);color:var(--x-text);font:400 16px/1.6 var(--num);resize:vertical;text-align:left}
 .ps-text:focus{outline:none;border-color:var(--x-accent)}
