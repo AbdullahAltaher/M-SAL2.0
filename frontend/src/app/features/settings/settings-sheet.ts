@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
+import changelog from '../../../changelog.json';
 import { environment } from '../../../environments/environment';
 import { Api } from '../../core/api/api';
 import { ApiError } from '../../core/api/api-error';
@@ -27,8 +28,8 @@ import { ImportExport } from './import-export';
  * SH-08: data and settings (SCREENS.md 4.2), as iPhone-style groups with a coloured icon per row
  * (DESIGN.md D-34): appearance (light or dark, D-07, and the cards' photos, D-15), security and
  * the daily reminder, the data (export, import and its history, in place of M-SAL's storage
- * status and snapshots), and the account (email, name, time zone, version, install steps,
- * sign-out).
+ * status and snapshots), the account (email, name, time zone, install steps, sign-out), and
+ * about the app (the version, what's new, the earlier versions).
  */
 @Component({
   selector: 'app-settings-sheet',
@@ -164,10 +165,6 @@ import { ImportExport } from './import-export';
             }
           </select>
         </div>
-        <div class="st-row">
-          <span class="st-ic" style="--c:#566A8E"><app-icon name="info" [size]="16" /></span>
-          <span class="st-l">الإصدار</span><span class="st-v" dir="ltr">{{ version }}</span>
-        </div>
         <button class="st-row" type="button" (click)="installHelp()">
           <span class="st-ic" style="--c:#566A8E"><app-icon name="phone" [size]="16" /></span>
           <span class="st-l">تعليمات التثبيت</span><app-icon name="chevL" [size]="16" />
@@ -177,6 +174,37 @@ import { ImportExport } from './import-export';
           <span class="st-l">تسجيل الخروج</span>
         </button>
       </div>
+
+      <!-- The version, what's new in it, and the earlier versions (src/changelog.json) -->
+      <h3 class="st-sec" dir="rtl">عن التطبيق</h3>
+      <div class="st-grp">
+        <div class="st-row">
+          <span class="st-ic" style="--c:#566A8E"><app-icon name="info" [size]="16" /></span>
+          <span class="st-l">الإصدار</span><bdi class="st-v" dir="ltr">{{ version }}</bdi>
+        </div>
+        <div class="av-new" dir="rtl">
+          <p class="av-t">ما الجديد</p>
+          <ul class="av-notes">
+            @for (n of latest.notes; track n) { <li>{{ n }}</li> }
+          </ul>
+        </div>
+        @if (older.length) {
+          <details class="av-old" dir="rtl">
+            <summary class="st-row">
+              <span class="st-l">الإصدارات السابقة</span><app-icon name="chevL" [size]="16" />
+            </summary>
+            @for (v of older; track v.version) {
+              <div class="av-ver">
+                <p class="av-t"><bdi dir="ltr">{{ v.version }}</bdi> · <bdi dir="ltr">{{ v.date }}</bdi></p>
+                <ul class="av-notes">
+                  @for (n of v.notes; track n) { <li>{{ n }}</li> }
+                </ul>
+              </div>
+            }
+          </details>
+        }
+      </div>
+      <p class="st-note" dir="rtl">البناء: <bdi dir="ltr">{{ build }}</bdi></p>
     }
   `,
 })
@@ -197,6 +225,9 @@ export class SettingsSheet {
     { mode: 'auto', label: 'تلقائي' }, { mode: 'light', label: 'فاتح' }, { mode: 'dark', label: 'داكن' },
   ];
   protected readonly version = environment.version;
+  protected readonly build = environment.build;
+  protected readonly latest = changelog[0];
+  protected readonly older = changelog.slice(1);
   protected readonly lockAvailable = signal(false);
   private readonly budgets = inject(BudgetsStore);
   private readonly expenses = inject(ExpensesStore);

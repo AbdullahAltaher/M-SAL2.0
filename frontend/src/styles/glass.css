@@ -666,3 +666,18 @@ app-day-strip{display:block;animation:stripIn .28s var(--ease-out)}
 .ps-row{display:flex;gap:4px;justify-content:flex-start;margin-top:2px}
 .ps-go{width:100%;margin-top:14px}
 .pc-paste{min-height:32px;margin-inline-start:4px;font-size:14px}
+/* The update pill (shell.html) and "عن التطبيق" in settings: the version and its notes */
+.upd-pill{align-self:center;display:inline-flex;align-items:center;gap:10px;padding:5px;padding-inline-start:14px;border-radius:999px;background:var(--x-glass-solid);border:1px solid var(--x-line);color:var(--x-text);font:500 14px var(--ar);box-shadow:0 8px 20px -10px rgba(0,0,0,.45);animation:updIn .3s var(--ease-out)}
+@keyframes updIn{from{opacity:0;transform:translateY(-6px)}}
+.upd-pill button{min-height:32px;padding:0 16px;border:none;border-radius:999px;background:linear-gradient(180deg,var(--x-btn-a),var(--x-btn-b));color:#fff;font:600 14px var(--ar);cursor:pointer}
+.upd-pill button:active{transform:scale(.97)}
+.av-new,.av-ver{padding:10px 14px;border-bottom:1px solid var(--x-line-soft)}
+.av-t{margin:0 0 4px;font:500 14px var(--ar);color:var(--x-text)}
+.av-notes{margin:0;padding-inline-start:1.2em;display:grid;gap:3px;color:var(--x-muted);font:400 13.5px/1.6 var(--ar)}
+.av-old summary{list-style:none;cursor:pointer}
+.av-old summary::-webkit-details-marker{display:none}
+.av-old summary > app-icon:last-child svg{transition:transform .2s var(--ease-out)}
+.av-old[open] summary > app-icon:last-child svg{transform:rotate(-90deg)}
+.av-old[open] summary{border-bottom:1px solid var(--x-line-soft)}
+.av-old .av-ver:last-child{border-bottom:none}
+.av-new:last-child{border-bottom:none}

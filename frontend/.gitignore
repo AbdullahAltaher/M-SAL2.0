@@ -45,3 +45,6 @@ Thumbs.db
 
 # Generated from ../.env by scripts/write-env.mjs
 /src/environments/environment.generated.ts
+
+# Written by scripts/write-env.mjs from src/changelog.json
+/public/version.json

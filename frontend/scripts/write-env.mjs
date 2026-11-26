@@ -1,6 +1,8 @@
 // Writes src/environments/environment.generated.ts from ../.env or the process environment.
 // The file is gitignored: no key is ever committed (CLAUDE.md rule 16). Values are never printed.
-// Runs before `npm start`, `npm run build` and `npm test`.
+// Also checks the version (package.json and the newest src/changelog.json entry must agree, or
+// this fails and so does the build) and writes public/version.json, which an open app reads to
+// offer "تحديث X متوفر". Runs before `npm start`, `npm run build` and `npm test`.
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -17,20 +19,35 @@ if (existsSync(envFile)) {
 }
 const get = (name, fallback = '') => process.env[name] ?? fromFile[name] ?? fallback;
 
-/** The build shown in settings: its date and commit, such as "2026-11-01 (f30c2e4)" */
+/** Semantic version: every deploy bumps package.json and adds a changelog entry (1 to 3 notes). */
+const pkg = JSON.parse(readFileSync(resolve(here, '../package.json'), 'utf8'));
+const changelog = JSON.parse(readFileSync(resolve(here, '../src/changelog.json'), 'utf8'));
+const latest = changelog[0];
+if (!latest || latest.version !== pkg.version) {
+  throw new Error(`src/changelog.json (${latest?.version}) and package.json (${pkg.version}) disagree: add the new version's notes first`);
+}
+for (const e of changelog) {
+  if (!/^\d+\.\d+\.\d+$/.test(e.version) || !/^\d{4}-\d{2}-\d{2}$/.test(e.date) || !Array.isArray(e.notes) || e.notes.length < 1 || e.notes.length > 3) {
+    throw new Error(`src/changelog.json: entry ${e.version} needs a version (1.2.3), a date (2026-11-27) and 1 to 3 notes`);
+  }
+}
+writeFileSync(resolve(here, '../public/version.json'), JSON.stringify(latest) + '\n');
+
+/** The build shown in settings under the version: its date and commit, such as "2026-11-01 (f30c2e4)" */
 let commit = '';
 try {
   commit = execSync('git rev-parse --short HEAD', { cwd: here, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
 } catch {
   // not a git checkout
 }
-const version = new Date().toLocaleDateString('en-CA') + (commit ? ` (${commit})` : '');
+const build = new Date().toLocaleDateString('en-CA') + (commit ? ` (${commit})` : '');
 
 const config = {
   apiUrl: get('MSAL_API_URL', 'http://localhost:8080/api/v1'),
   supabaseUrl: get('SUPABASE_URL'),
   supabasePublishableKey: get('SUPABASE_PUBLISHABLE_KEY'),
-  version,
+  version: pkg.version,
+  build,
 };
 
 writeFileSync(
@@ -39,6 +56,6 @@ writeFileSync(
     `export const generated = ${JSON.stringify(config, null, 2)};\n`,
 );
 console.log(
-  `environment: api ${config.apiUrl}, supabase url ${config.supabaseUrl ? 'set' : 'MISSING'}, ` +
+  `environment: version ${pkg.version}, api ${config.apiUrl}, supabase url ${config.supabaseUrl ? 'set' : 'MISSING'}, ` +
     `publishable key ${config.supabasePublishableKey ? 'set' : 'MISSING'}`,
 );

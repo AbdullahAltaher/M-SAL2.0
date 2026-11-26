@@ -2,13 +2,14 @@
 
 > **اقرأه أولاً، وحدّثه في نهاية كل جلسة.** مختصر عمداً: الحالة، وأين الكود، والفخاخ.
 > **لتوفير التوكنز:** اقرأ فقط ما تحتاجه المهمة. `HANDOFF-HISTORY.md` (~70KB) ابحث فيه بـ `grep` ولا تقرأه كاملاً، و`API.md` و`BANK-SMS.md` و`DESIGN.md` اقرأ منها القسم المطلوب فقط (`grep -n "^#"` أولاً). خريطة الكود في القسم 4 تغني عن الاستكشاف.
-> آخر تحديث: 2026-11-08.
+> آخر تحديث: 2026-11-27.
 
 ## 1. المالك وطريقة العمل
 
 - **العربي الخليجي**: الشرح بالعربي البسيط، والمصطلحات التقنية بالإنجليزي. يعرف Java وSpring وAngular وFlyway، وليس خبيراً في السيرفرات.
 - **Claude يتحكم في كل شيء ممكن.** بيد المالك فقط: تسجيل الدخول للخدمات، وإنشاء الحسابات، والدفع، والموافقة على الشروط، وإعدادات Windows. لا يحب البحث في واجهات المواقع: استخرج القيم بأوامر.
 - **commit وpush على `main` فقط بطلبه** (عادة: "نعم، commit push"). `main` ينشر التطبيق والسيرفر مباشرة.
+- **كل نشر للواجهة يرفع الإصدار** (MAJOR.MINOR.PATCH): `version` في `frontend/package.json` (و`package-lock.json`)، ومدخل جديد **أول** `frontend/src/changelog.json` بالتاريخ و1–3 ملاحظات عربية قصيرة للمستخدم. ميزة = MINOR، وإصلاح = PATCH. إذا اختلفا يفشل البناء. بدون رفع لا يظهر شريط التحديث.
 - **أي تصميم جديد:** نقاش ونماذج مرئية قبل الكود (النماذج فكرة، لا الشكل النهائي). **طلب صغير وواضح منه** (مثل B-21) يُنفَّذ مباشرة ويُكتب قراره.
 - **يجرّب على الآيفون ويرسل صوراً.** اشرح خطوات الآيفون واحدة واحدة بالأسماء الإنجليزية كما تظهر عنده.
 - **الأسرار** في `.env` يضعها بنفسه: لا تطلبها ولا تطبعها. **المستودع عام:** لا أرقام ولا أسماء من بياناته الحقيقية في `docs/` أو الاختبارات أو الكود.
@@ -24,6 +25,7 @@
 - **D-40 ثلاث حالات للحلقة** (2026-11-21): أخضر إذا الصرف ≤ الوقت، وأصفر "صرفك أسرع بشوي" لفرق 1–5 نقاط، وبرتقالي فوق 5 (`pace()` يرجع `level`). **لم يُجرَّب على الآيفون.**
 - **B-23 لصق رسالة فاتت** (2026-11-21، مرفوع `33bc3e0`، **لم يُجرَّب على الآيفون**): `POST /sms/paste` (JWT، نفس `SmsIngestService.ingest`)، و`paste-sms-sheet.ts` و`paste-sms.ts`، وزر في نافذة المصروف ورابط في المراجعة. السبب: رسالة ضاعت بخطأ `-1009` (الجوال بدون إنترنت). المالك عنده كلمة `FESCO SUPERMARKET LLC` ← بقالة، وليس `SUPERMARKET` عامة.
 - **D-42 الذكر والشكر بعد الإضافة** (2026-11-14): **مرفوع (`5bac512`)، والخلفية الضبابية معه. لم يُجرَّب على الآيفون.** `features/gratitude/` (`Gratitude` و`GratitudeHost` في الـ shell، والنصوص `gratitude-texts.json` تُحمَّل عند أول استخدام في ملف منفصل). بعد كل إضافة (مصروف، ودخل، واختصار، ونسخ) بطاقة في الوسط بعد الكوين والشاشة خلفها ضبابية (`.gr-float`، و"تراجع" فوقها)، وفي مراجعة البنك بعد آخر طلب فقط، وبطاقة "وصل الراتب" لدورة جديدة مفتوحة. 80 نصاً (61 آية من Tanzil، والأدعية والأذكار من البخاري ومسلم، والأذكار: الحمد والشكر، والعامة التي لها صلة بالرزق). **أرقام الأحاديث من الذاكرة: لم يتحقق منها المالك بعد.** صفحة المراجعة `docs/GRATITUDE-TEXTS.md` تُولَّد بـ `node scripts/gratitude/review.mjs`، وأي آية جديدة بـ `scripts/gratitude/verse.mjs` (لا تُكتب يدوياً).
+- **الإصدارات وشريط التحديث** (2026-11-27، الإصدار **1.5.0**): التاريخ من 1.0.0 (الإطلاق 11-01) إلى 1.5.0، باختيار المالك. `scripts/write-env.mjs` يفحص الإصدار ويكتب `public/version.json` (مستثنى من git، ولا يدخل كاش الـ worker). `AppStatus.newVersion`: عند `VERSION_READY` يقرأ `version.json`، وشريط "تحديث X متوفر" و"حدّث" في الـ shell يظهر فقط بدون نافذة أو بطاقة شكر مفتوحة، وفي الرئيسية والمصاريف والإحصاءات والميزانية (لا في المراجعة ولا الإدارة)، ويحفظ الميزانية قبل إعادة التحميل. وقسم "عن التطبيق" آخر الإعدادات (الإصدار، وما الجديد، والإصدارات السابقة، والبناء). **جُرّب محلياً بنسخ مؤقتة 1.5.1–1.5.3، ولم يُجرَّب على الآيفون.**
 - **اقتراحات لاحقة (غير ضرورية):** تنبيهات Dependabot، وRLS على `flyway_schema_history` (في `V11`)، ومسح أرقام بياناته القديمة من تاريخ git (يحتاج `push --force`: قراره).
 
 ## 3. أين كل شيء
@@ -47,7 +49,8 @@
   `system/`: `security/SecurityConfig` (JWT)، و`access/ServiceAccessInterceptor` (الصلاحية والحدود)، و`error/ErrorCode` (كل الأكواد)، و`audit/AuditService`، و`time/Today` (اليوم بتوقيت المستخدم)، و`web/Inputs` (تحليل المبالغ والتواريخ)، و`web/RequestSizeFilter`.
   الجداول: `src/main/resources/db/migration/V1`–`V10`. **التالي `V11`.**
 - **الاختبارات** `backend/src/test/...`: `IntegrationTest` (الأساس: Testcontainers، والساعة ثابتة 2026-11-11 08:00Z، و`signUp`، و`budgetOf`، و`accountOf`، و`categoryOf`)، و`system/IsolationTest`، و`banksms/FakeSms` (رسائل وهمية).
-- **الواجهة** `frontend/src/app/`: `app.routes.ts` · `core/api/api.ts` و`models.ts` (كل المسارات والأشكال) · `core/session/session-store.ts` · `features/expenses/` (`home-view`، و`entries-view`، و`entry-sheet` + `entry-sheets.ts` تفتح كل النوافذ، و`expenses-store.ts`، و`pending-view.ts`، و`pace-rings.ts` حلقتا D-40 ونص الأيام الباقية) · `core/pwa/app-badge.ts` (الرقم على الأيقونة، B-22) و`device-push.ts` (مفتاح الجهاز، D-41) · `features/gratitude/` (D-42) · `features/budget/` · `features/stats/` · `features/settings/` (`settings-sheet.ts`، و`bank-sms-sheet.ts`، و`shortcut-setup.ts`) · `shared/components/icon.ts` (الأيقونات) · `shared/sheet/` (النوافذ، و`Dialogs` تستبدل النافذة الحالية).
+- **الواجهة** `frontend/src/app/`: `app.routes.ts` · `core/api/api.ts` و`models.ts` (كل المسارات والأشكال) · `core/session/session-store.ts` · `features/expenses/` (`home-view`، و`entries-view`، و`entry-sheet` + `entry-sheets.ts` تفتح كل النوافذ، و`expenses-store.ts`، و`pending-view.ts`، و`pace-rings.ts` حلقتا D-40 ونص الأيام الباقية) · `core/pwa/app-status.ts` (عدم الاتصال وشريط التحديث) و`app-badge.ts` (الرقم على الأيقونة، B-22) و`device-push.ts` (مفتاح الجهاز، D-41) · `features/gratitude/` (D-42) · `features/budget/` · `features/stats/` · `features/settings/` (`settings-sheet.ts`، و`bank-sms-sheet.ts`، و`shortcut-setup.ts`) · `shared/components/icon.ts` (الأيقونات) · `shared/sheet/` (النوافذ، و`Dialogs` تستبدل النافذة الحالية).
+  الإصدارات: `frontend/src/changelog.json` (الأحدث أولاً)، ويُعرض في `settings-sheet.ts`.
   الأنماط: `styles/tokens.scss` (الألوان فاتح وداكن)، و`styles/glass.css` (كل الشكل، والأقسام الجديدة في آخره).
 
 ## 5. التشغيل والتجربة
@@ -58,6 +61,7 @@
 - **الواجهة بدون دخول (الأسرع):** `preview_start` باسم `frontend`، ثم `resize_window` بـ `mobile`، ثم افتح `/login` ونفّذ بـ javascript_exec:
   `window.__mockGo = '/expenses/home'; await import('/dev/mock-api.js?' + Date.now())`
   الملف `frontend/dev/mock-api.js`: API وجلسة وهميان (`ng serve` فقط، ليس في البناء)، وحالته في `window.__mock` (`pending`، و`settings`، و`last` = آخر جسم أُرسل). أي إعادة تحميل (تعديل ملف) تمسحه: نفّذه مرة ثانية. مسار غير موجود فيه ← 404 و`mock: unmocked` في الـ console.
+- **تجربة شريط التحديث محلياً:** مؤقتاً `enabled: true` في `provideServiceWorker` (`app.config.ts`)، ثم `MSYS_NO_PATHCONV=1 npx ng build -c development --service-worker ngsw-config.json --base-href /M-SAL2.0/` (فيه `dev/mock-api.js`)، وانسخ الناتج لمجلد في scratchpad وشغّل `node scripts/serve-pages.mjs <المجلد>` (المنفذ 4321، عبر `launch.json` و`preview_start`). ادخل بالـ mock (`import('/M-SAL2.0/dev/mock-api.js?...')`)، ثم ابنِ نسخة أعلى وانسخها فوق المجلد، ثم `document.dispatchEvent(new Event('visibilitychange'))`. حالة الـ worker: `/M-SAL2.0/ngsw/state`. أرجع كل شيء بعدها.
 - **المتصفح المخفي** لا يرسم ويبطئ المؤقتات: `show_pane preview` قبل الصور، ولا تنتظر طويلاً داخل javascript_exec (يتوقف بعد 45 ثانية).
 - **الدخول الحقيقي محلياً:** المالك بإيميله، أو `node scripts/dev-sign-in-link.mjs` **يشغّله المالك بنفسه**.
 - **رسائل البنك بـ curl محلياً:** مستخدم وهمي في قاعدة Docker مع `sms_tokens.token_hash` = SHA-256 لرمز تولّده بـ Node (لا تطبعه)، ثم `POST http://localhost:8080/api/v1/sms/ingest`، ثم احذفه (`audit_log` ← `sms_tokens` ← `budgets` ← `user_roles` ← `app_users`).
@@ -73,11 +77,12 @@
 - **Spring:** `@Transactional` من service أخرى ثم التقاط الاستثناء يجعلها rollback-only (لذلك `CategoryService.find` يرجع `Optional`).
 - **السحب الجانبي:** `header.top` يمتد بهامش سالب = حشوة `.wrap` (12px في `glass.css`)؛ أي فرق يجعل الصفحة تتحرك جانبياً في الآيفون. للفحص: عنصر داخل `.wrap` يتجاوز `clientWidth` بمقاس 320 و375.
 - **Guards:** `inject()` لا يعمل بعد `await`.
-- **قوالب Angular:** `in` كلمة محجوزة، فلا تسمِّ خاصية `in` وتستخدمها في القالب (خطأ `NG5002`).
+- **قوالب Angular:** المسافة في آخر كتلة `@if {... }` تُحذف: استخدم `&nbsp;`. و`in` كلمة محجوزة، فلا تسمِّ خاصية `in` وتستخدمها في القالب (خطأ `NG5002`).
 - **CSP في `index.html`:** أي عنوان خارجي جديد يُضاف لها.
 - **التخزين في الجهاز:** مفاتيح `msal2.*` فقط، والصور في IndexedDB `msal2.photos`. **ممنوع أي `mizaniya`.**
 - **`backend/mvnw`** يبقى `100755` في git. و**`docker --env-file`** يأخذ القيم حرفياً.
 - **`SmsSecurityConfig`:** فلتر الرمز ليس `@Component` (وإلا يعمل على كل طلب)، ويمسح أي مصادقة، فـ `jwt()` في MockMvc لا يمر من `/sms/ingest`.
+- **`fetch` في الواجهة بنص وليس `URL`:** `dev/mock-api.js` يقرأ `input.url`، فكائن `URL` يكسره.
 - **`Instant.now()` في الاختبارات:** السيرفر في الاختبارات على 2026-11-11 (`NOW`)، فأي تاريخ مبني على الوقت الحقيقي ينكسر مع مرور الأيام. استخدم `NOW`.
 - **الساعة الثابتة في الاختبارات:** كل الطلبات بنفس `received_at`، فابحث بالجهة (`byMerchant`) لا بالترتيب. وحد `@StrictRateLimit` 10 في الدقيقة لكل مستخدم يشمل `/sms/ingest` و`/sms/token`.
 - **ملفات CRLF** (`API.md`، و`CLAUDE.md`، و`SCREENS.md`، و`DATABASE.md`، و`angular.json`): التعديل بسكربت Node يحوّل لـ LF ثم يرجع، أو بأداة Edit. `sed` و`node -e` مع `\n` لا يطابقان.

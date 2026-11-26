@@ -58,10 +58,10 @@
         <span class="b-text" dir="rtl">لا يوجد اتصال، لا يمكن الحفظ الآن.</span>
       </div>
     }
-    @if (status.updateReady()) {
-      <div class="banner" role="status">
-        <span class="b-text" dir="rtl">يوجد تحديث جديد</span>
-        <button class="pill sm" type="button" (click)="status.update()">تحديث</button>
+    @if (updateOffer(); as u) {
+      <div class="upd-pill" role="status">
+        <span dir="rtl">تحديث @if (u.v) {<bdi dir="ltr">{{ u.v }}</bdi>&nbsp;}متوفر</span>
+        <button type="button" (click)="update()">حدّث</button>
       </div>
     }
     @if (exportReminder(); as r) {

@@ -13,9 +13,11 @@ import { FloatingWallet } from '../../shared/components/floating-wallet';
 import { Icon } from '../../shared/components/icon';
 import { Dialogs } from '../../shared/sheet/dialogs';
 import { SheetHost } from '../../shared/sheet/sheet-host';
+import { Sheets } from '../../shared/sheet/sheets';
 import { ToastHost, Toasts } from '../../shared/toast/toast';
 import { LedgerStore } from '../budget/ledger-store';
 import { CycleSwitch } from '../expenses/cycle-switch';
+import { Gratitude } from '../gratitude/gratitude';
 import { GratitudeHost } from '../gratitude/gratitude-host';
 import { LockScreen } from '../lock/lock-screen';
 import { ImportExport } from '../settings/import-export';
@@ -43,6 +45,8 @@ export class Shell {
   protected readonly status = inject(AppStatus);
   protected readonly lock = inject(AppLock);
   private readonly dialogs = inject(Dialogs);
+  private readonly sheets = inject(Sheets);
+  private readonly gratitude = inject(Gratitude);
   private readonly toasts = inject(Toasts);
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
@@ -53,6 +57,8 @@ export class Shell {
   protected readonly admin = signal(false);
   /** The Expenses home screen, the only one with the floating wallet (D-09) */
   protected readonly home = signal(false);
+  /** Screens that only show data: home, the entries, stats and the budget (not review or admin) */
+  private readonly calm = signal(false);
   protected readonly menuOpen = signal(false);
   protected readonly shrunk = signal(false);
   protected readonly savedOn = signal(false);
@@ -62,6 +68,12 @@ export class Shell {
   protected readonly exportReminder = computed(() => {
     const r = this.session.user()?.exportReminder;
     return r?.due && !this.reminderClosed() ? r : null;
+  });
+
+  /** "تحديث X متوفر", only where nothing is in progress: no sheet or card open, on a calm screen */
+  protected readonly updateOffer = computed(() => {
+    const v = this.status.newVersion();
+    return v !== null && this.calm() && !this.sheets.current() && !this.gratitude.card() ? { v } : null;
   });
 
   constructor() {
@@ -93,6 +105,12 @@ export class Shell {
       this.document.removeEventListener('visibilitychange', onVisibility);
       this.document.documentElement.classList.remove('x-paused');
     });
+  }
+
+  /** Budget edits waiting to save go first, then the new version loads. */
+  protected async update(): Promise<void> {
+    await this.ledger.flushAll().catch(() => undefined);
+    await this.status.update();
   }
 
   /** Face ID failed: the lock goes, and the email sign-in decides (SCREENS.md S-03). */
@@ -173,6 +191,7 @@ export class Shell {
     this.expenses.set(expenses);
     this.admin.set(url.startsWith('/admin'));
     this.home.set(url.startsWith('/expenses/home'));
+    this.calm.set(/^\/(budget|expenses\/(home|entries|stats))([/?#]|$)/.test(url));
     this.menuOpen.set(false);
     if (url.startsWith('/budget') || expenses) LastTab.remember(expenses ? 'expenses' : 'budget');
   }

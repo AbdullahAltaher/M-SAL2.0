@@ -82,6 +82,7 @@
 - **السيرفر:** modular monolith، وحدة لكل خدمة، وكل وحدة فيها Controller ← Service ← Repository مع DTOs.
 - **حزمة Java:** `com.abdullah.msal2`. **صورة Docker:** `m-sal2.0`.
 - **التصميم:** الزجاج الأزرق للتطبيق كله (`DESIGN.md`) وخط IBM Plex Sans Arabic، فاتح وداكن.
+- **الإصدار:** كل نشر للواجهة يرفع `version` في `frontend/package.json` ويضيف مدخلاً أول `frontend/src/changelog.json` (التاريخ و1–3 ملاحظات عربية). إذا اختلفا يفشل البناء.
 
 ## التقدم
 
